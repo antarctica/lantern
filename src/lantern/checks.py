@@ -1,4 +1,3 @@
-import base64
 import json
 import logging
 import time
@@ -10,7 +9,7 @@ from joblib import Parallel, delayed
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
-from lantern.lib.requests.auth import HTTPBearerTokenAuth
+from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
 from lantern.log import init as init_logging
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.outputs.checks import ChecksOutput
@@ -83,12 +82,13 @@ class CheckRunner:
 
     def _check_url(self) -> None:
         """
-        Check URL as per check properties.
+        Check URL as per check properties or optional override.
 
         Validates the response status code and optionally, content length and/or location header (for redirects).
         """
-        self._logger.info("Fetching: %s", self._check.url)
-        self._logger.debug({"method": self._check.http_method, "url": self._check.url})
+        url = self._check.access_url or self._check.url
+        self._logger.info("Fetching: %s", url)
+        self._logger.debug({"method": self._check.http_method, "url": url})
 
         headers = None
         if self._check.type == CheckType.DOWNLOADS_NORA:
@@ -97,7 +97,7 @@ class CheckRunner:
 
         r = self._fetch_url(
             method=self._check.http_method,
-            url=self._check.url,
+            url=url,
             headers=headers,
             auth=self._check.http_auth,
             redirects=0,
@@ -136,21 +136,22 @@ class CheckRunner:
 
         # Follow redirect(s if a DOI)
         r_max = 2 if self._check.type == CheckType.DOI_REDIRECTS else 1
-        r2 = self._fetch_url(method=self._check.http_method, url=self._check.url, redirects=r_max, raise_errors=True)
+        r2 = self._fetch_url(method=self._check.http_method, url=url, redirects=r_max, raise_errors=True)
         if r2 is None:
             return
 
         self._check.state = CheckState.PASS
         self._check.result_output = "OK"
 
-    def _check_arcgis_url(self, url: str) -> None:
+    def _check_arcgis_api(self) -> None:
         """
-        Common method for checking ArcGIS resources.
+        Common method for checking resources within ArcGIS APIs.
 
         Limited to public items.
 
         Uses a GET request as Arc APIs return 200 responses for errors.
         """
+        url = self._check.access_url or self._check.url
         self._check.http_method = HTTPMethod.GET
 
         r = self._fetch_url(method=self._check.http_method, url=url, raise_errors=True)
@@ -165,95 +166,18 @@ class CheckRunner:
         self._check.state = CheckState.PASS
         self._check.result_output = "OK"
 
-    def _check_arcgis_item(self) -> None:
-        """
-        Check ArcGIS item using ArcGIS sharing API.
-
-        API lookup used over loading item page directly for speed and robustness. Limited to public items.
-        """
-        item_id = self._check.url.split("id=")[-1]
-        item_url = f"https://www.arcgis.com/sharing/rest/content/items/{item_id}?f=json"
-        self._logger.info("Checking ArcGIS item page: %s", self._check.url)
-        self._logger.info("Fetching from ArcGIS sharing API: %s", item_url)
-        self._check_arcgis_url(item_url)
-
-    def _check_arcgis_service(self) -> None:
-        """
-        Check ArcGIS service.
-
-        Checks service endpoint directly. Limited to public items.
-        """
-        service_url = f"{self._check.url}?f=json"
-        self._logger.info("Fetching: %s", service_url)
-        self._check_arcgis_url(service_url)
-
-    def _check_magic_resource(self) -> None:
-        """
-        Check MAGIC Resource Distribution hosted file.
-
-        [0] https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution
-
-        Uses MS Graph to get a Drive Item ID from a SharePoint URL [1], returning basic details [2] including expected
-        file size to check against.
-
-        Note: The `/shares` endpoint works with both sharing ('https://x.sharepoint.com/:b:/r/sites/...') and
-        direct ('https://x.sharepoint.com/sites/...') links.
-
-        [1] https://learn.microsoft.com/en-us/graph/api/shares-get#encoding-sharing-urls
-        [2] https://learn.microsoft.com/en-us/graph/api/shares-get#access-the-shared-item-directly
-        """
-        self._logger.info("Fetching: %s", self._check.url)
-
-        share_url = "u!" + base64.urlsafe_b64encode(self._check.url.encode("utf-8")).decode("utf-8").rstrip("=")
-        graph_url = f"https://graph.microsoft.com/v1.0/shares/{share_url}/driveItem"
-        self._logger.info("Resolved to: %s", graph_url)
-
-        r = self._fetch_url(
-            method=HTTPMethod.GET,
-            url=graph_url,
-            params={"$select": "id,name,size,file"},
-            auth=self._check.http_auth,
-            redirects=0,
-            raise_errors=False,
-        )
-        if r is None:
-            return
-        result = r.json()
-
-        if self._check.result_http_status != self._check.http_status:
-            self._check.state = CheckState.FAILED
-            self._check.result_output = (
-                f"Bad status: {self._check.result_http_status} (expected {self._check.http_status})"
-            )
-            return
-
-        if "file" not in result:
-            self._check.state = CheckState.FAILED
-            self._check.result_output = "Bad drive item type: expected file"
-            return
-
-        if self._check.content_length is not None and result.get("size") != self._check.content_length:
-            self._check.state = CheckState.FAILED
-            self._check.result_output = (
-                f"Bad drive item size: {result.get('size')} (expected {self._check.content_length})"
-            )
-            return
-
-        self._check.state = CheckState.PASS
-        self._check.result_output = "OK"
-
     def run(self) -> None:
         """Run check unless skipped."""
         if self._check.state == CheckState.SKIPPED:
             return
 
         start = time.monotonic()
-        if self._check.type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
-            self._check_arcgis_item()
-        elif self._check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
-            self._check_arcgis_service()
-        elif self._check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
-            self._check_magic_resource()
+        if self._check.type in (
+            CheckType.INFO_ARCGIS_LAYER,
+            CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.DOWNLOADS_ARCGIS_SERVICE,
+        ):
+            self._check_arcgis_api()
         else:
             self._check_url()
         self._check.duration = time.monotonic() - start
@@ -286,48 +210,48 @@ class Checker:
         self._config = config
         self._parallel_jobs = self._config.PARALLEL_JOBS
 
-    def _get_auth_entra(self) -> str:
+    def _prepare_checks(self, checks: list[Check]) -> None:
         """
-        Get access token for accessing entra protected resources.
+        Post process checks prior to execution.
 
-        Includes the Microsoft Graph API.
+        E.g. To include authentication or construct an alternative access URL.
         """
-        response = requests.post(
-            f"https://login.microsoftonline.com/{self._config.CHECKS_MAGIC_PRODUCTS_TENANT_ID}/oauth2/v2.0/token",
-            data={
-                "client_id": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_ID,
-                "client_secret": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET,
-                "scope": "https://graph.microsoft.com/.default",
-                "grant_type": "client_credentials",
-            },
-            timeout=30,
+        magic_resource_client = MagicResourceDistributionClient(
+            tenant_id=self._config.CHECKS_MAGIC_RESOURCES_TENANT_ID,
+            app_client_id=self._config.CHECKS_MAGIC_RESOURCES_CLIENT_ID,
+            app_client_secret=self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET,
+            site_id=self._config.CHECKS_MAGIC_RESOURCES_SITE_ID,
+            library_name=self._config.CHECKS_MAGIC_RESOURCES_LIBRARY_NAME,
         )
-        response.raise_for_status()
-        return response.json()["access_token"]
-
-    def _prepare_auth(self, checks: list[Check]) -> None:
-        """
-        Add authentication needed to check restricted resources.
-
-        Reuses/caches tokens for supported services.
-        """
-        _entra_token: str | None = None
 
         for check in checks:
-            # Add basic auth for accessing trusted publishing content (Ops Data Store LDAP)
             if check.type == CheckType.ITEM_PAGES_TRUSTED:
+                # Add basic auth for accessing trusted publishing content (Ops Data Store LDAP)
+                self._logger.info(
+                    "[%s] Setting credentials for accessing trusted publishing page: %s",
+                    check.file_identifier,
+                    check.url,
+                )
                 check.http_auth = HTTPBasicAuth(
                     username=self._config.CHECKS_TRUSTED_USERNAME, password=self._config.CHECKS_TRUSTED_PASSWORD
                 )
             elif check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
-                # Add entra token for accessing SharePoint drive items (MS Graph via catalogue app registration)
-                if not _entra_token:
-                    _entra_token = self._get_auth_entra()
-                check.http_auth = HTTPBearerTokenAuth(token=_entra_token)
-
-    def _prepare_checks(self, checks: list[Check]) -> None:
-        """Post process checks prior to execution."""
-        self._prepare_auth(checks)
+                # Add presigned access URL to access restricted content
+                artefact = magic_resource_client.lookup_artefact(check.url)
+                check.access_url = artefact.presigned_url
+            if check.type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
+                # Check item page via ArcGIS sharing API
+                self._logger.info("[%s] Processing check for ArcGIS item page: %s", check.file_identifier, check.url)
+                item_id = check.url.split("id=")[-1]
+                check.access_url = f"https://www.arcgis.com/sharing/rest/content/items/{item_id}?f=json"
+                self._logger.info(
+                    "[%s] Checking item page using ArcGIS sharing API: %s", check.file_identifier, check.access_url
+                )
+            if check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
+                # Check service directly
+                self._logger.info("[%s] Processing check for ArcGIS service: %s", check.file_identifier, check.url)
+                check.access_url = f"{check.url}?f=json"
+                self._logger.info("[%s] Checking ArcGIS service: %s", check.file_identifier, check.access_url)
 
     def execute(self, checks: list[Check]) -> list[Check]:
         """

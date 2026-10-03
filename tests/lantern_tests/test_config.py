@@ -112,11 +112,13 @@ class TestConfig:
             "BASE_URL_LIVE": "https://example.com",
             "CHECKS_TRUSTED_USERNAME": "x",
             "CHECKS_TRUSTED_PASSWORD": redacted_value,
-            "CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
-            "CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
-            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": redacted_value,
-            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
-            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": date(2014, 6, 30),
+            "CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+            "CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": redacted_value,
+            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": date(2014, 6, 30),
+            "CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+            "CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
         }
 
         output = fx_config.dumps_safe()
@@ -329,50 +331,82 @@ class TestConfig:
             # Checks (trusted content)
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": None, "LANTERN_CHECKS_TRUSTED_PASSWORD": "x"}),
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": "x", "LANTERN_CHECKS_TRUSTED_PASSWORD": None}),
-            # Checks (MAGIC Products Distribution)
+            # Checks (MAGIC Resource Distribution)
             (
                 {
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": None,
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
                 }
             ),
             (
                 {
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": None,
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
                 }
             ),
             (
                 {
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": None,
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
                 }
             ),
             (
                 {
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": None,
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "2014-06-30",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
                 }
             ),
             (
                 {
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
-                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": None,
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": None,
                 }
             ),
         ],
@@ -422,7 +456,7 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("env", ["LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP"])
+    @pytest.mark.parametrize("env", ["LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP"])
     def test_validate_invalid_date(self, env: str):
         """Cannot validate where a required date is not a date."""
         envs: dict = {env: "x"}
@@ -475,11 +509,13 @@ class TestConfig:
             ("BASE_URL_LIVE", "https://example.com", False),
             ("CHECKS_TRUSTED_USERNAME", "x", False),
             ("CHECKS_TRUSTED_PASSWORD", "x", True),
-            ("CHECKS_MAGIC_PRODUCTS_TENANT_ID", "x", False),
-            ("CHECKS_MAGIC_PRODUCTS_CLIENT_ID", "x", False),
-            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET", "x", True),
-            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID", "x", False),
-            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP", date(2014, 6, 30), False),
+            ("CHECKS_MAGIC_RESOURCES_TENANT_ID", "x", False),
+            ("CHECKS_MAGIC_RESOURCES_CLIENT_ID", "x", False),
+            ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET", "x", True),
+            ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID", "x", False),
+            ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP", date(2014, 6, 30), False),
+            ("CHECKS_MAGIC_RESOURCES_SITE_ID", "x", False),
+            ("CHECKS_MAGIC_RESOURCES_LIBRARY_NAME", "x", False),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
@@ -505,7 +541,7 @@ class TestConfig:
             "STORE_GITLAB_TOKEN",
             "SITE_UNTRUSTED_AWS_ACCESS_SECRET",
             "CHECKS_TRUSTED_PASSWORD",
-            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET",
+            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET",
         ],
     )
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):

@@ -10,20 +10,16 @@ interactions:
       - keep-alive
       User-Agent:
       - python-requests/2.33.0
-    method: GET
-    uri: https://www.arcgis.com/sharing/rest/content/items/123?f=json
+    method: HEAD
+    uri: https://example.com/alt.html
   response:
     body:
-      string: '{"error":{"code":400,"messageCode":"CONT_0001","message":"Item does not exist or is inaccessible.","details":[]}}'
+      string: ''
     headers:
-      Cache-Control:
-      - no-cache
       Content-Length:
-      - '113'
+      - '15'
       Content-Type:
-      - application/json;charset=utf-8
-      Server:
-      - ArcGIS Online
+      - text/html
     status:
       code: 200
       message: OK

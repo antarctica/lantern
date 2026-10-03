@@ -1,14 +1,12 @@
 import time
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 import pytest
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
 
 from lantern.checks import Checker, CheckRunner, run_check
-from lantern.lib.requests.auth import HTTPBearerTokenAuth
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 
@@ -18,6 +16,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from lantern.config import Config
+    from lantern.lib.magic_distribution.models.artefact import ArtefactSharePointFile
 
 
 class TestCheckRunner:
@@ -30,8 +29,11 @@ class TestCheckRunner:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_check_url(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a URL normally."""
+    @pytest.mark.parametrize("access_url", [None, "https://example.com/alt.html"])
+    def test_check_url(self, fx_logger: logging.Logger, fx_check: Check, access_url: str | None):
+        """Can check an (access) URL normally."""
+        if access_url:
+            fx_check.access_url = access_url
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
         runner._check_url()
@@ -136,157 +138,59 @@ class TestCheckRunner:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_check_arc_item(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check an ArcGIS item normally."""
-        fx_check.type = CheckType.INFO_ARCGIS_LAYER
-        fx_check.url = "https://www.arcgis.com/home/item.html?id=123"
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_arcgis_item()
-        assert fx_check.state == CheckState.PASS
-
-    @pytest.mark.cov
-    def test_check_arc_item_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Can handle a ArcGIS layer that times out correctly."""
-        mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_arcgis_item()
-        assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Request timed out"
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    def test_check_arc_item_error(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check an ArcGIS item that triggers an error."""
-        fx_check.type = CheckType.INFO_ARCGIS_LAYER
-        fx_check.url = "https://www.arcgis.com/home/item.html?id=123"
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_arcgis_item()
-        assert fx_check.state == CheckState.FAILED
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
     @pytest.mark.parametrize(
-        "url",
+        ("check_type", "url", "access_url"),
         [
-            "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer",
-            "https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/FeatureServer",
+            (
+                CheckType.INFO_ARCGIS_LAYER,
+                "https://www.arcgis.com/home/item.html?id=123",
+                "https://www.arcgis.com/sharing/rest/content/items/123?f=json",
+            ),
+            (
+                CheckType.DOWNLOADS_ARCGIS_SERVICE,
+                "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer",
+                "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer?f=json",
+            ),
+            (
+                CheckType.DOWNLOADS_ARCGIS_SERVICE,
+                "https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/FeatureServer",
+                "https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/FeatureServer?f=json",
+            ),
         ],
     )
-    def test_check_arc_service(self, fx_logger: logging.Logger, fx_check: Check, url: str):
-        """Can check an ArcGIS service normally."""
-        fx_check.type = CheckType.DOWNLOADS_ARCGIS_SERVICE
+    def test_check_arc_api(
+        self, fx_logger: logging.Logger, fx_check: Check, check_type: CheckType, url: str, access_url: str
+    ):
+        """Can check an ArcGIS API resource normally."""
+        fx_check.type = check_type
         fx_check.url = url
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
+        fx_check.access_url = access_url
 
-        runner._check_arcgis_service()
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+        runner._check_arcgis_api()
         assert fx_check.state == CheckState.PASS
 
     @pytest.mark.cov
-    def test_check_arc_service_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Can handle a ArcGIS service that times out correctly."""
+    def test_check_arc_api_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
+        """Can handle a ArcGIS API resource that times out correctly."""
         mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_arcgis_service()
+        runner._check_arcgis_api()
         assert fx_check.state == CheckState.FAILED
         assert fx_check.result_output == "Request timed out"
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_check_arc_service_error(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check an ArcGIS service that triggers an error."""
+    def test_check_arc_api_error(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check an ArcGIS API resource that triggers an error."""
         fx_check.type = CheckType.DOWNLOADS_ARCGIS_SERVICE
-        fx_check.url = "https://services.arcgis.com/arcgis/rest/services/x/featureserver"
+        fx_check.url = "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
+        fx_check.access_url = f"{fx_check.url}?f=json"
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_arcgis_service()
+        runner._check_arcgis_api()
         assert fx_check.state == CheckState.FAILED
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    def test_check_magic_resource(self, fx_logger: logging.Logger, fx_check: Check):
-        """
-        Can check a file in the MAGIC Resource Distribution service normally.
-
-        To generate expected encoded share URL (in VCR cassette):
-
-        - base64 encode fx_check.url;
-        - strip padding '=' (replace '/' -> '_', '+' -> '-');
-        - prepend with 'u!'
-
-        E.g.
-        "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg" ->
-        "u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS9zaXRlcy9CQVMtTUFHSUNSZXNvdXJjZXMvTWFpbi94L3guanBn"
-
-        To make a real request, disable env overrides in `pyproject.toml`, then use:
-        ```
-        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
-        fx_check.http_auth = HTTPBearerTokenAuth(token=Checker(logger=fx_logger, config=Config())._get_auth_entra())
-        ```
-        """
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
-        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
-        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_magic_resource()
-        assert fx_check.state == CheckState.PASS
-
-    @pytest.mark.cov
-    def test_check_magic_resource_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Can handle a request for a MAGIC Resource Distribution service hosted resource that times out correctly."""
-        mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_magic_resource()
-        assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Request timed out"
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    @pytest.mark.cov
-    def test_check_magic_resource_error(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a MAGIC Resource Distribution service hosted resource that triggers an error."""
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
-        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
-        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_magic_resource()
-        assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Bad status: 403 (expected 200)"
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    @pytest.mark.cov
-    def test_check_magic_resource_not_file(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a MAGIC Resource Distribution service hosted resource with the wrong drive item type."""
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
-        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x"
-        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_magic_resource()
-        assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Bad drive item type: expected file"
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    @pytest.mark.cov
-    def test_check_magic_resource_wrong_size(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a MAGIC Resource Distribution service hosted resource with the wrong file size."""
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
-        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
-        fx_check.content_length = 1
-        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
-        runner = CheckRunner(logger=fx_logger, check=fx_check)
-
-        runner._check_magic_resource()
-        assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Bad drive item size: 2 (expected 1)"
 
     @pytest.mark.parametrize("skipped", [False, True])
     def test_run(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check, skipped: bool) -> None:
@@ -314,7 +218,6 @@ class TestRunCheck:
             CheckType.INFO_ARCGIS_LAYER,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
             CheckType.INFO_ARCGIS_WEBMAP,
-            CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE,
         ],
     )
     def test_run(
@@ -322,17 +225,14 @@ class TestRunCheck:
     ) -> None:
         """Can run a CheckRunner with the correct check method."""
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
-        mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
-        mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
-        mocker.patch.object(CheckRunner, "_check_magic_resource", side_effect=RuntimeError)
-        if check_type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
+        mocker.patch.object(CheckRunner, "_check_arcgis_api", side_effect=RuntimeError)
+        if check_type in (
+            CheckType.INFO_ARCGIS_LAYER,
+            CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.DOWNLOADS_ARCGIS_SERVICE,
+        ):
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
-            mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
-        elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
-            mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
-            mocker.patch.object(CheckRunner, "_check_arcgis_service", return_value=None)
-        elif check_type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
-            mocker.patch.object(CheckRunner, "_check_magic_resource", return_value=None)
+            mocker.patch.object(CheckRunner, "_check_arcgis_api", return_value=None)
 
         fx_check.type = check_type
         result = run_check(fx_logger.level, fx_check)
@@ -347,53 +247,57 @@ class TestChecker:
         runner = Checker(logger=fx_logger, config=fx_config)
         assert isinstance(runner, Checker)
 
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    def test_get_auth_entra(self, fx_checker: Checker):
-        """Can get Entra access token."""
-        result = fx_checker._get_auth_entra()
-        assert result == "x"
-
     @pytest.mark.parametrize(
-        ("check_type", "expected_auth"),
+        ("check_type", "expected_access_url", "expected_auth"),
         [
-            (CheckType.NONE, None),
-            (CheckType.ITEM_PAGES_TRUSTED, HTTPBasicAuth),
-            (CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE, HTTPBearerTokenAuth),
+            (CheckType.NONE, None, None),
+            (CheckType.ITEM_PAGES_TRUSTED, None, HTTPBasicAuth),
+            (CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE, "x", None),
+            (CheckType.INFO_ARCGIS_LAYER, "https://www.arcgis.com/sharing/rest/content/items/123?f=json", None),
+            (
+                CheckType.DOWNLOADS_ARCGIS_SERVICE,
+                "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer?f=json",
+                None,
+            ),
         ],
     )
-    def test_prepare_auth(
+    def test_prepare_checks(
         self,
         mocker: MockerFixture,
         fx_checker: Checker,
         fx_check: Check,
+        fx_lib_artefact_sharepoint: ArtefactSharePointFile,
         check_type: CheckType,
+        expected_access_url: str | None,
         expected_auth: AuthBase | None,
     ):
         """
-        Can prepare checks for authenticated resources.
+        Can prepare checks for selected resource distribution options.
 
-        Checks correct auth class is set (if applicable). Does not check if credentials are real.
+        E.g. access URL or auth class is set.
         """
-        mocker.patch.object(fx_checker, "_get_auth_entra", return_value="x")
-
         fx_check.type = check_type
+        if check_type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
+            mocker.patch(
+                "lantern.checks.MagicResourceDistributionClient.lookup_artefact",
+                return_value=fx_lib_artefact_sharepoint,
+            )
+        if check_type == CheckType.INFO_ARCGIS_LAYER:
+            fx_check.url = "https://www.arcgis.com/home/item.html?id=123"
+        elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
+            fx_check.url = "https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
         checks = [fx_check]
-        fx_checker._prepare_auth(checks=checks)
+        fx_checker._prepare_checks(checks=checks)
+
+        if expected_access_url:
+            assert checks[0].access_url == expected_access_url
+            assert checks[0].access_url != checks[0].url
+        else:
+            assert checks[0].access_url is None
         if expected_auth:
             assert isinstance(checks[0].http_auth, expected_auth)
         else:
             assert checks[0].http_auth is None
-
-    @pytest.mark.cov()
-    def test_prepare_auth_reuse_token(self, mocker: MockerFixture, fx_checker: Checker, fx_check: Check):
-        """Can reuse generated tokens across checks within the same prepare loop."""
-        mocker.patch.object(fx_checker, "_get_auth_entra", return_value=str(uuid4()))
-
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
-        checks = [fx_check, fx_check]
-        fx_checker._prepare_auth(checks=checks)
-        assert checks[0].http_auth._token == checks[1].http_auth._token
 
     def test_execute(self, fx_checker: Checker, fx_check: Check) -> None:
         """

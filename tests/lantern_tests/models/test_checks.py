@@ -42,6 +42,7 @@ class TestCheck:
         assert check.http_auth is None
         assert check.content_length is None
         assert check.redirect_location is None
+        assert check.access_url is None
         assert check.file_identifier is None
 
     @pytest.mark.cov()
@@ -51,8 +52,10 @@ class TestCheck:
         expected_method = HTTPMethod.GET
         expected_status = HTTPStatus.NOT_FOUND
         expected_auth = HTTPBasicAuth(username="x", password="x")  # noqa: S106
+        expected_access_url = "y"
         expected_int = 1
         expected = "x"
+
         check = Check(
             type=expected_type,
             url=expected,
@@ -61,6 +64,7 @@ class TestCheck:
             http_auth=expected_auth,
             content_length=expected_int,
             redirect_location=expected,
+            access_url=expected_access_url,
             file_identifier=expected,
         )
         assert check.type == expected_type
@@ -70,6 +74,7 @@ class TestCheck:
         assert check.http_auth == expected_auth
         assert check.content_length == expected_int
         assert check.redirect_location == expected
+        assert check.access_url == expected_access_url
         assert check.file_identifier == expected
 
     def test_from_site_content(self, fx_site_content: SiteContent):
@@ -103,6 +108,7 @@ class TestCheck:
             "http_auth": "[**REDACTED**]" if has_auth else None,
             "content_length": None,
             "redirect_location": None,
+            "access_url": None,
             "file_identifier": None,
             "result_http_status": None,
             "result_output": None,

@@ -51,11 +51,13 @@ LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="{{ op://Infrastructure/l2whnxwdbixs3x
 
 LANTERN_CHECKS_TRUSTED_USERNAME="op://Employee/qdewrgvwjf3pwxygkli5jkswtq/username"
 LANTERN_CHECKS_TRUSTED_PASSWORD="op://Infrastructure/hnanekrypud5jyamuilznjsv4y/password"
-LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/tenancy-id"
-LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/username"
-LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/password"
-LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/secret-id"
-LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/secret-exp"
+LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/tenancy-id"
+LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/username"
+LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/password"
+LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/secret-id"
+LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP="op://Infrastructure/tsuxet4wmrwdthy43rhiotkf2y/secret-exp"
+LANTERN_CHECKS_MAGIC_RESOURCES_SITE_ID="op://Infrastructure/e7rftaanttrgjfyoppl3rqqlcm/site-id"
+LANTERN_CHECKS_MAGIC_RESOURCES_LIBRARY_NAME="Main"
 
 LANTERN_BASE_URL_TESTING="https://data-testing.data.bas.ac.uk"
 LANTERN_BASE_URL_LIVE="https://data.bas.ac.uk"

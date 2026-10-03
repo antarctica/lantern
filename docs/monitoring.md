@@ -18,16 +18,14 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
 - `CHECKS_TRUSTED_USERNAME`: credential for trusted publishing based [Checks](#site-checks)
 - `CHECKS_TRUSTED_PASSWORD`: credential for trusted publishing based [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_CLIENT_ID`: credential for MAGIC Products Distribution service based [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET`: credential for MAGIC Products Distribution service based
-  [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP`: credential for MAGIC Products Distribution service based
-  [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID`: credential for MAGIC Products Distribution service based
-  [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_SAFE`: credential for MAGIC Products Distribution service based
-  [Checks](#site-checks)
-- `CHECKS_MAGIC_PRODUCTS_TENANT_ID`: credential for MAGIC Products Distribution service based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_CLIENT_ID`: credential for MAGIC Resource Distribution service based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_CLIENT_SECRET`: credential for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP`: credential for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID`: credential for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_SAFE`: credential for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_LIBRARY_NAME`: document library for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_SITE_ID`: SharePoint site ID for MAGIC Resource Distribution based [Checks](#site-checks)
+- `CHECKS_MAGIC_RESOURCES_TENANT_ID`: credential for MAGIC Resource Distribution based [Checks](#site-checks)
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -173,14 +171,15 @@ for layers.
 > [!NOTE]
 > Only public items can be checked. Checks for non-public items will be marked as failures.
 
-### MAGIC Products Distribution Service checks
+### MAGIC Resource Distribution service checks
 
 Distribution options for files hosted in the
-[MAGIC Products Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) are checked using
-the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/), as the platform underpinning the Products Service.
+[MAGIC Resource Distribution 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) service are checked using
+the MAGIC Resource Distribution [SharePoint Client](/docs/libraries.md#sharepoint-client) to generate a presigned
+access URL, which can be processed as normal URL checks.
 
-Access tokens to check files within the Products Service SharePoint site are generated using the
-[App Registration](/docs/infrastructure.md#microsoft-entra) representing the Catalogue within Microsoft Entra.
+The Distribution service client uses the [App Registration](/docs/infrastructure.md#microsoft-entra) representing the
+Catalogue (which has read only access to all deposited artefacts).
 
 ### Site checks data
 

@@ -1,5 +1,7 @@
 # Generate and export catalogue site
 
+from __future__ import annotations
+
 import time
 from argparse import ArgumentParser
 from pathlib import Path

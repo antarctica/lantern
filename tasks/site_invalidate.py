@@ -1,5 +1,7 @@
 # Invalidate selected outputs in CloudFront cache for live site
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 
 from tasks._shared import init

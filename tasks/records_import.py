@@ -1,5 +1,7 @@
 # Push records into store as a changeset
 
+from __future__ import annotations
+
 import subprocess
 import sys
 from argparse import ArgumentParser

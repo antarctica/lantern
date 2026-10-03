@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING

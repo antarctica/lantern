@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from http import HTTPStatus
 from typing import TYPE_CHECKING
@@ -24,7 +26,7 @@ class TestSearch:
                 request_data = json.loads(route.request.post_data)
                 if "requests" in request_data and len(request_data["requests"]) > 0:
                     query = request_data["requests"][0].get("query")
-            except json.JSONDecodeError, TypeError, IndexError, KeyError:
+            except (json.JSONDecodeError, TypeError, IndexError, KeyError):
                 pass
 
         all_results = {

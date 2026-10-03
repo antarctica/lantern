@@ -1,5 +1,7 @@
 # Set up a new GitLab store remote repository
 
+from __future__ import annotations
+
 import sys
 from itertools import chain
 from pathlib import Path

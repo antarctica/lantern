@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging  # needed for mocking  # noqa: TC003
 from base64 import b64decode

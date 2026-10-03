@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from bas_metadata_library.standards.magic_administration.v1.utils import (

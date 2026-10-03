@@ -1,5 +1,7 @@
 # Directly output catalogue items for selected records
 
+from __future__ import annotations
+
 import json
 from argparse import ArgumentParser
 from pathlib import Path

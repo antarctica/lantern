@@ -1,5 +1,7 @@
 # Preview local site with CORS support
 
+from __future__ import annotations
+
 import csv
 import os
 import ssl

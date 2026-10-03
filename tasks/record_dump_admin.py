@@ -1,5 +1,7 @@
 # Display administration metadata set in a record
 
+from __future__ import annotations
+
 import json
 from argparse import ArgumentParser
 from pathlib import Path

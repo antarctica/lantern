@@ -1,4 +1,7 @@
 # Based on: https://gitlab.com/ayblaq/prependnewline/-/blob/master/prependnewline.py
+
+from __future__ import annotations
+
 import re
 from typing import TYPE_CHECKING
 

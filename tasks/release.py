@@ -1,5 +1,7 @@
 # Prepare project release
 
+from __future__ import annotations
+
 import argparse
 import subprocess
 from datetime import UTC, datetime

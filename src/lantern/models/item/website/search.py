@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.enums import ProgressCode

@@ -325,6 +325,7 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 - all deployable code SHOULD be contained in the `lantern` package
 - `Path.resolve()` SHOULD be used to display or log file/directory paths
 - logging SHOULD be used to record how actions progress, using the app logger (`logger = logging.getLogger('lantern')`)
+- `from __future__ import annotations` and `if TYPE_CHECKING` SHOULD be used for future proofing later Python versions
 - extensions to third party dependencies SHOULD be:
   - created in `lantern.lib`
   - documented in [Libraries](/docs/libraries.md)

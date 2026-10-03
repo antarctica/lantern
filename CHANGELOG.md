@@ -27,6 +27,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET`
 * `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID`
 * `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP`
+* Downgrading package from Python 3.14 to 3.12 (for compatibility with BAS IT)
 
 ### Removed [BREAKING!]
 

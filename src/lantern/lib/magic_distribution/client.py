@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 from base64 import urlsafe_b64encode
 from functools import cached_property

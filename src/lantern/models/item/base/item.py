@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -266,7 +268,7 @@ class ItemBase(ItemCore):
         """
         try:
             return get_kv(self.record)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             return {}
 
     @property

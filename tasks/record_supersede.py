@@ -1,5 +1,7 @@
 # Indicate a record is a successor to an existing record
 
+from __future__ import annotations
+
 import logging
 from argparse import ArgumentParser
 from datetime import UTC, datetime

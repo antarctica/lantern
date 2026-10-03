@@ -6,7 +6,7 @@ import schemathesis
 from schemathesis import Case
 from schemathesis.checks import not_a_server_error
 from schemathesis.core.errors import LoaderError
-from schemathesis.hooks import HookContext  # noqa: TC002
+from schemathesis.hooks import HookContext
 from tests.conftest import has_network
 
 BASE_URL = "https://data.bas.ac.uk/static/json/openapi.json"

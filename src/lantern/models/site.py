@@ -247,7 +247,7 @@ class SiteMeta:
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
     - algolia_id: Algolia site identifier
-    - algolia_key: non-senstitive Algolia search API key
+    - algolia_key: non-sensitive Algolia search API key
     - algolia_index: name of Algolia search index
     - generator: name of application and source of records
     - version: version of application

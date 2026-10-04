@@ -1,4 +1,4 @@
-# Deposit one or more artefacts related to an existing record in the MAGIC Resource Distribution service (SharePoint)
+# Deposit one or more artefacts for a record in the MAGIC Resource Distribution service (SharePoint)
 
 from __future__ import annotations
 

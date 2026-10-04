@@ -1,4 +1,4 @@
-# Crude check of CSS classes used in static site templates
+# Generate a crude list of CSS classes used in static site templates
 
 from __future__ import annotations
 

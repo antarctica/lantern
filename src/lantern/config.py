@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from hashlib import sha1
 from importlib.metadata import version
 from typing import TYPE_CHECKING, TypedDict
@@ -188,6 +189,14 @@ class Config:  # noqa: PLW1641
         # Accept integers >= 0 or the sentinel -1. Reject other values.
         if not (type(n) is int and (n > 0 or n == -1)):
             msg = "Must be a positive integer or -1."
+            raise ValidationError(msg)
+
+    @staticmethod
+    def _expiry_validator(n: date) -> None:
+        """Expiry date must be later than now."""
+        now = datetime.now(tz=UTC).date()
+        if n <= now:
+            msg = "Must be a future expiry date."
             raise ValidationError(msg)
 
     @property
@@ -530,7 +539,7 @@ class Config:  # noqa: PLW1641
     def CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP(self) -> date:
         """Non-sensitive expiry date for CHECKS_MAGIC_RESOURCES_CLIENT_SECRET."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_RESOURCES_"):
-            return self._env.date("CLIENT_SECRET_EXP")
+            return self._env.date("CLIENT_SECRET_EXP", validate=self._expiry_validator)
 
     @property
     def CHECKS_MAGIC_RESOURCES_SITE_ID(self) -> str:

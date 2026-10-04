@@ -1,4 +1,4 @@
-# Check any files in a directory are supported as file artefacts.
+# Check any files in a directory are supported as file artefact formats.
 
 from __future__ import annotations
 

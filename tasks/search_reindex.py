@@ -1,4 +1,4 @@
-# Recreate catalogue search index
+# Recreate the catalogue search index
 
 from __future__ import annotations
 

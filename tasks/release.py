@@ -1,4 +1,4 @@
-# Prepare project release
+# Prepare a project release
 
 from __future__ import annotations
 

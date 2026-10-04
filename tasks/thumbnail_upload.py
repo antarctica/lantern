@@ -1,3 +1,5 @@
+# Downsample an image for use as an item overview thumbnail and upload to the BAS CDN
+
 from __future__ import annotations
 
 from argparse import ArgumentParser

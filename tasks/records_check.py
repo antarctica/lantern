@@ -1,4 +1,4 @@
-# Check catalogue site contents
+# Check catalogue site contents and distribution options
 
 from __future__ import annotations
 

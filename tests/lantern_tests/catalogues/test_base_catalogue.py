@@ -5,7 +5,7 @@ from unittest.mock import PropertyMock
 
 import pytest
 
-from lantern.catalogues.base import CatalogueBase
+from lantern.catalogues.base import CatalogueBase, group_output_classes
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -31,13 +31,8 @@ if TYPE_CHECKING:
     from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
-class TestCatalogueBase:
-    """Test catalogue abstract base class via fake catalogue implementation."""
-
-    def test_init(self, tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
-        """Can create a catalogue instance."""
-        cat = FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path / "output")
-        assert isinstance(cat, CatalogueBase)
+class TestCatalogueBaseStandalone:
+    """Test standalone base class static methods."""
 
     all_global: Final[list[Callable[..., OutputBase]]] = [
         SiteResourcesOutput,
@@ -65,9 +60,8 @@ class TestCatalogueBase:
             ([SiteResourcesOutput, RedirectsOutput], ([SiteResourcesOutput], [])),
         ],
     )
-    def test__sort_output_classes(
+    def test_group_output_classes(
         self,
-        fx_fake_catalogue: FakeCatalogue,
         values: list[Callable[..., OutputBase]] | None,
         expected: tuple[list[Callable[..., OutputBase]], list[Callable[..., OutputBase]]],
     ):
@@ -76,8 +70,17 @@ class TestCatalogueBase:
 
         Except for RedirectsOutput which is filtered out to run separately.
         """
-        results = fx_fake_catalogue._group_output_classes(values)
+        results = group_output_classes(values)
         assert results == expected
+
+
+class TestCatalogueBase:
+    """Test catalogue abstract base class via fake catalogue implementation."""
+
+    def test_init(self, tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
+        """Can create a catalogue instance."""
+        cat = FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path / "output")
+        assert isinstance(cat, CatalogueBase)
 
     def test_export(self, fx_fake_catalogue: FakeCatalogue):
         """

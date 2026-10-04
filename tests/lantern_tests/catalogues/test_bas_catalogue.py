@@ -200,11 +200,6 @@ class TestBasCatUntrusted:
         results = fx_bas_cat_untrusted.checks()
         assert len(results) > 0
 
-    def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
-        """Cannot directly check untrusted site (not supported)."""
-        with pytest.raises(NotImplementedError):
-            fx_bas_cat_untrusted.check()
-
 
 class TestBasCatTrusted:
     """Test BAS data catalogue trusted site."""
@@ -236,11 +231,6 @@ class TestBasCatTrusted:
         check = results[0]
         assert "/-/items/" in check.url
         assert check.type == CheckType.ITEM_PAGES_TRUSTED
-
-    def test_check(self, fx_bas_cat_trusted: BasCatUntrusted):
-        """Cannot directly check trusted site (not supported)."""
-        with pytest.raises(NotImplementedError):
-            fx_bas_cat_trusted.check()
 
 
 class TestBasCatEnv:

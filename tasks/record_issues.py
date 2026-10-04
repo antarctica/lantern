@@ -1,4 +1,4 @@
-# Set gitlab issues in administration metadata in a record
+# Set gitlab issues in a record's administration metadata
 
 from __future__ import annotations
 

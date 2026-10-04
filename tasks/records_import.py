@@ -1,4 +1,4 @@
-# Push records into store as a changeset
+# Push records into catalogue as a commit/changeset
 
 from __future__ import annotations
 

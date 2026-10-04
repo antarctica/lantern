@@ -71,7 +71,7 @@ A Python application defined within the `src/lantern` package consisting of:
 
 `lantern.catalogues`
 
-Catalogues are the core component of this project, responsible for:
+Catalogues are the application entrypoint, responsible for:
 
 - managing [Records](/docs/models.md#records)
 - transforming these into a static website for discovery
@@ -96,6 +96,9 @@ A minimum Catalogue consists of:
 Repositories abstract managing [Records](/docs/models.md#records) in one or more [Stores](#stores) within larger
 [Catalogues](#catalogues).
 
+> [!IMPORTANT]
+> Only the BAS Repository, `lantern.repositories.bas.BasRepository`, is officially supported by this project.
+
 ## Sites
 
 `lantern.site.Site`
@@ -116,7 +119,7 @@ See the [Checks](/docs/monitoring.md#site-checks) docs for information about the
 
 > [!NOTE]
 > Some outputs MAY require additional properties, populated by [Export Metadata](/docs/models.md#export-metadata) where
-> possible, or dict of extra values passed to a Site.
+> possible, or additional dict of extra values.
 
 ## Stores
 

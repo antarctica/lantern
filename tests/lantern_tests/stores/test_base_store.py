@@ -39,11 +39,7 @@ class TestRecordsNotFoundError:
 
 
 class TestBaseStore:
-    """
-    Test base store.
-
-    The base store is an abstract class so for testing the FakeRecordsStore is used.
-    """
+    """Test store abstract base class via fake store implementation."""
 
     def test_len(self, fx_fake_store: FakeRecordsStore):
         """Can get count of records in store."""

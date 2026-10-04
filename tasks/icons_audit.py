@@ -1,4 +1,4 @@
-# Crude check of Font Awesome icon classes used in static site templates
+# Generate a crude list of Font Awesome icon classes used in static site templates
 
 from __future__ import annotations
 

@@ -33,6 +33,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Construction partner CDE (Common Data Environment) distribution options
 * `HTTPBearerTokenAuth` auth class for Requests (no longer used)
+* `DistributionMaker` utility, replaced by more robust `ArtefactFormat` and `Artefact` classes
 
 ### Added
 
@@ -80,9 +81,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring BAS (un)trusted sub-catalogues to not inherit from `BaseCatalogue` to avoid poor fit
 * Refactoring `Site` to use a record access protocol, decoupling from using a `Store` directly
 
-### Removed [BREAKING!]
+### Removed
 
-* `DistributionMaker` utility, replaced by more robust `ArtefactFormat` and `Artefact` classes
+* 'access' property from catalogue item page summary grid
 
 ## [0.15.2] - 2026-08-17
 

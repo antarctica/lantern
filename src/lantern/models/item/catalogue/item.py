@@ -292,7 +292,7 @@ class ItemCatalogue(ItemBase):
 
     @cached_property
     def summary(self) -> PageSummary:
-        """Item summary."""
+        """Item summary grid."""
         return PageSummary(
             item_super_type=self._super_type,
             edition=self.edition,
@@ -300,7 +300,6 @@ class ItemCatalogue(ItemBase):
             revision_date=self._dates.revision_relative,
             aggregations=self._aggregations,
             live=self.live,
-            restricted=self._restricted,
             citation=self.citation_html,
             description=self.description_html,
         )

@@ -507,7 +507,6 @@ class PageSummary:
         revision_date: FormattedDate | None,
         aggregations: Aggregations,
         live: bool,
-        restricted: bool,
         citation: str | None,
         description: str,
     ) -> None:
@@ -517,7 +516,6 @@ class PageSummary:
         self._revision_date = revision_date
         self._aggregations = aggregations
         self._live = live
-        self._restricted = restricted
         self._citation = citation
         self._description = description
 
@@ -531,8 +529,7 @@ class PageSummary:
         Shown if item has any summary grid properties (e.g. restricted, edition, one or more collections, etc.).
         """
         return (
-            self.restricted
-            or self.live
+            self.live
             or self.edition is not None
             or self.published is not None
             or len(self.collections) > 0
@@ -580,11 +577,6 @@ class PageSummary:
     def live(self) -> bool:
         """Live updating."""
         return self._live
-
-    @property
-    def restricted(self) -> bool:
-        """Access restricted."""
-        return self._restricted
 
     @property
     def citation(self) -> str | None:

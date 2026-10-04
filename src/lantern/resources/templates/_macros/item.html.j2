@@ -52,9 +52,6 @@
     {% if data.live %}
       {{ live() }}
     {% endif %}
-    {% if data.restricted %}
-      {{ access() }}
-    {% endif %}
   </dl>
 {% endmacro %}
 
@@ -112,12 +109,6 @@
     {{ com.live_i() }} This item is frequently updated
   {% endcall %}
 {% endmacro %}
-
-{% macro access() %}
-  {% call summary_grid_section(id="summary-access", title="Access") %}
-    <span class="bg-yellow-500 px-2 py-1 text-sm dark:text-grey-950">{{ com.restricted_i() }} Restricted</span>
-  {% endcall %}
-{% endmacro %}x
 
 {% macro citation(value) %}
   {{ summary_prose(id="summary-citation", title="Citation", value=value) }}

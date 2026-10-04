@@ -653,7 +653,7 @@ class TestPageSummary:
     """Test Catalogue Item summary panel."""
 
     @pytest.mark.parametrize(
-        ("item_type", "edition", "published", "aggregations", "live", "restricted", "citation"),
+        ("item_type", "edition", "published", "aggregations", "live", "citation"),
         [
             (
                 HierarchyLevelCode.PRODUCT,
@@ -673,7 +673,6 @@ class TestPageSummary:
                     select_record=_select_record,
                 ),
                 True,
-                False,
                 "x",
             ),
             (
@@ -686,7 +685,6 @@ class TestPageSummary:
                     select_record=_select_record,
                 ),
                 False,
-                True,
                 None,
             ),
             (
@@ -707,7 +705,6 @@ class TestPageSummary:
                     select_record=_select_record,
                 ),
                 False,
-                False,
                 "x",
             ),
         ],
@@ -719,7 +716,6 @@ class TestPageSummary:
         published: FormattedDate | None,
         aggregations: Aggregations,
         live: bool,
-        restricted: bool,
         citation: str | None,
     ):
         """Can create class for summary panel."""
@@ -733,14 +729,12 @@ class TestPageSummary:
             revision_date=None,
             aggregations=aggregations,
             live=live,
-            restricted=restricted,
             citation=citation,
             description="x",
         )
         assert summary.collections == collections
         assert summary.edition == edition
         assert summary.live == live
-        assert summary.restricted == restricted
         assert summary.about == "x"
 
         if super_type == ItemSuperType.RESOURCE:
@@ -749,13 +743,12 @@ class TestPageSummary:
             assert summary.citation is None
 
     @pytest.mark.parametrize(
-        ("edition", "published", "live", "restricted", "aggregations", "expected"),
+        ("edition", "published", "live", "aggregations", "expected"),
         [
             # [all triggers]
             (
                 "1",
                 FormattedDate.from_rec_date(Date(date=datetime(2014, 6, 30, tzinfo=UTC))),
-                True,
                 True,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
@@ -787,7 +780,6 @@ class TestPageSummary:
                 "1",
                 None,
                 False,
-                False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
@@ -807,7 +799,6 @@ class TestPageSummary:
             (
                 None,
                 "x",
-                False,
                 False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
@@ -829,7 +820,6 @@ class TestPageSummary:
                 None,
                 None,
                 False,
-                False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations([]),
@@ -844,7 +834,6 @@ class TestPageSummary:
         edition: str | None,
         published: str | None,
         live: bool,
-        restricted: bool,
         aggregations: Aggregations,
         expected: bool,
     ):
@@ -855,7 +844,6 @@ class TestPageSummary:
             published_date=published,
             revision_date=None,
             live=live,
-            restricted=restricted,
             aggregations=aggregations,
             citation=None,
             description="x",
@@ -895,7 +883,6 @@ class TestPageSummary:
             published_date=published,
             revision_date=revision,
             live=False,
-            restricted=False,
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), select_record=_select_record
             ),
@@ -925,7 +912,6 @@ class TestPageSummary:
                 select_record=_select_record,
             ),
             live=False,
-            restricted=False,
             edition=None,
             published_date=None,
             revision_date=None,

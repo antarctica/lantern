@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from lantern.models.item.algolia.item import ObjectRecord
+    from lantern.repositories.base import RecordsProtocol
     from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 
 
@@ -94,11 +95,10 @@ def reset_site_singletons() -> None:
     """
     Reset Site module singletons for test isolation.
 
-    Must be called when switching between different store implementations
-    (e.g., from GitLabCachedStore to FakeRecordsStore) to prevent singleton pollution.
+    Must be called when switching between different records protocol implementations to prevent singleton pollution.
     """
     mod = importlib.import_module("lantern.site")
-    mod._STORE_SINGLETON = None
+    mod._RECORDS_SINGLETON = None
     mod._ISO_HTML_XSLT_SINGLETON = None
 
 
@@ -813,6 +813,13 @@ def fx_fake_repo(fx_logger: logging.Logger, fx_config: Config, fx_fake_store: Fa
 
 
 @pytest.fixture()
+def fx_records_snapshot(fx_fake_repo: FakeRepository) -> RecordsProtocol:
+    """Records snapshot protocol using a fake repository."""
+    with fx_fake_repo.snapshot() as snapshot:
+        yield snapshot
+
+
+@pytest.fixture()
 def fx_bas_repo(fx_logger: logging.Logger, fx_config: Config) -> BasRepository:
     """BAS Catalogue repository instance."""
     return BasRepository(logger=fx_logger, config=fx_config)
@@ -1027,9 +1034,9 @@ def fx_reset_site_singletons() -> Generator[None]:
 
 
 @pytest.fixture()
-def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: FakeRecordsStore) -> Site:
+def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_records_snapshot: RecordsProtocol) -> Site:
     """Site generator using fake/test records."""
-    return Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+    return Site(logger=fx_logger, meta=fx_export_meta, records=fx_records_snapshot)
 
 
 @pytest.fixture()
@@ -1187,7 +1194,7 @@ def fx_static_site(fx_session_tmp_dir: Path) -> TemporaryDirectory:
     store = FakeRecordsStore(logger=logger)
     meta = ExportMeta.from_config(config=config, env="testing", build_repo_ref="83fake48", trusted=True)
     exporter = LocalExporter(logger=logger, path=site_path)
-    site = Site(logger=logger, meta=meta, store=store)
+    site = Site(logger=logger, meta=meta, records=store)
 
     content = site.generate_content(
         global_outputs=[

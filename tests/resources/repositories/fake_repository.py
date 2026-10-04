@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, cast
 
 from lantern.models.repository import UpsertResults
-from lantern.repositories.base import RepositoryBase
+from lantern.repositories.base import RecordsProtocol, RepositoryBase
 
 if TYPE_CHECKING:
     import logging
-    from collections.abc import Collection
+    from collections.abc import Collection, Iterator
 
     from lantern.config import Config
     from lantern.models.record.record import Record
@@ -40,3 +41,8 @@ class FakeRepository(RepositoryBase):
     def upsert_records(self, content: Collection[Record]) -> UpsertResults:
         """Persist new or existing records."""
         return UpsertResults(new_identifiers=[], updated_identifiers=[])
+
+    @contextmanager
+    def snapshot(self) -> Iterator[RecordsProtocol]:
+        """Yield available records for Site generation."""
+        yield cast("RecordsProtocol", self._store)

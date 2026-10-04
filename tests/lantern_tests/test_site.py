@@ -5,7 +5,7 @@ import logging
 from datetime import date
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from unittest.mock import PropertyMock
+from unittest.mock import MagicMock, PropertyMock
 from uuid import uuid4
 
 import pytest
@@ -24,11 +24,10 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
-from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transform, _job_worker_store, _run_job
-from lantern.stores.base import StoreBase
+from lantern.repositories.base import RecordsProtocol
+from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transform, _job_worker_records, _run_job
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
-from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -37,6 +36,8 @@ if TYPE_CHECKING:
 
     from lantern.models.record.revision import RecordRevision
     from lantern.outputs.base import OutputBase
+    from lantern.stores.base import StoreBase
+    from tests.resources.repositories.fake_repository import FakeRepository
 
 
 @pytest.mark.usefixtures("fx_reset_site_singletons")
@@ -44,33 +45,41 @@ class TestSiteJob:
     """Test functions related to site generator parallel processing jobs."""
 
     @pytest.mark.cov()
-    def test_job_worker_store(self, fx_fake_store: StoreBase):
-        """Can create store instance."""
-        result = _job_worker_store(key=str(uuid4()), store=fx_fake_store)
-        assert isinstance(result, StoreBase)
+    def test_job_worker_source(self, fx_records_snapshot: RecordsProtocol):
+        """Can create records snapshot instance."""
+        result = _job_worker_records(key=str(uuid4()), records=fx_records_snapshot)
+        assert isinstance(result.record_count, int)
 
     @pytest.mark.cov()
-    def test_job_worker_store_cached(self, fx_fake_store: StoreBase):
-        """Reuses the store for subsequent jobs from the same site."""
+    def test_job_worker_source_cached(self, fx_fake_repo: FakeRepository, fx_records_snapshot: RecordsProtocol):
+        """Can reuse the records snapshot for workers associated with the same site."""
         key = str(uuid4())
-        first = _job_worker_store(key=key, store=fx_fake_store)
-        second = _job_worker_store(key=key, store=FakeRecordsStore(logger=logging.getLogger("lantern")))
+        first = _job_worker_records(key=key, records=fx_records_snapshot)
+        with fx_fake_repo.snapshot() as alt_snapshot:
+            second = _job_worker_records(key=key, records=alt_snapshot)
         assert second is first
 
     @pytest.mark.cov()
-    def test_job_worker_store_rekeyed(self, fx_fake_store: StoreBase):
-        """Does not reuse a store from a different site, as workers may be shared between sites."""
-        first = _job_worker_store(key=str(uuid4()), store=fx_fake_store)
-        other = FakeRecordsStore(logger=logging.getLogger("lantern"))
-        second = _job_worker_store(key=str(uuid4()), store=other)
+    def test_job_worker_store_rekeyed(self, fx_fake_repo: FakeRepository, fx_records_snapshot: RecordsProtocol):
+        """
+        Cannot reuse the records snapshot for workers associated with different sites.
+
+        As determined by site keys.
+        """
+        first = _job_worker_records(key=str(uuid4()), records=fx_records_snapshot)
+        second = _job_worker_records(key=str(uuid4()), records=MagicMock(spec=RecordsProtocol))
         assert second is not first
-        assert second is other
 
     @pytest.mark.cov()
     def test_job_worker_store_gitlab_cache(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
-        """Can create and re-warm GitLabCachedStore instance."""
+        """
+        Can create and re-warm a GitLabCachedStore instance.
+
+        To test `RecordsProtocol.restore_parallel()` method, which in this case calls a Store implementing that
+        protocol directly (rather than via a Repository).
+        """
         fx_gitlab_cached_store_pop._cache._flash.clear()
-        result = _job_worker_store(key=str(uuid4()), store=fx_gitlab_cached_store_pop)
+        result = _job_worker_records(key=str(uuid4()), records=fx_gitlab_cached_store_pop)
         assert isinstance(result, GitLabCachedStore)
         assert len(result._cache._flash) > 0
 
@@ -137,7 +146,7 @@ class TestSiteJob:
             else None,
         )
         content = _run_job(
-            log_level=logging.DEBUG, meta=fx_export_meta, store=fx_fake_store, job=job, worker_key=str(uuid4())
+            log_level=logging.DEBUG, meta=fx_export_meta, records=fx_fake_store, job=job, worker_key=str(uuid4())
         )
 
         results = [str(output.path) for output in content]
@@ -147,7 +156,7 @@ class TestSiteJob:
         checks = _run_job(
             log_level=logging.DEBUG,
             meta=fx_export_meta,
-            store=fx_fake_store,
+            records=fx_fake_store,
             job=SiteJob(action="checks", output=output_cls, record=fx_revision_model_min),
             worker_key=str(uuid4()),
         )
@@ -171,7 +180,7 @@ class TestSiteJob:
         mocker: MockerFixture,
         fx_logger: logging.Logger,
         fx_revision_model_min: RecordRevision,
-        fx_fake_store: StoreBase,
+        fx_records_snapshot: RecordsProtocol,
         fx_export_meta: ExportMeta,
         output_cls: type[OutputBase],
     ):
@@ -182,7 +191,7 @@ class TestSiteJob:
             results = _run_job(
                 log_level=fx_logger.level,
                 meta=fx_export_meta,
-                store=fx_fake_store,
+                records=fx_records_snapshot,
                 job=SiteJob(action=action, output=output_cls, record=fx_revision_model_min),
                 worker_key=str(uuid4()),
             )
@@ -193,19 +202,21 @@ class TestSiteJob:
 class TestSite:
     """Test site generator."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: StoreBase):
+    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_records_snapshot: RecordsProtocol):
         """Can create a site generator instance."""
-        site = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+        site = Site(logger=fx_logger, meta=fx_export_meta, records=fx_records_snapshot)
         assert isinstance(site, Site)
         assert site._extras == {}
         assert site._workers == 1
         assert site._worker_key
 
     @pytest.mark.cov()
-    def test_worker_key_unique(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: StoreBase):
-        """Each site gets a distinct worker key, so reused workers don't return another site's store."""
-        site_a = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
-        site_b = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+    def test_worker_key_unique(
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_records_snapshot: RecordsProtocol
+    ):
+        """Can assign a distinct worker key to site instances, to prevent workers pollution."""
+        site_a = Site(logger=fx_logger, meta=fx_export_meta, records=fx_records_snapshot)
+        site_b = Site(logger=fx_logger, meta=fx_export_meta, records=fx_records_snapshot)
         assert site_a._worker_key != site_b._worker_key
 
     @pytest.mark.cov()

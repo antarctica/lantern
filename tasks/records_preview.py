@@ -158,7 +158,7 @@ def _export(logger: logging.Logger, config: Config, records: list[Record], outpu
     meta.plausible_id = None
     meta.turnstile_key = None
 
-    site = Site(logger=logger, meta=meta, store=PlaceholderStore())
+    site = Site(logger=logger, meta=meta, records=PlaceholderStore())
     exporter = LocalExporter(logger=logger, path=output_path)
 
     jobs = [SiteJob(action="content", output=cls) for cls in [SiteResourcesOutput, SitePagesOutput, SiteApiOutput]]

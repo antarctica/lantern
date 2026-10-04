@@ -99,7 +99,8 @@ class TestBasCatUntrusted:
         # mock fx_bas_cat_untrusted._invalidator.invalidate to capture invalidation keys it is called with
         mocker.patch.object(fx_bas_cat_untrusted._invalidator, "invalidate", return_value=None)
 
-        fx_bas_cat_untrusted.export(identifiers={"x"})
+        with fx_bas_cat_untrusted._repo.snapshot() as records:
+            fx_bas_cat_untrusted.export(records=records, identifiers={"x"})
         result = fx_bas_cat_untrusted._exporter._s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = {o["Key"] for o in result["Contents"]}
         assert keys.issuperset(expected_keys)
@@ -129,13 +130,19 @@ class TestBasCatUntrusted:
         expected_key = "static/json/health.json"
         expected_count = 99
 
-        # mock stores to return fixed length
+        # mock the frozen snapshot and search count to return fixed values
         mock_store = mocker.MagicMock()
-        mock_store.__len__ = mocker.MagicMock(return_value=expected_count)
+        mock_store.record_count = expected_count
         mocker.patch.object(fx_bas_cat_untrusted._repo, "_make_gitlab_store", return_value=mock_store)
-        mocker.patch.object(fx_bas_cat_untrusted._repo, "_make_algolia_store", return_value=mock_store)
+        mocker.patch.object(
+            type(fx_bas_cat_untrusted._repo),
+            "search_record_count",
+            new_callable=PropertyMock,
+            return_value=expected_count,
+        )
 
-        fx_bas_cat_untrusted.export(outputs=[SiteHealthOutput])
+        with fx_bas_cat_untrusted._repo.snapshot() as records:
+            fx_bas_cat_untrusted.export(records=records, outputs=[SiteHealthOutput])
 
         item_object = fx_bas_cat_untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=expected_key
@@ -178,7 +185,8 @@ class TestBasCatUntrusted:
         if has_redirects:
             outputs.append(RedirectsOutput)
 
-        fx_bas_cat_untrusted.export(outputs=outputs)
+        with fx_bas_cat_untrusted._repo.snapshot() as records:
+            fx_bas_cat_untrusted.export(records=records, outputs=outputs)
 
         if not has_redirects:
             with pytest.raises(ClientError):
@@ -197,7 +205,8 @@ class TestBasCatUntrusted:
 
     def test_checks(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can generate checks for untrusted site content."""
-        results = fx_bas_cat_untrusted.checks()
+        with fx_bas_cat_untrusted._repo.snapshot() as records:
+            results = fx_bas_cat_untrusted.checks(records=records)
         assert len(results) > 0
 
 
@@ -213,7 +222,8 @@ class TestBasCatTrusted:
 
     def test_export(self, fx_bas_cat_trusted: BasCatTrusted):
         """Can export trusted site."""
-        fx_bas_cat_trusted.export()
+        with fx_bas_cat_trusted._repo.snapshot() as records:
+            fx_bas_cat_trusted.export(records=records)
 
         trusted_path = fx_bas_cat_trusted._exporter._path
         item_path = trusted_path.joinpath("items/x/index.html")
@@ -225,7 +235,8 @@ class TestBasCatTrusted:
 
     def test_checks(self, fx_bas_cat_trusted: BasCatTrusted):
         """Can generate checks for trusted site content."""
-        results = fx_bas_cat_trusted.checks()
+        with fx_bas_cat_trusted._repo.snapshot() as records:
+            results = fx_bas_cat_trusted.checks(records=records)
         assert len(results) > 0
 
         check = results[0]
@@ -255,9 +266,11 @@ class TestBasCatEnv:
         assert isinstance(cat._untrusted, BasCatUntrusted)
         assert isinstance(cat._trusted, BasCatTrusted)
 
-    def test_export(self, fx_bas_cat_env: BasCatEnv):
+    def test_export(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
         """Can export static sites."""
+        make_store = mocker.spy(fx_bas_cat_env._repo, "_make_gitlab_store")
         fx_bas_cat_env.export()
+        make_store.assert_called_once()
 
         result = fx_bas_cat_env._untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_env._untrusted._exporter._bucket, Key="items/x/index.html"
@@ -272,9 +285,11 @@ class TestBasCatEnv:
         """Does not include trusted content when no relevant Outputs are included."""
         fx_bas_cat_env.export(outputs=[SiteResourcesOutput])
 
-    def test_check(self, fx_bas_cat_env: BasCatEnv):
+    def test_check(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
         """Can check catalogue contents."""
+        make_store = mocker.spy(fx_bas_cat_env._repo, "_make_gitlab_store")
         fx_bas_cat_env.check()
+        make_store.assert_called_once()
 
         result = fx_bas_cat_env._untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_env._bucket, Key="-/checks/data.json"

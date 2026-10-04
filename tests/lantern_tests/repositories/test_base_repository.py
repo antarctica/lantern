@@ -36,3 +36,8 @@ class TestRepositoryBase:
         """
         results = fx_fake_repo.upsert_records([fx_record_model_min])
         assert isinstance(results, UpsertResults)
+
+    def test_snapshot(self, fx_fake_repo: FakeRepository):
+        """Can get a snapshot of available records for use in Sites."""
+        with fx_fake_repo.snapshot() as snapshot:
+            assert snapshot.record_count > 0

@@ -25,29 +25,29 @@ if TYPE_CHECKING:
     from lantern.models.record.revision import RecordRevision
     from lantern.models.site import ExportMeta, SiteContent
     from lantern.outputs.base import OutputBase
-    from lantern.stores.base import StoreBase
+    from lantern.repositories.base import RecordsProtocol
 
 SiteAction = Literal["content", "checks", "invalidations"]
 
-_STORE_SINGLETON: tuple[str, StoreBase] | None = None
+_RECORDS_SINGLETON: tuple[str, RecordsProtocol] | None = None
 _ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
 
 
-def _job_worker_store(key: str, store: StoreBase) -> StoreBase:
+def _job_worker_records(key: str, records: RecordsProtocol) -> RecordsProtocol:
     """
-    Store per worker process.
+    Records snapshot per worker process.
 
-    Singleton used to avoid re-initialising the store for each job, as some stores are expensive or impossible
+    Singleton used to avoid re-initialising the records source for each job, as some are expensive or impossible
     to pickle with in memory state.
 
-    Keyed by the owning Site so that a worker reused by a different Site does not silently return the wrong
-    store. Only the most recent store is retained, as jobs from a Site are dispatched together.
+    Keyed by a value unique to each Site instance so workers reused by a different Site do not silently return the
+    wrong snapshot. Where keys differ, only the new snapshot is retained.
     """
-    global _STORE_SINGLETON  # noqa: PLW0603
-    if _STORE_SINGLETON is None or _STORE_SINGLETON[0] != key:
-        store.restore_parallel()
-        _STORE_SINGLETON = (key, store)
-    return _STORE_SINGLETON[1]
+    global _RECORDS_SINGLETON  # noqa: PLW0603
+    if _RECORDS_SINGLETON is None or _RECORDS_SINGLETON[0] != key:
+        records.restore_parallel()
+        _RECORDS_SINGLETON = (key, records)
+    return _RECORDS_SINGLETON[1]
 
 
 def _job_worker_iso_html_transform() -> etree.XSLT:
@@ -68,7 +68,7 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
 def _run_job(
     log_level: int,
     meta: ExportMeta,
-    store: StoreBase,
+    records: RecordsProtocol,
     job: SiteJob,
     worker_key: str,
 ) -> list[SiteContent] | list[Check] | list[str]:
@@ -79,9 +79,9 @@ def _run_job(
     """
     init_logging(log_level)
     logger = logging.getLogger("lantern")
-    store = _job_worker_store(key=worker_key, store=store)
-    select_record = store.select_one
-    select_records = store.select
+    records = _job_worker_records(key=worker_key, records=records)
+    select_record = records.select_one
+    select_records = records.select
     job_extras = job.extras or {}
 
     if job.output == ItemCatalogueOutput:
@@ -133,17 +133,21 @@ class SiteJob(NamedTuple):
 
 class Site:
     """
-    Simple static site generator.
+    Multipurpose static site generator with job based parallelism.
 
-    Generates content or content checks for selected Output classes and records from a Store.
+    Generates content, content checks or invalidation keys for selected Output classes and records. Intended for use in
+    higher level and opinionated Catalogue instances.
 
-    Flexible class intended to be used in a higher level and opinionated Catalogue class.
+    Records access is defined by a minimal RecordSource protocol to avoid coupling to specific store implementations
+    and breaking abstraction.
     """
 
-    def __init__(self, logger: logging.Logger, meta: ExportMeta, store: StoreBase, extras: dict | None = None) -> None:
+    def __init__(
+        self, logger: logging.Logger, meta: ExportMeta, records: RecordsProtocol, extras: dict | None = None
+    ) -> None:
         self._logger = logger
         self._meta = meta
-        self._store = store
+        self._records = records
         self._extras = extras or {}
 
         self._workers = meta.parallel_jobs
@@ -171,7 +175,7 @@ class Site:
             SiteJob(action=action, output=cls, record=record, extras=extras)
             for action in actions
             for cls in individual_outputs
-            for record in self._store.select(identifiers)
+            for record in self._records.select(identifiers)
         ]
         return global_ + individual_
 
@@ -181,10 +185,10 @@ class Site:
 
         Returns generated content, checks or invalidation keys as a flattened list.
         """
-        store = self._store.prep_parallel()
+        records = self._records.prep_parallel()
         start = time.monotonic()
         nested_outputs: list[list[SiteContent | Check | list[str]]] = Parallel(n_jobs=self._workers)(
-            delayed(_run_job)(self._logger.level, self._meta, store, job, self._worker_key) for job in jobs
+            delayed(_run_job)(self._logger.level, self._meta, records, job, self._worker_key) for job in jobs
         )
         outputs: list[SiteContent | Check | list[str]] = [
             output for output_outputs in nested_outputs for output in output_outputs

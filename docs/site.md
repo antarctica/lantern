@@ -342,10 +342,8 @@ A permissive `robots.txt` is included to prevent indexing internal (but not sens
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 [Algolia](/docs/architecture.md#algolia) is used to implement a basic site wide search using
-[InstantSearch.js](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js).
-
-> [!NOTE]
-> Only item titles are searchable.
+[InstantSearch.js](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js), with an
+automatically maintained Index of all records.
 
 Search results:
 
@@ -359,6 +357,11 @@ Search terms:
 
 > [!TIP]
 > Search statistics are available through the [Algolia Dashboard](/docs/infrastructure.md#algolia).
+
+The settings for the search index are defined in `resources/configs/search.toml`.
+
+> [!TIP]
+> See the [Usage](/docs/usage.md#updating-search-index) docs for how to update these settings.
 
 ## User feedback
 

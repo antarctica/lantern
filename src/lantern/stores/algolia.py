@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from algoliasearch.http.exceptions import RequestException
 from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.models import IndexSettings
 
 from lantern.models.item.algolia.item import ItemAlgolia, ObjectRecord
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
@@ -57,6 +58,29 @@ class AlgoliaStore(StoreBase):
             return next(index for index in self._client.list_indices().items if index.name == self._index)
         except StopIteration:
             raise LookupError from None
+
+    def index_settings(self) -> IndexSettings | None:
+        """Read current index settings."""
+        self._logger.info("Reading settings for index '%s'.", self._index)
+        result = self._client.get_settings(index_name=self._index, get_version=2)
+        return IndexSettings.from_dict(result.to_dict())
+
+    def configure_index(self, settings: dict) -> None:
+        """
+        Configure index settings and wait for changes to apply.
+
+        E.g. searchable properties, ranking, facets, etc.
+
+        See https://www.algolia.com/doc/guides/managing-results/relevance-overview for recommendations.
+        """
+        IndexSettings.model_validate(settings)
+        self._logger.info("Configuring index '%s'...", self._index)
+        try:
+            task = self._client.set_settings(index_name=self._index, index_settings=settings)
+            self._client.wait_for_task(index_name=self._index, task_id=task.task_id)
+        except RequestException as e:
+            self._logger.exception("Error configuring index '%s'", self._index, exc_info=e)
+            raise
 
     def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
         """

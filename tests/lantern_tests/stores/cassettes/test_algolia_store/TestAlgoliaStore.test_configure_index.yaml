@@ -1,0 +1,190 @@
+interactions:
+- request:
+    body: '{"searchableAttributes": ["objectID"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.47.0); Python (3.12.8); Search (4.47.0)
+    method: PUT
+    uri: https://x.algolia.net/1/indexes/x/settings
+  response:
+    body:
+      string: '{"updatedAt":"2014-06-30T12:30:45Z","taskID":123}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '61'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.47.0); Python (3.12.8); Search (4.47.0)
+    method: GET
+    uri: https://x-dsn.algolia.net/1/indexes/x/task/123
+  response:
+    body:
+      string: '{"status":"notPublished","pendingTask":false}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '45'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.47.0); Python (3.12.8); Search (4.47.0)
+    method: GET
+    uri: https://x-dsn.algolia.net/1/indexes/x/task/123
+  response:
+    body:
+      string: '{"status":"published","pendingTask":false}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.47.0); Python (3.12.8); Search (4.47.0)
+    method: GET
+    uri: https://x-dsn.algolia.net/1/indexes/x/settings?getVersion=2
+  response:
+    body:
+      string: '{"searchableAttributes":["objectID"]}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

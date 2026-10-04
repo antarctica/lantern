@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: '{"x": "x"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.47.0); Python (3.12.8); Search (4.47.0)
+    method: PUT
+    uri: https://x.algolia.net/1/indexes/x/settings
+  response:
+    body:
+      string: '{"message":"error"}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '61'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 400
+      message: Bad Request
+version: 1

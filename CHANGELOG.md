@@ -51,6 +51,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial, internal, support for file checksums within distribution options
 * Updated Python dependencies
 * Updated Algolia, Scalar and Sentry vendored JS dependencies
+* `search-configure` development task
 
 ### Fixed
 

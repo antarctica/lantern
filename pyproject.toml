@@ -50,6 +50,7 @@ dev = [
     "rich>=15.0.0",
     "ruff>=0.15.0",
     "taskipy>=1.14.1",
+    "tomli-w>=1.2.0",
     "trustme>=1.2.1",
     "ty>=0.0.49",
     "types-lxml>=2025.3.30",
@@ -149,9 +150,11 @@ bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstr
 # fake CLI (artefact)
 check-artefacts = { cmd = "python -m tasks.artefacts_check", help = "Check files are supported file artefact formats" }
 deposit-artefacts = { cmd = "python -m tasks.artefacts_deposit", help = "Deposit file artefacts to SharePoint Online as record distribution options" }
+# fake CLI (search)
+search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
+search-configure = { cmd = "python -m tasks.search_configure", help = "Update catalogue search index settings" }
 # fake CLI (other)
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
-search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
 upload-thumbnail = { cmd = "python -m tasks.thumbnail_upload", help = "Upload an image to the BAS CDN as a record graphic overview" }
 invalidate-thumbnails = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnails for an item in the BAS CDN" }

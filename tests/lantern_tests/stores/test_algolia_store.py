@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 import pytest
-from algoliasearch.search.models import FetchedIndex
+from algoliasearch.http.exceptions import RequestException
+from algoliasearch.search.models import FetchedIndex, IndexSettings
 
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.algolia import AlgoliaStore
@@ -26,6 +27,18 @@ class TestAlgoliaStore:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
+    def test_len(self, fx_algolia_store: AlgoliaStore):
+        """Can get count of records in store."""
+        assert len(fx_algolia_store) > 0
+
+    @pytest.mark.cov()
+    def test_freeze(self, fx_algolia_store: AlgoliaStore):
+        """Cannot freeze store (unsupported when not cached)."""
+        with pytest.raises(StoreFrozenUnsupportedError):
+            fx_algolia_store.freeze()
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
     def test_index_info(self, fx_algolia_store: AlgoliaStore):
         """Can get information about selected index."""
         result = fx_algolia_store._index_info
@@ -36,7 +49,7 @@ class TestAlgoliaStore:
     @pytest.mark.block_network
     @pytest.mark.cov()
     def test_index_info_error(self, fx_algolia_store: AlgoliaStore):
-        """Getting index information raises error if index does not exist."""
+        """Cannot get index information if index does not exist."""
         fx_algolia_store._index = "invalid"
 
         with pytest.raises(LookupError):
@@ -44,9 +57,31 @@ class TestAlgoliaStore:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_len(self, fx_algolia_store: AlgoliaStore):
-        """Can get count of records in store."""
-        assert len(fx_algolia_store) > 0
+    def test_index_settings(self, fx_algolia_store: AlgoliaStore):
+        """Can get index settings."""
+        result = fx_algolia_store.index_settings()
+        assert isinstance(result, IndexSettings)
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_configure_index(self, fx_algolia_store: AlgoliaStore):
+        """Can set index settings."""
+        expected = {"searchableAttributes": ["objectID"]}
+        fx_algolia_store.configure_index(expected)
+        result = fx_algolia_store.index_settings()
+        assert result.searchable_attributes == expected["searchableAttributes"]
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_configure_index_error(self, fx_algolia_store: AlgoliaStore):
+        """
+        Cannot set index settings if an error occurs.
+
+        Uses VCR recording to simulate an internal error.
+        """
+        expected = {"searchableAttributes": ["objectID"]}
+        with pytest.raises(RequestException):
+            fx_algolia_store.configure_index(expected)
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -96,9 +131,3 @@ class TestAlgoliaStore:
             ),
         )
         assert result["objectRevID"] == fx_revision_model_min.file_revision
-
-    @pytest.mark.cov()
-    def test_freeze(self, fx_algolia_store: AlgoliaStore):
-        """Cannot freeze store (unsupported when not cached)."""
-        with pytest.raises(StoreFrozenUnsupportedError):
-            fx_algolia_store.freeze()

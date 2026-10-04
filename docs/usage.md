@@ -326,6 +326,19 @@ To apply properties from a record to an item in ArcGIS Online, and create an ass
 - [Publish](#publishing-workflows) or [Import](#importing-records) the source catalogue record
 - run the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command
 
+## Updating search index
+
+> [!NOTE]
+> This is an advanced topic.
+
+To refresh the contents of the Algolia index used for [Site Search](/docs/site.md#search):
+
+- run the [`search-reindex`](/docs/supplemental/proto-cli-reference.md#search-reindex) command
+
+To update the settings for this index:
+
+- run the [`search-configure`](/docs/supplemental/proto-cli-reference.md#search-configure) command
+
 ## Rotating access tokens
 
 See [Infrastructure](/docs/infrastructure.md#rotating-tokens) documentation.

@@ -81,7 +81,7 @@ A minimum Catalogue consists of:
 
 ![Minimum catalogue components](/docs/img/architecture-generic-min.png)
 
-- a [Store](#stores) to manage and access Records created by [Editors](#record-editors)
+- a [Store](#stores) or [Repository](#repositories) to manage and access Records created by [Editors](#record-editors)
 - a [Site](#sites) generator
 - an [Exporter](#exporters) to publish the generated site to a hosting service, such as [AWS S3](#amazon-s3)
 - a [Checker](/docs/monitoring.md#site-checks) to verify generated site content and downloads linked from records
@@ -96,6 +96,10 @@ A minimum Catalogue consists of:
 Repositories abstract managing [Records](/docs/models.md#records) in one or more [Stores](#stores) within larger
 [Catalogues](#catalogues).
 
+All repositories inherit from the `lantern.repositories.base.RepositoryBase` abstract base class and MUST implement its
+minimal public interface, including a `snapshot` method implementing the records access protocol required by
+[Sites](#sites).
+
 > [!IMPORTANT]
 > Only the BAS Repository, `lantern.repositories.bas.BasRepository`, is officially supported by this project.
 
@@ -106,7 +110,8 @@ Repositories abstract managing [Records](/docs/models.md#records) in one or more
 Sites are static websites built from a set of Records and other content as the output of a [Catalogue](#catalogues).
 
 They generate content, checks and/or cache invalidation keys for content from [Outputs](#outputs) using a
-[Store](#stores) to access records.
+[Store](#stores) or [Repository](#repositories) implementing the `lantern.repositories.base.RecordsProtocol` to access
+records.
 
 > [!TIP]
 > A static site is used over a dynamic site for its robustness and ease of hosting, such as via [AWS S3](#amazon-s3).
@@ -128,7 +133,8 @@ See the [Checks](/docs/monitoring.md#site-checks) docs for information about the
 Stores create, update, read and delete Records in local or remote systems, such as GitLab. They are used in
 [Repositories](#repositories) in larger [Catalogues](#catalogues).
 
-They provide access to Records used to build a [Site](#sites) and may add or update Records for use in future builds.
+They provide access to Records, and MAY implement the records access protocol required by [Sites](#sites). They MAY
+also support adding or updating Records.
 
 See the [Stores](/docs/stores.md) docs for more information.
 

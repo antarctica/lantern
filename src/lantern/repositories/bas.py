@@ -1,24 +1,25 @@
 from __future__ import annotations
 
 import re
+from contextlib import contextmanager
 from functools import cached_property
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urlparse
 
 from gitlab import Gitlab, GitlabGetError
 from pathvalidate import sanitize_filepath
 
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
-from lantern.repositories.base import RepositoryBase
+from lantern.repositories.base import RecordsProtocol, RepositoryBase
 from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 if TYPE_CHECKING:
     import logging
-    from collections.abc import Collection
+    from collections.abc import Collection, Iterator
 
     from gitlab.v4.objects import Project as GitlabProject
     from gitlab.v4.objects import ProjectIssue as GitlabIssue
@@ -137,6 +138,17 @@ class BasRepository(RepositoryBase):
             api_key=self._config.STORE_ALGOLIA_WRITE_API_KEY,
             index=self._config.STORE_ALGOLIA_INDEX_NAME,
         )
+
+    @contextmanager
+    def snapshot(self, branch: str | None = None) -> Iterator[RecordsProtocol]:
+        """Yield a single refreshed and frozen view of a branch's records for a catalogue operation."""
+        store = self._make_gitlab_store(branch=branch, cached=True, frozen=True)
+        yield cast("RecordsProtocol", store)
+
+    @property
+    def search_record_count(self) -> int:
+        """Number of records currently indexed for search."""
+        return len(self._make_algolia_store())
 
     @staticmethod
     def _get_gitlab_merge_id_by_url(url: str) -> int:

@@ -45,6 +45,15 @@ class TestBaseStore:
         """Can get count of records in store."""
         assert len(fx_fake_store) > 0
 
+    def test_record_count(self, fx_fake_store: FakeRecordsStore):
+        """Can get count of records in store (for RecordsProtocol)."""
+        assert fx_fake_store.record_count > 0
+        assert fx_fake_store.record_count == len(fx_fake_store)
+
+    def test_head_commit(self, fx_fake_store: FakeRecordsStore):
+        """Can get optional head commit like reference of store."""
+        assert fx_fake_store.head_commit is None
+
     @pytest.mark.cov()
     @pytest.mark.parametrize("frozen", [False, True])
     def test_frozen(self, fx_fake_store: FakeRecordsStore, frozen: bool):

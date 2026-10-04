@@ -136,6 +136,22 @@ class TestBasRepository:
         assert isinstance(store, AlgoliaStore)
         assert store._index == fx_config.STORE_ALGOLIA_INDEX_NAME
 
+    def test_snapshot(self, fx_bas_repo_cached_store_pop: BasRepository):
+        """Can get a snapshot of available records for use in Sites."""
+        with fx_bas_repo_cached_store_pop.snapshot(branch="main") as records:
+            assert records.record_count == 1
+            assert records.head_commit is not None
+            assert records.select_one("a1b2c3") == records.select_one("a1b2c3")
+
+    def test_search_record_count(self, mocker: MockerFixture, fx_bas_repo: BasRepository):
+        """Can get Search counts are exposed without leaking the Algolia store."""
+        expected_count = 1
+        store = MagicMock(spec=AlgoliaStore)
+        store.__len__.return_value = expected_count
+        mocker.patch.object(fx_bas_repo, "_make_algolia_store", return_value=store)
+
+        assert fx_bas_repo.search_record_count == expected_count
+
     @pytest.mark.cov()
     def test_make_gitlab_store_frozen_conflict(self, fx_bas_repo: BasRepository):
         """Cannot get frozen GitLab Store without caching."""

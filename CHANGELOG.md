@@ -78,6 +78,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring checks to use `access_url` where a transformed version of the canonical is needed (presigned, etc.)
 * Refactoring checks for MAGIC Resource Distribution hosted files to use SharePoint client
 * Refactoring BAS (un)trusted sub-catalogues to not inherit from `BaseCatalogue` to avoid poor fit
+* Refactoring `Site` to use a record access protocol, decoupling from using a `Store` directly
 
 ### Removed [BREAKING!]
 

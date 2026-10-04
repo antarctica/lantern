@@ -39,6 +39,10 @@ interface to:
 
 Stores MAY support additional features, such as storing new or updated Records.
 
+Stores MAY also implement the `lantern.repositories.base.RecordsProtocol` to be used with
+[Sites](/docs/architecture.md#sites) directly, and/or delegate to this to a parent
+[Repository](/docs/architecture.md#repositories).
+
 ## Frozen stores
 
 Stores MAY be configurable as frozen (read-only) by calling a `freeze()` method after instantiation. Frozen stores are

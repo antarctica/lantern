@@ -325,6 +325,7 @@ exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
     "@abstractmethod",
+    '^[ \t]*\.\.\.[ \t]*$',  # matches '...' used in Protocol method stubs, which have no runtime behaviour to test
 ]
 
 [tool.coverage.html]

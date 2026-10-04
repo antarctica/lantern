@@ -70,6 +70,26 @@ class StoreBase(ABC):
         ...
 
     @property
+    def record_count(self) -> int:
+        """
+        Number of available records.
+
+        To implement `lantern.repositories.base.RecordsProtocol.record_count` property.
+        """
+        return len(self)
+
+    @property
+    def head_commit(self) -> str | None:
+        """
+        Optional commit-like reference where a store supports a versioning concept.
+
+        Represents the version of the local store for comparison against a remote.
+
+        To implement `lantern.repositories.base.RecordsProtocol.head_commit` property.
+        """
+        return None
+
+    @property
     @abstractmethod
     def frozen(self) -> bool:
         """Whether store can be modified/updated."""

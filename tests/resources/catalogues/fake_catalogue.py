@@ -13,6 +13,7 @@ from lantern.models.site import ExportMeta
 from lantern.outputs.item_html import ItemCatalogueOutput
 from lantern.outputs.redirects import RedirectsOutput
 from lantern.site import Site
+from tests.resources.repositories.fake_repository import FakeRepository
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 if TYPE_CHECKING:
@@ -39,14 +40,16 @@ class FakeCatalogue(CatalogueBase):
         self._path_trusted = base_path.with_name(f"{base_path.name}-trusted")
 
         self._store = FakeRecordsStore(logger=logger)
+        self._repo = FakeRepository(logger=self._logger, config=self._config, store=self._store)
         self._checker = Checker(logger=self._logger, config=self._config)
 
-        self._site_extras = {
-            "site_records_count": len(self._store),
-            "search_records_count": -1,  # not available
-            "entra_secret_expiry": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP,
-            "entra_secret_id": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID,
-        }
+        with self._repo.snapshot() as records:
+            self._site_extras = {
+                "site_records_count": records.record_count,
+                "search_records_count": -1,  # not available
+                "entra_secret_expiry": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP,
+                "entra_secret_id": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID,
+            }
 
     @time_task(label="Export site")
     def export(self, identifiers: set[str] | None = None, trusted: bool = False) -> None:
@@ -58,7 +61,8 @@ class FakeCatalogue(CatalogueBase):
         path = self._path_untrusted if not trusted else self._path_trusted
 
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_repo_ref="83fake48", trusted=trusted)
-        site = Site(logger=self._logger, meta=meta, store=self._store, extras=self._site_extras)
+        with self._repo.snapshot() as records:
+            site = Site(logger=self._logger, meta=meta, records=records, extras=self._site_extras)
         exporter = LocalExporter(logger=self._logger, path=path)
 
         content = site.generate_content(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
@@ -94,7 +98,8 @@ class FakeCatalogue(CatalogueBase):
         """
         global_, individual = group_output_classes()
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_repo_ref="83fake48", trusted=False)
-        site = Site(logger=self._logger, meta=meta, store=self._store, extras=self._site_extras)
+        with self._repo.snapshot() as records:
+            site = Site(logger=self._logger, meta=meta, records=records, extras=self._site_extras)
         exporter = LocalExporter(logger=self._logger, path=self._path_untrusted)
 
         checks = site.generate_checks(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)

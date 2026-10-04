@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from lantern.models.record.record import Record
     from lantern.models.repository import GitUpsertContext, GitUpsertResults
     from lantern.outputs.base import OutputBase
+    from lantern.repositories.base import RecordsProtocol
 
 # AWS has a 150/second invalidations limit. Above this invalidating the whole distribution is cheaper and faster.
 MAX_INVALIDATION_KEYS = 140
@@ -83,32 +84,28 @@ class BasCatUntrusted:
 
     def export(
         self,
+        records: RecordsProtocol,
         identifiers: set[str] | None = None,
-        branch: str | None = None,
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """
         Generate and export site content to hosting.
 
         Optionally for selected records from a branch and for selected Output types.
-
-        Site requires direct access to underlying store for additional processing.
         """
-        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
-        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=records.head_commit, trusted=False)
         global_, individual = group_output_classes(outputs=outputs)
         site_extras = {}
         content_params = {"global_outputs": global_, "individual_outputs": individual, "identifiers": identifiers}
 
         # include extras needed for some outputs
         if SiteHealthOutput in global_:
-            search_store = self._repo._make_algolia_store()
-            site_extras["site_records_count"] = len(store)
-            site_extras["search_records_count"] = len(search_store)
+            site_extras["site_records_count"] = records.record_count
+            site_extras["search_records_count"] = self._repo.search_record_count
             site_extras["entra_secret_expiry"] = self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP
             site_extras["entra_secret_id"] = self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID
 
-        site = Site(logger=self._logger, meta=meta, store=store, extras=site_extras)
+        site = Site(logger=self._logger, meta=meta, records=records, extras=site_extras)
         content = site.generate_content(**content_params)
         if outputs is None or RedirectsOutput in outputs:
             content.extend(RedirectsOutput(logger=self._logger, meta=meta, content=content).content)
@@ -123,8 +120,8 @@ class BasCatUntrusted:
 
     def checks(
         self,
+        records: RecordsProtocol,
         identifiers: set[str] | None = None,
-        branch: str | None = None,
         outputs: list[type[OutputBase]] | None = None,
     ) -> list[Check]:
         """
@@ -135,12 +132,9 @@ class BasCatUntrusted:
         When not using the live site, filter out DOI checks as these are set externally for the live endpoint only.
 
         Site entries used to avoid generating content we don't need (i.e. generating checks doesn't need actual content).
-
-        Site requires direct access to underlying store for additional processing.
         """
-        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
-        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
-        site = Site(logger=self._logger, meta=meta, store=store)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=records.head_commit, trusted=False)
+        site = Site(logger=self._logger, meta=meta, records=records)
         global_, individual = group_output_classes(outputs=outputs)
 
         checks = site.generate_checks(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
@@ -175,22 +169,21 @@ class BasCatTrusted:
         self._env = env
         self._exporter = RsyncExporter(logger=logger, host=host, path=path)
 
-    def export(self, identifiers: set[str] | None = None, branch: str | None = None) -> None:
+    def export(self, records: RecordsProtocol, identifiers: set[str] | None = None) -> None:
         """
         Generate and export site content to hosting.
 
         Optionally for selected records from a branch. Output classes are fixed for the trusted site environment.
         """
-        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
-        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=True)
-        site = Site(logger=self._logger, meta=meta, store=store)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=records.head_commit, trusted=True)
+        site = Site(logger=self._logger, meta=meta, records=records)
 
         content = site.generate_content(
             global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers
         )
         self._exporter.export(content)
 
-    def checks(self, identifiers: set[str] | None = None, branch: str | None = None) -> list[Check]:
+    def checks(self, records: RecordsProtocol, identifiers: set[str] | None = None) -> list[Check]:
         """
         Generate checks from site entries.
 
@@ -204,9 +197,8 @@ class BasCatTrusted:
 
         Site entries used to avoid generating content we don't need (i.e. generating checks doesn't need actual content).
         """
-        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
-        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=True)
-        site = Site(logger=self._logger, meta=meta, store=store)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=records.head_commit, trusted=True)
+        site = Site(logger=self._logger, meta=meta, records=records)
 
         checks = site.generate_checks(
             global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers
@@ -270,12 +262,17 @@ class BasCatEnv(CatalogueBase):
         branch: str | None = None,
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
-        """Generate and export site content to hosting."""
-        self._logger.info("Exporting untrusted %s site", self._env)
-        self._untrusted.export(identifiers=identifiers, branch=branch, outputs=outputs)
-        if outputs is None or ItemCatalogueOutput in outputs:
-            self._logger.info("Exporting trusted %s site", self._env)
-            self._trusted.export(identifiers=identifiers, branch=branch)
+        """
+        Generate and export catalogue site content.
+
+        Export is delegated to each site as different exporters and build context are used.
+        """
+        with self._repo.snapshot(branch) as records:
+            self._logger.info("Exporting untrusted %s site", self._env)
+            self._untrusted.export(records=records, identifiers=identifiers, outputs=outputs)
+            if outputs is None or ItemCatalogueOutput in outputs:
+                self._logger.info("Exporting trusted %s site", self._env)
+                self._trusted.export(records=records, identifiers=identifiers)
 
     def check(
         self,
@@ -288,18 +285,20 @@ class BasCatEnv(CatalogueBase):
 
         Checks are executed at this level to produce a combined report for checks from the trusted and untrusted Sites.
         """
-        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
-        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
+        with self._repo.snapshot(branch) as records:
+            meta = ExportMeta.from_config(
+                config=self._config, env=self._env, build_ref=records.head_commit, trusted=False
+            )
 
-        self._logger.info("Generating checks for untrusted %s site", self._env)
-        checks = self._untrusted.checks(identifiers=identifiers, branch=branch, outputs=outputs)
-        if outputs is None or ItemCatalogueOutput in outputs:
-            self._logger.info("Generating checks for trusted %s site", self._env)
-            checks.extend(self._trusted.checks(identifiers=identifiers, branch=branch))
+            self._logger.info("Generating checks for untrusted %s site", self._env)
+            checks = self._untrusted.checks(identifiers=identifiers, records=records, outputs=outputs)
+            if outputs is None or ItemCatalogueOutput in outputs:
+                self._logger.info("Generating checks for trusted %s site", self._env)
+                checks.extend(self._trusted.checks(identifiers=identifiers, records=records))
 
-        self._logger.info("Checking %s site", self._env)
-        content = self._checker.check(meta=meta, checks=checks)
-        self._untrusted.export_content(content)
+            self._logger.info("Checking %s site", self._env)
+            content = self._checker.check(meta=meta, checks=checks)
+            self._untrusted.export_content(content)
 
 
 class BasCatalogue:

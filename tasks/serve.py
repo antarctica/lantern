@@ -1,4 +1,4 @@
-# Preview local site with CORS support
+# Preview local site
 
 from __future__ import annotations
 
@@ -219,7 +219,7 @@ def run(
         print(f"- loaded {len(REDIRECTS)} redirects")
         print(f"- using {len(MEDIA_TYPES)} extra content-type mappings")
         print(
-            f"- use username '{username}' and password '{password}' to access restricted content under '{BASIC_AUTH_PATH}'"
+            f"- 🛂 use username '{username}' and password '{password}' to access restricted content under '{BASIC_AUTH_PATH}'"
         )
         print("- ⚠️ using self-signed certificate which will trigger security warnings in clients")
 
@@ -229,18 +229,15 @@ def run(
         symlink_path = doc_root / ".sample-artefacts"
         symlink_target = project_root / "tests" / "resources" / "artefacts"
         if not symlink_path.exists() or not symlink_path.is_symlink():
-            print("Symlinking %s to %s", symlink_path.resolve(), symlink_target.resolve())
+            print("- ℹ️ Symlinking %s to %s", symlink_path.resolve(), symlink_target.resolve())  # noqa: RUF001
             relative_target = os.path.relpath(symlink_target, symlink_path.parent)
             symlink_path.symlink_to(relative_target, target_is_directory=True)
 
         # The trusted content symlink should be created by FakeCatalogue so isn't repeated here.
         if not doc_root.joinpath("-/items").is_dir():
-            print(
-                "\n**Note:** The FakeCatalogue should have created a symlink for `/-/items` to simulate the reverse proxy."
-            )
-
+            print("- ℹ️ The FakeCatalogue should have created a symlink for `/-/items` to simulate the reverse proxy.")  # noqa: RUF001
         try:
-            print("ready for connections ...")
+            print("Ready for connections ...")
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("Keyboard interrupt received, exiting.")

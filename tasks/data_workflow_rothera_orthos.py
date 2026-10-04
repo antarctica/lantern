@@ -1,4 +1,4 @@
-# Automatically process Rothera progress monitoring orthomosaics
+# Process Rothera progress monitoring orthomosaics automatically
 
 from __future__ import annotations
 

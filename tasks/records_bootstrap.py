@@ -1,4 +1,4 @@
-# Set up a new GitLab store remote repository
+# Set up a new remote GitLab store
 
 from __future__ import annotations
 

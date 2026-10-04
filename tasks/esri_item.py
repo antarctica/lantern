@@ -1,4 +1,4 @@
-# Update an ArcGIS Online item based on a related catalogue record
+# Update an ArcGIS Online item based on a record
 
 from __future__ import annotations
 

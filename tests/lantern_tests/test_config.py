@@ -118,7 +118,7 @@ class TestConfig:
             "CHECKS_MAGIC_RESOURCES_CLIENT_ID": "x",
             "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET": redacted_value,
             "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID": "x",
-            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": date(2014, 6, 30),
+            "CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP": date(2099, 6, 30),
             "CHECKS_MAGIC_RESOURCES_SITE_ID": "x",
             "CHECKS_MAGIC_RESOURCES_LIBRARY_NAME": "x",
         }
@@ -482,6 +482,18 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
+    @pytest.mark.parametrize("env", ["LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP"])
+    def test_validate_invalid_expiry(self, env: str):
+        """Cannot validate where a value that expires, has."""
+        envs: dict = {env: "2014-04-30"}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_dotenv=False)
+
+        with pytest.raises(EnvValidationError):
+            config.validate()
+
+        self._unset_envs(envs, envs_bck)
+
     @pytest.mark.parametrize(
         ("property_name", "expected", "sensitive"),
         [
@@ -515,7 +527,7 @@ class TestConfig:
             ("CHECKS_MAGIC_RESOURCES_CLIENT_ID", "x", False),
             ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET", "x", True),
             ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID", "x", False),
-            ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP", date(2014, 6, 30), False),
+            ("CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP", date(2099, 6, 30), False),
             ("CHECKS_MAGIC_RESOURCES_SITE_ID", "x", False),
             ("CHECKS_MAGIC_RESOURCES_LIBRARY_NAME", "x", False),
         ],

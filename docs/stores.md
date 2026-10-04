@@ -29,8 +29,8 @@ See the [Infrastructure](/docs/infrastructure.md#stores-components) docs for cre
 
 ## Store classes
 
-All stores inherit from the `lantern.stores.base.Store` abstract base class and MUST implement its minimal
-public interface to:
+All stores inherit from the `lantern.stores.base.StoreBase` abstract base class and MUST implement its minimal public
+interface to:
 
 - select some or all available Records, using `store.select()`
 - select a specific Record by file identifier, using `store.select_one()`
@@ -54,10 +54,10 @@ intended for data integrity and increased performance in parallel processing.
 
 ## Parallel processing in stores
 
-Stores may be used within parallel processing jobs (such as generating a [Site](/docs/architecture.md#sites), using
-multiple worker processes with their own store instances, reused between worker jobs.
+Stores may be used within parallel processing jobs (such as generating a [Site](/docs/architecture.md#sites)), using
+multiple worker processes with their own abstracted store instances, reused between worker jobs.
 
-Stores MUST therefore ensure they can be pickled efficently to pass to workers. This may include:
+Stores MUST therefore ensure they can be pickled efficiently to pass to workers. This may include:
 
 - implementing `__getstate__` / `__setstate__` methods to handle attributes that cannot be pickled
 - overriding `lantern.stores.base.StoreBase.prep_parallel` / `restore_parallel` methods to use stores efficiently
@@ -65,14 +65,14 @@ Stores MUST therefore ensure they can be pickled efficently to pass to workers. 
 
 > [!NOTE]
 >
-> - `__getstate__` / `__setstate__` methods are called for each job executed by workers
-> - `prep_parallel` / `restore_parallel` methods are called for each worker
+> - `__getstate__` / `__setstate__` methods are called for each *job* executed by workers
+> - `prep_parallel` / `restore_parallel` methods are called once for each worker at start-up
 
 For example:
 
-- a store that cannot be pickled with an active client connection MUST use `__getstate__` / `__setstate__` to  close or
-  clear the client
-- a store that uses an in-memory cache, slowing down but not preventing pickling, SHOULD be emptied then recreated,
+- a store that cannot be pickled with an active client connection MUST implement `__getstate__` / `__setstate__` to
+  disconnect the connection or clear the client
+- a store that uses an in-memory cache, slowing down but not preventing pickling SHOULD be emptied, then recreated,
   using `prep_parallel` / `restore_parallel` (the cache SHOULD be recreated to ensure jobs within workers are fast)
 
 ## Algolia store

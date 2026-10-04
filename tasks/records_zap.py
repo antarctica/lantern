@@ -1,4 +1,4 @@
-# Workaround shortfalls and config draft in records from Zap ⚡️editor
+# Workaround shortfalls and config draft in records from Zap ⚡️ I editor
 
 from __future__ import annotations
 

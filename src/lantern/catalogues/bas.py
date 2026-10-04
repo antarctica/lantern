@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, get_args
 
 from boto3 import client as BotoClient
 
-from lantern.catalogues.base import CatalogueBase
+from lantern.catalogues.base import CatalogueBase, group_output_classes
 from lantern.checks import Checker
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.rsync import RsyncExporter
@@ -35,13 +35,13 @@ if TYPE_CHECKING:
 MAX_INVALIDATION_KEYS = 140
 
 
-class BasCatUntrusted(CatalogueBase):
+class BasCatUntrusted:
     """
     BAS data catalogue untrusted site.
 
-    Sub-catalogue within an environment within a BasCatalogue instance.
+    Sub-catalogue within an environment within a `BasCatEnv` sub-catalogue.
 
-    Manages unrestricted (public) content for all site outputs (except trusted content), uploaded to AWS S3.
+    Manages unrestricted (public) content for all site outputs, uploaded to AWS S3.
 
     Supports optional cache invalidation within a CloudFront distribution.
     """
@@ -56,7 +56,7 @@ class BasCatUntrusted(CatalogueBase):
         distribution: str | None,
         env: SiteEnvironment,
     ) -> None:
-        super().__init__(logger)
+        self._logger = logger
         self._config = config
         self._repo = repo
         self._s3 = s3
@@ -78,7 +78,7 @@ class BasCatUntrusted(CatalogueBase):
         )
 
     def export_content(self, content: list[SiteContent]) -> None:
-        """Export pre-generated content to hosting to avoid regenerating content."""
+        """Export pre-generated content to hosting."""
         self._exporter.export(content)
 
     def export(
@@ -96,7 +96,7 @@ class BasCatUntrusted(CatalogueBase):
         """
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
-        global_, individual = self._group_output_classes(outputs=outputs)
+        global_, individual = group_output_classes(outputs=outputs)
         site_extras = {}
         content_params = {"global_outputs": global_, "individual_outputs": individual, "identifiers": identifiers}
 
@@ -141,38 +141,23 @@ class BasCatUntrusted(CatalogueBase):
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
         site = Site(logger=self._logger, meta=meta, store=store)
-        global_, individual = self._group_output_classes(outputs=outputs)
+        global_, individual = group_output_classes(outputs=outputs)
 
         checks = site.generate_checks(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
         if self._env != "live":
             checks = [check for check in checks if check.type != CheckType.DOI_REDIRECTS]
         return checks
 
-    def check(
-        self,
-        identifiers: set[str] | None = None,
-        branch: str | None = None,
-        outputs: list[type[OutputBase]] | None = None,
-    ) -> None:
-        """
-        Check site contents.
 
-        Optionally for selected records from a branch and for selected Output types.
-
-        Checks are executed in `BasCatEnv.check()` because they may need to be aggregated with untrusted content.
-        """
-        raise NotImplementedError
-
-
-class BasCatTrusted(CatalogueBase):
+class BasCatTrusted:
     """
     BAS data catalogue trusted site.
 
-    Sub-catalogue within an environment within a BasCatalogue instance.
+    Sub-catalogue within an environment within a `BasCatEnv` sub-catalogue.
 
-    Manages restricted content for catalogue items only to support viewing administration metadata.
+    Manages restricted versions of catalogue items outputs to support viewing administration metadata only.
 
-    Uses the BAS Operations Data Store as a trusted host, responsible for controlling access.
+    Uses the BAS Operations Data Store as a trusted host exported responsible for controlling access via Rsync.
     """
 
     def __init__(
@@ -184,11 +169,10 @@ class BasCatTrusted(CatalogueBase):
         path: Path,
         env: SiteEnvironment,
     ) -> None:
-        super().__init__(logger)
+        self._logger = logger
         self._config = config
         self._repo = repo
         self._env = env
-
         self._exporter = RsyncExporter(logger=logger, host=host, path=path)
 
     def export(self, identifiers: set[str] | None = None, branch: str | None = None) -> None:
@@ -232,22 +216,17 @@ class BasCatTrusted(CatalogueBase):
             check.type = CheckType.ITEM_PAGES_TRUSTED
         return checks
 
-    def check(self, identifiers: set[str] | None = None, branch: str | None = None) -> None:
-        """
-        Check site contents.
-
-        Optionally for selected records from a branch. Output classes are fixed for the trusted site environment.
-
-        Checks are executed in `BasCatEnv.check()` because they may need to be aggregated with untrusted content.
-        """
-        raise NotImplementedError
-
 
 class BasCatEnv(CatalogueBase):
     """
     BAS data catalogue environment.
 
-    Sub-catalogue within a BasCatalogue instance. Consists of two sites, trusted and untrusted.
+    Sub-catalogue within a `BasCatalogue`. Consists of two `BasCatTrusted` and `BasCatUntrusted` sub-catalogues:
+    - untrusted (public): for the vast majority of site content, hosted on AWS S3
+    - trusted (restricted): for Items with administration metadata only, hosted within the BAS Operations Data Store
+
+    These sites form a logical whole, with this class acting as an entrypoint and router. A common `Checks` instance
+    is used for the overall logical site. Sub-catalogues manage specific Site and Exporter instances.
     """
 
     def __init__(
@@ -305,9 +284,9 @@ class BasCatEnv(CatalogueBase):
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """
-        Check untrusted site contents (optionally for selected records).
+        Check catalogue site contents (optionally for selected records).
 
-        Checks need to be executed at this level to produce report content items from untrusted and trusted checks.
+        Checks are executed at this level to produce a combined report for checks from the trusted and untrusted Sites.
         """
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
@@ -327,17 +306,12 @@ class BasCatalogue:
     """
     British Antarctic Survey data catalogue.
 
-    Consists of two environments:
+    Consists of three environments:
     - testing: for publishers to preview records and site changes
     - live: for general use
 
-    And two sites within each environment:
-    - untrusted (public): for the vast majority of site content, hosted on AWS S3
-    - a trusted (restricted) for Items with administration metadata included, hosted within the BAS Operations Data Store
-
-    Each environment and site is managed as a sub-catalogue, with this class acting as an entrypoint and coordinator.
-
-    Uses a BasRepository as a wrapper around a branch based GitLab records Store.
+    Each environment is managed as a `BasCatEnv` sub-catalogue, with this class acting as an entrypoint and router.
+    A common `BasRepository` is used for records access.
     """
 
     def __init__(self, logger: logging.Logger, config: Config, s3: S3Client) -> None:

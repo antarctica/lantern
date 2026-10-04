@@ -1,4 +1,4 @@
-# Invalidate selected outputs in CloudFront cache for live site
+# Invalidate selected outputs in CloudFront cache for the live site
 
 from __future__ import annotations
 

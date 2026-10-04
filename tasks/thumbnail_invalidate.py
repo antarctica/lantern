@@ -1,4 +1,4 @@
-# Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
+# Invalidate thumbnails for selected records in the CloudFront cache for the BAS CDN
 
 from __future__ import annotations
 

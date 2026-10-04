@@ -60,10 +60,12 @@ class AlgoliaStore(StoreBase):
 
     def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
         """
-        Get some or all records filtered by file identifier.
+        Get some or all records filtered by file identifier (object ID).
 
-        ... no way to pass a list of records to Algolia, will work up to 1k records. (add to future)
-        ... Browse used instead of search to avoid analytics.
+        The `browse()` method is used instead of `search()` to avoid being counted in index analytics.
+
+        Note: Records are filtered client side in memory up to the first 1,000 records as Algolia doesn't provide a
+        server side method without making the property searchable.
 
         Raises a `RecordsNotFoundError` exception if any selected records aren't found (i.e. all or nothing).
         """
@@ -95,7 +97,7 @@ class AlgoliaStore(StoreBase):
 
     def select_one(self, file_identifier: str) -> RecordRevision:
         """
-        Get specific record by file identifier.
+        Get specific record by file identifier (object ID).
 
         Returns a record constructed from an Algolia object which contain a limited subset of properties. These records
         therefore have limited utility and are not intended or supported for general use.

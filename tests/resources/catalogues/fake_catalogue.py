@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from tasks._shared import time_task
 
-from lantern.catalogues.base import CatalogueBase
+from lantern.catalogues.base import CatalogueBase, group_output_classes
 from lantern.checks import Checker
 from lantern.exporters.local import LocalExporter
 from lantern.models.site import ExportMeta
@@ -51,7 +51,7 @@ class FakeCatalogue(CatalogueBase):
     @time_task(label="Export site")
     def export(self, identifiers: set[str] | None = None, trusted: bool = False) -> None:
         """Generate and export site content locally."""
-        global_, individual = self._group_output_classes()
+        global_, individual = group_output_classes()
         if trusted:
             global_ = []
             individual = [ItemCatalogueOutput]
@@ -92,7 +92,7 @@ class FakeCatalogue(CatalogueBase):
 
         Locked to untrusted content.
         """
-        global_, individual = self._group_output_classes()
+        global_, individual = group_output_classes()
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_repo_ref="83fake48", trusted=False)
         site = Site(logger=self._logger, meta=meta, store=self._store, extras=self._site_extras)
         exporter = LocalExporter(logger=self._logger, path=self._path_untrusted)

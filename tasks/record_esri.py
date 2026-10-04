@@ -1,4 +1,4 @@
-# Update record to include distribution options for an ArcGIS Online item
+# Update a record to include distribution options for an ArcGIS Online item
 
 from __future__ import annotations
 
@@ -117,7 +117,7 @@ def get_agol_token(config: ExtraConfig) -> str:
     token_endpoint = "https://www.arcgis.com/sharing/rest/oauth2/token"  # noqa: S105
     session = OAuth2Session(
         client_id=config.AGOL_CLIENT_ID,
-        client_secret=config.AGOL_CLIENT_ID,
+        client_secret=config.AGOL_CLIENT_SECRET,
         token_endpoint_auth_method=ClientSecretJWT(token_endpoint),
     )
     # AGOL requires the client ID/secret as body parameters, not from basic auth which AuthLib does by default.

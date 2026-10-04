@@ -41,6 +41,20 @@ class RecordsNotFoundError(Exception):
         return f"Records '{', '.join(self.file_identifiers)}' not found."
 
 
+class SelectRecordsProtocol(Protocol):
+    """Callable interface for selecting records from Store."""
+
+    def __call__(  # pragma: no branch  # noqa: D102
+        self, file_identifiers: set[str] | None = None
+    ) -> list[RecordRevision]: ...
+
+
+class SelectRecordProtocol(Protocol):
+    """Callable interface for selecting a record from Store."""
+
+    def __call__(self, file_identifier: str) -> RecordRevision: ...  # pragma: no branch  # noqa: D102
+
+
 class StoreBase(ABC):
     """
     Abstract base class for stores.
@@ -52,7 +66,7 @@ class StoreBase(ABC):
 
     @abstractmethod
     def __len__(self) -> int:
-        """Return the number of records a store contains."""
+        """Number of available records."""
         ...
 
     @property
@@ -63,12 +77,12 @@ class StoreBase(ABC):
 
     @abstractmethod
     def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
-        """Return all records or raise a `RecordsNotFoundError` exception."""
+        """Return all or specified records, raises `RecordsNotFoundError` if any specified records aren't found."""
         ...
 
     @abstractmethod
     def select_one(self, file_identifier: str) -> RecordRevision:
-        """Return a specific record or raise a `RecordNotFoundError` exception."""
+        """Return a specific record or raise a `RecordNotFoundError`."""
         ...
 
     @abstractmethod
@@ -82,37 +96,28 @@ class StoreBase(ABC):
 
     def prep_parallel(self) -> StoreBase:
         """
-        Return store configured for use in parallel jobs.
+        Return store configured for use in parallel workers.
 
-        Stores are pickled for each parallel job, which may be inefficient for e.g. in-memory state.
+        When used in parallel processing, Stores are pickled for each parallel worker (not job), which may be
+        impossible (e.g. for active database connections) or inefficient (e.g. for in-memory state).
 
-        Where applicable, stores SHOULD exclude or otherwise mitigate such overheads within a returned copy.
-        Stores MUST NOT modify the current instance, as it remains in use by the calling process.
+        Stores MUST support pickling and SHOULD exclude, or otherwise mitigate, any significant overheads within a
+        returned COPY. Stores MUST NOT modify the current instance, as it MAY remain in use by a calling process.
 
-        Paired with `restore_parallel()`, which recreates any excluded state for each worker process.
+        Where changes are not needed, the current store SHOULD be returned unchanged.
 
-        Where this is not a problem, the current store SHOULD be returned unchanged.
+        Paired with `restore_parallel()`, which reverses/restores any changes.
         """
         return self
 
     def restore_parallel(self) -> None:
         """
-        Rebuild any state excluded by `prep_parallel()`.
+        Re-configure store for optimum use after assignment to a parallel worker.
 
-        Called once per worker process if needed, otherwise this method SHOULD not be overridden.
+        Called after `prep_parallel()` per worker process.
+
+        Intended to regenerate in-memory caches or other performance orientated features.
+
+        Where changes are not needed, the current store SHOULD be returned unchanged.
         """
         return
-
-
-class SelectRecordsProtocol(Protocol):
-    """Callable protocol for selecting records from Store."""
-
-    def __call__(  # pragma: no branch  # noqa: D102
-        self, file_identifiers: set[str] | None = None
-    ) -> list[RecordRevision]: ...
-
-
-class SelectRecordProtocol(Protocol):
-    """Callable protocol for selecting a record from Store."""
-
-    def __call__(self, file_identifier: str) -> RecordRevision: ...  # pragma: no branch  # noqa: D102

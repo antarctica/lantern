@@ -360,8 +360,13 @@ Search terms:
 
 The settings for the search index are defined in `resources/configs/search.toml`.
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > See the [Usage](/docs/usage.md#updating-search-index) docs for how to update these settings.
+
+> [!TIP]
+> A set of [Automated tests](/docs/dev.md#search-tests) are used to help verify site search behaves as expected.
+<!-- pyml enable md028 -->
 
 ## User feedback
 

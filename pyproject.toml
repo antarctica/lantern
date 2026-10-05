@@ -84,7 +84,7 @@ explicit = true
 [tool.taskipy.variables]
 docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
-targets = "src/ tasks/ tests/ tests_slow/"
+targets = "src/ tasks/ tests/ tests_slow/ tests_search/"
 test_base = "pytest -n auto"
 test_slow_base = { var = "{test_base} tests_slow/", recursive = true}
 ci_test_options = "-o junit_family=xunit2 --continue-on-collection-errors"
@@ -101,6 +101,7 @@ markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs
 prek = { cmd = "prek run --all-files", help = "Run pre-hooks hooks on all files using Prek" }
 test = { cmd = "{test_base}", help = "Run tests", use_vars = true }
 test-slow = { cmd = "{test_slow_base}", help = "Run slow tests (Playwright + Schemathesis)", use_vars = true }
+test-search = { cmd = "pytest --envfile .env tests_search/", help = "Run search tests", use_vars = true }
 test-cov = { cmd = "{test_base} {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 audit = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
@@ -232,11 +233,12 @@ ignore = [
 "config.py" = ["D401", "N802"]
 # tailwind.py        |   N802 | ignore use of upper case method names in config subclass
 "tasks/tailwind.py" = ["N802"]
-#   tests(_slow)/*   | ANN201 | ignore public functions
-#   tests(_slow)/*   | ANN401 | ignore use of 'Any' type
-#   tests(_slow)/*   |   S101 | ignore use of assert
+#   tests(_slow|_search)/*   | ANN201 | ignore public functions
+#   tests(_slow|_search)/*   | ANN401 | ignore use of 'Any' type
+#   tests(_slow|_search)/*   |   S101 | ignore use of assert
 "tests/*" = ["ANN201", "ANN401", "D401", "S101"]
 "tests_slow/*" = ["ANN201", "ANN401", "D401", "S101"]
+"tests_search/*" = ["ANN201", "ANN401", "D401", "S101"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
@@ -250,7 +252,7 @@ ignore-variadic-names = true
 
 [tool.ty.src]
 include = ["src", "tasks"]
-exclude = ["tests", "tests_slow"]
+exclude = ["tests", "tests_slow", "tests_search"]
 
 [tool.pymarkdown]
 plugins.md013.line_length = 120

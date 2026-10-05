@@ -268,13 +268,11 @@ Manually:
 
 Manually:
 
-- register a Algolia application site for the project
+- register an Algolia application site for the project
 - record the application ID and write/search API keys in 1Password
 - set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
-
-> [!TIP]
-> The [Algolia Store](/docs/stores.md#algolia-store) will configure indicies and their settings.
+- run the [`configure-search`](/docs/dev.md#development-tasks) development task to configure search indices.
 
 ## ArcGIS Online
 
@@ -305,12 +303,12 @@ Manually:
 ## Microsoft Entra
 
 The Microsoft Entra ID (previously Azure Active Directory) app registration used for
-[Monitoring Checks](/docs/monitoring.md#magic-products-distribution-service-checks) is managed using
+[Monitoring Checks](/docs/monitoring.md#magic-resource-distribution-service-checks) is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 IaC will:
 
-- register a Entra app registration project
+- register an Entra app registration project
 - generate an application password as a client secret
 - store details about the app registration and client secret in 1Password
 

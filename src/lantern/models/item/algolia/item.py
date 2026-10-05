@@ -39,7 +39,7 @@ class ObjectRecord(TypedDict):
     """
     RecordRevision represented as an Algolia search index object.
 
-    `object*` properties are intended for internal use.
+    `object*` properties are needed for internal use and/or rendering search results, but MAY be made searchable.
 
     `objectRecData` is a JSON encoded list/tuple of values needed to recreate a minimally valid record (not all values).
     See `ItemAlgolia._record_data` and `ItemAlgolia._loads_from_algolia_object` for encoding/decoding.

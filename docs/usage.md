@@ -333,11 +333,11 @@ To apply properties from a record to an item in ArcGIS Online, and create an ass
 
 To refresh the contents of the Algolia index used for [Site Search](/docs/site.md#search):
 
-- run the [`search-reindex`](/docs/supplemental/proto-cli-reference.md#search-reindex) command
+- run the [`search-reindex`](/docs/supplemental/proto-cli-reference.md#reindex-search) command
 
 To update the settings for this index:
 
-- run the [`search-configure`](/docs/supplemental/proto-cli-reference.md#search-configure) command
+- run the [`search-configure`](/docs/supplemental/proto-cli-reference.md#configure-search) command
 
 ## Rotating access tokens
 

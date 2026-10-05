@@ -759,10 +759,11 @@ To update configured hooks:
 ### Pytest
 
 [pytest](https://docs.pytest.org) with a number of plugins is used for testing the application. Config options are set
-in `pyproject.toml`. Tests are grouped into two test suites:
+in `pyproject.toml`. Tests are grouped into three test suites:
 
 - main: mostly unit tests, defined in the `tests` package
 - slow: mostly end-to-end tests, defined in the `tests_slow` package
+- search: see [Search Tests](#search-tests) defined in the `tests_search` package
 
 > [!NOTE]
 > Tests are usually run in parallel using [`pytest-xdist`](#pytest-xdist).
@@ -770,11 +771,11 @@ in `pyproject.toml`. Tests are grouped into two test suites:
 > To avoid issues with [HTTP recording](#pytest-recording), parallel processing *within* code under test is disabled
 > by setting the `PARALLEL_JOBS` [config option](#pytest-env).
 
-Main and slow tests are run automatically in [Continuous Integration](#continuous-integration).
+The *main* and *slow* test suites are run automatically in [Continuous Integration](#continuous-integration).
 
 <!-- pyml disable md028 -->
 > [!TIP]
-> To run tests manually, run the `test` or `test-slow` [Development Tasks](#development-tasks).
+> To run tests manually, run the `test`, `test-slow` or `test-search` [Development Tasks](#development-tasks).
 
 > [!TIP]
 > To run a specific test:
@@ -782,6 +783,7 @@ Main and slow tests are run automatically in [Continuous Integration](#continuou
 > ```shell
 > % uv run pytest tests/path/to/test_module.py::<class>.<method>
 > % uv run pytest tests_slow/path/to/test_module.py::<class>.<method>
+> % uv run pytest tests_search/path/to/test_module.py::<class>.<method>
 > ```
 <!-- pyml enable md028 -->
 
@@ -926,6 +928,24 @@ Schemathesis tests are part of the slow test suite.
 
 Tests are run via Pytest in `tests_slow.openapi.test_openapi`, with additional configuration to account for
 infrastructure configuration we cannot control (e.g. how unsupported HTTP methods are handled within AWS).
+
+### Search tests
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+A separate test suite is used to verify the behaviour of the Algolia based [Site Search](/docs/site.md#search).
+
+Tests are run via Pytest against the live search index in `tests_search.test_live`, with additional configuration to
+use the same [Config](/docs/config.md#site-templates-config-options) options as the generated site.
+
+<!-- pyml disable md028 -->
+> [!NOTE]
+> These tests are intended to verify basic functionality and the search index configuration - they are not exhaustive.
+
+> [!NOTE]
+> These tests are not run within [Continuous Integration](#continuous-integration).
+<!-- pyml enable md028 -->
 
 ### Test catalogue
 

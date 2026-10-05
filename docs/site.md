@@ -358,7 +358,7 @@ Search terms:
 > [!TIP]
 > Search statistics are available through the [Algolia Dashboard](/docs/infrastructure.md#algolia).
 
-The settings for the search index are defined in `resources/configs/search.toml`.
+Settings for the search index are defined in `resources/configs/search.toml`.
 
 <!-- pyml disable md028 -->
 > [!TIP]

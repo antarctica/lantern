@@ -152,8 +152,8 @@ bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstr
 check-artefacts = { cmd = "python -m tasks.artefacts_check", help = "Check files are supported file artefact formats" }
 deposit-artefacts = { cmd = "python -m tasks.artefacts_deposit", help = "Deposit file artefacts to SharePoint Online as record distribution options" }
 # fake CLI (search)
-search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
-search-configure = { cmd = "python -m tasks.search_configure", help = "Update catalogue search index settings" }
+reindex-search = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
+configure-search = { cmd = "python -m tasks.search_configure", help = "Update catalogue search index settings" }
 # fake CLI (other)
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }

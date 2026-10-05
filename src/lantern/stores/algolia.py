@@ -34,7 +34,7 @@ class AlgoliaStore(StoreBase):
         self._index = index
 
     def __len__(self) -> int:
-        """Count of records in store."""
+        """Count of records in remote store."""
         return self._index_info.entries
 
     @property

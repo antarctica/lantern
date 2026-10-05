@@ -49,8 +49,8 @@ check-artefacts          Check files are supported file artefact formats
 deposit-artefacts        Deposit file artefacts to SharePoint Online as record distribution options
 
 # search commands
-search-reindex           Recreate catalogue search index
-search-configure         Update catalogue search index settings
+reindex-search           Recreate catalogue search index
+configure-search         Update catalogue search index settings
 
 # other commands
 esri-item                Sync record details to an Esri item
@@ -463,6 +463,52 @@ Examples:
 > [!TIP]
 > See the [`check-artefacts`](#check-artefacts) command to list supported files within the artefacts directory.
 
+## Search commands
+
+### `reindex-search`
+
+Refresh the contents of the Algolia search index.
+
+> [!NOTE]
+> This index is normally maintained automatically whenever records are [Imported](#import-records)
+> (directly or via [Publishing Workflows](#publishing-workflow-commands)).
+
+```shell
+% task reindex-search --help
+```
+
+> [!NOTE]
+> The search index is always populated with all records from the default branch.
+>
+> This command does not wait for changes to be applied (due to being a batch operation). The index may therefore be
+> temporarily inconsistent.
+
+Examples:
+
+```shell
+# reindex the search index
+% task reindex-search
+```
+
+### `configure-search`
+
+Update the Algolia search index based on the `resources/configs/search.toml` config file, which reflects the index's
+target configuration.
+
+```shell
+% task configure-search --help
+```
+
+> [!TIP]
+> This command waits for Algolia to confirm changes have been applied to the index.
+
+Examples:
+
+```shell
+# update the search index settings
+% task configure-search
+```
+
 ## Other commands
 
 ### `esri-item`
@@ -502,50 +548,6 @@ Examples:
 
 > [!TIP]
 > See the [`esri-record`](#esri-record) command to do the opposite (add an AGOL item to a catalogue record).
-
-### `search-reindex`
-
-Refresh the contents of the Algolia search index.
-
-> [!NOTE]
-> This index is normally maintained automatically whenever records are [Imported](#import-records)
-> (directly or via [Publishing Workflows](#publishing-workflow-commands)).
-
-```shell
-% task search-reindex --help
-```
-
-> [!NOTE]
-> The search index is always populated with all records from the default branch.
->
-> This command does not wait for changes to be applied (due to being a batch operation). The index may therefore be
-> temporarily inconsistent.
-
-Examples:
-
-```shell
-# reindex the search index
-% task search-reindex
-```
-
-### `search-configure`
-
-Update the Algolia search index based on the `resources/configs/search.toml` config file, which reflects the index's
-target configuration.
-
-```shell
-% task search-configure --help
-```
-
-> [!TIP]
-> This command waits for Algolia to confirm changes have been applied to the index.
-
-Examples:
-
-```shell
-# update the search index settings
-% task search-configure
-```
 
 ### `site-invalidate`
 

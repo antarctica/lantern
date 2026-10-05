@@ -19,24 +19,16 @@
   {{ com.experimental_page() }}
 
   {% call section(slug='recently-released', title='Recently released') %}
-    {% call subsection(title='Web map items') %}
-      <p>Initially for our <a class="{{ com.link_classes() }}" href="/maps/5003">Antarctic base map</a>.</p>
-      <p>We have also added relations for map items to list the layers they include, or maps a layer is part of.</p>
+    {% call subsection(title='Deprecated items') %}
+      <p>We've added a warning to items that are old and should no longer be used, such as the
+        <a class="{{ com.link_classes() }}" href="/items/4df5a9d9-b4de-4d90-812a-abbbe90cb96a">Rothera Masterplan Map</a>.</p>
     {% endcall %}
-    {% call subsection(title='Improving printing support') %}
-      <p>We're improving the formatting applied when printing item pages.</p>
+    {% call subsection(title='Frequently updated items') %}
+      <p>We've added an indicator for items that are updated in near real time, such as
+        <a class="{{ com.link_classes() }}" href="/items/260298c6-8b63-4def-b0c3-964986a8bd24">Asset tracking data</a>.</p>
     {% endcall %}
-    {% call subsection(title='Improving copying metadata to ArcGIS items') %}
-      <p>We're improving how catalogue metadata is applied to ArcGIS items, including thumbnails and admonitions.</p>
-    {% endcall %}
-    {% call subsection(title='Search') %}
-      <p>We're introduced a basic <a class="{{ com.link_classes() }}" href="/search">Search</a> page.</p>
-    {% endcall %}
-    {% call subsection(title='Placeholder Homepage') %}
-      <p>We're adding a placeholder <a class="{{ com.link_classes() }}" href="/home">Home</a> page linking to key collections.</p>
-    {% endcall %}
-    {% call subsection(title='Roadmap and changelog') %}
-      <p>We've added this page to explain how this website is developing.</p>
+    {% call subsection(title='Performance improvements') %}
+      <p>We've significantly improved the efficiency of the code used to build this website, reducing its carbon emissions.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
       <p>This section only includes recent, high level, changes intended for a general audience.</p>
@@ -44,32 +36,35 @@
         contains a full history at a lower technical level aimed at developers.</p>
     {% endcall %}
   {% endcall %}
+
   {% call section(slug='working-on', title='What we\'re doing now') %}
-    {% call subsection(title='Improving printing support') %}
-      <p>We're improving the formatting applied when printing item pages.</p>
-    {% endcall %}
-    {% call subsection(title='OpenAPI tests') %}
-      <p>We're using {{ com.ext_link_a(href='https://schemathesis.readthedocs.io/', value='Schemathesis') }} to check
-        our OpenAPI specification is written correctly.</p>
-    {% endcall %}
-    {% call subsection(title='Site checks for restricted items') %}
-      <p>We've added an indicator for items that are updated in near real time, such as
-        <a class="{{ com.link_classes() }}" href="/items/260298c6-8b63-4def-b0c3-964986a8bd24">Asset tracking data</a>.</p>
+    {% call subsection(title='Improving restricted items') %}
+      <p>We're clarifying who can access some restricted item downloads, such as those restricted to BAS Staff.</p>
     {% endcall %}
     {% call subsection(title='Site checks for restricted items') %}
       <p>We're expanding the automatic broken download checks we run to include restricted downloads hosted in SharePoint.</p>
     {% endcall %}
-    {% call subsection(title='Migrating to UKRI AWS') %}
-      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
+    {% call subsection(title='File download checksums') %}
+      <p>We're including checksums for verifying file downloads are complete to some download links, initially for
+        automated checks.</p>
+    {% endcall %}
+    {% call subsection(title='Automated publishing') %}
+      <p>To reduce manual effort and improve consistency, we're prototyping a workflow to process, deposit and
+        catalogue initially one time series of products automatically.</p>
     {% endcall %}
   {% endcall %}
+
   {% call section(slug='future-plans', title='Future plans') %}
     {% call subsection(title='Improving search') %}
       <p>To include filters for things such as download types, publication date and access restrictions.</p>
       <p>We are also exploring how searching for items based on their location might work.</p>
     {% endcall %}
-    {% call subsection(title='Management API') %}
-      <p>We will add an API for storing new or updated records, and to publish them to this website.</p>
+    {% call subsection(title='Improving multiple product editions') %}
+      <p>For maps that are created each year/season, we're exploring how to improve navigating between previous and
+        future editions as part of a historical series.</p>
+    {% endcall %}
+    {% call subsection(title='Migrate to UKRI AWS') %}
+      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
       <p>

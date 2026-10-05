@@ -277,6 +277,9 @@ record.identification.graphic_overviews = GraphicOverviews(
 record.identification.other_citation_details = "Produced by the Mapping and Geographic Information Centre, British Antarctic Survey, 2025, version 1, https://data.bas.ac.uk/maps/1005."
 set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297"}, record)
 
+# mark item as 'live'
+record.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
 # add a containing project
 record.identification.aggregations.append(
     Aggregation(

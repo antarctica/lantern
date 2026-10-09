@@ -650,7 +650,7 @@ class Constraints(list[Constraint]):
         restrictions: ConstraintRestrictionCode | list[ConstraintRestrictionCode] | None = None,
     ) -> Constraints:
         """
-        Filter constraints by href and/or type(s) and/or restriction(s).
+        Filter constraints by href and/or type(s) and/or restriction(s), returning matching constraints.
 
         Conditions use logical AND, i.e. constraints must match a href and type(s) if specified.
         Types/restrictions use logical OR for multiple values.
@@ -658,6 +658,45 @@ class Constraints(list[Constraint]):
         types = [types] if isinstance(types, ConstraintTypeCode) else types
         restrictions = [restrictions] if isinstance(restrictions, ConstraintRestrictionCode) else restrictions
         return Constraints([constraint for constraint in self if constraint.matches_filter(href, types, restrictions)])
+
+    def without(
+        self,
+        constraints: Constraint | list[Constraint] | None = None,
+        href: str | None = None,
+        types: ConstraintTypeCode | list[ConstraintTypeCode] | None = None,
+        restrictions: ConstraintRestrictionCode | list[ConstraintRestrictionCode] | None = None,
+    ) -> Constraints:
+        """
+        Filter constraints by exact match, href and/or type(s) and/or restriction(s), returning non-matching constraints.
+
+        Conditions use logical AND, i.e. constraints will be returned unless they match a href and type(s) if specified.
+        Types/restrictions use logical OR for multiple values.
+
+        Combining exact matches to exclude (via `constraints`) with other conditions will give unexpected results and
+        isn't supported.
+        """
+        constraints = [constraints] if isinstance(constraints, Constraint) else constraints
+        types = [types] if isinstance(types, ConstraintTypeCode) else types
+        restrictions = [restrictions] if isinstance(restrictions, ConstraintRestrictionCode) else restrictions
+
+        return Constraints(
+            c
+            for c in self
+            if not (
+                (constraints is None or c in constraints)
+                and (href is None or c.href == href)
+                and (types is None or c.type in types)
+                and (restrictions is None or c.restriction_code in restrictions)
+            )
+        )
+
+    def ensure(self, constraint: Constraint) -> None:
+        """Add constraint without creating duplicates."""
+        if constraint in self:
+            # skip exact match
+            return
+
+        self.append(constraint)
 
 
 @dataclass(kw_only=True)

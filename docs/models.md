@@ -212,10 +212,10 @@ Permissions Framework (v1), or `AccessLevel.NONE` if undefined.
 <!-- pyml enable md028 -->
 
 [Catalogue Items](#catalogue-items) simplify the `admin_resource_access` access level to a binary `restricted`
-property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.PUBLIC`.
+property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.OPEN_ACCESS`.
 
-Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
-the data tab (if applicable).
+Where restricted, [Item Templates](/docs/site.md#templates) display additional context in the data tab (if applicable)
+and item summaries within collections and search results.
 
 ## Catalogue items
 

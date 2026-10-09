@@ -32,7 +32,7 @@ class TestBasAccess:
     def test_default(self):
         """Can get constant."""
         result = BAS_STAFF
-        assert result.statement == "Closed Access (BAS Staff)"
+        assert result.statement == "Closed Access (British Antarctic Survey staff only)"
 
 
 class TestOglV3:

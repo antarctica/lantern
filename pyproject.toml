@@ -136,7 +136,7 @@ deprecate-record = { cmd = "python -m tasks.record_deprecate", help = "Indicate 
 supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
-restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions for a record" }
+restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions/constraints for a record" }
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
 # fake CLI (multiple records)
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }

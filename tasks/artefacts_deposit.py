@@ -73,7 +73,7 @@ def _get_cli_args() -> tuple[bool, Path, Path, Path | None, bool]:
 def _get_args(
     logger: logging.Logger,
     cli_args: tuple[bool, Path, Path, Path | None, bool],
-) -> tuple[Path, Path, Record, bool, str]:
+) -> tuple[bool, Path, Path, Record, bool, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_artefacts_path, cli_records_path, cli_record_path, cli_clean_deposited = cli_args
 
@@ -93,8 +93,8 @@ def _get_args(
         record = r[0][0]
 
         clean_flag = " --clean-deposited" if clean_deposited else ""
-        params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --records-path {record_path.resolve()}{clean_flag}"
-        return artefacts_path, records_path, record, clean_deposited, params
+        params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --record {record_path.resolve()}{clean_flag}"
+        return cli_force, artefacts_path, records_path, record, clean_deposited, params
 
     artefacts_path = Path(
         inquirer.path("Artefacts path", path_type=InquirerPath.DIRECTORY, exists=True, default=artefacts_path)
@@ -129,8 +129,8 @@ def _get_args(
         raise TypeError(msg) from None
 
     clean_flag = " --clean-deposited" if clean_deposited else ""
-    params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --record-path {record_path.resolve()}{clean_flag}"
-    return artefacts_path, records_path, record, clean_deposited, params
+    params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --record {record_path.resolve()}{clean_flag}"
+    return cli_force, artefacts_path, records_path, record, clean_deposited, params
 
 
 def get_permissions(
@@ -257,22 +257,33 @@ def _run(
 ) -> None:
     """Run task."""
     cli_args = _get_cli_args()
-    artefacts_path, output_path, record, clean_deposited, params = _get_args(logger=logger, cli_args=cli_args)
+    noninteractive, artefacts_path, output_path, record, clean_deposited, params = _get_args(
+        logger=logger, cli_args=cli_args
+    )
 
     access_groups, unrestricted = get_permissions(
         admin_keys=config.ADMIN_METADATA_KEYS, record=record, groups_mapping=groups_mapping
     )
-    artefacts = _get_artefacts(logger=logger, artefacts_path=artefacts_path, resource_id=record.file_identifier)  # ty: ignore[invalid-argument-type]
+    artefacts = _get_artefacts(
+        logger=logger,
+        artefacts_path=artefacts_path,
+        resource_id=record.file_identifier,  # ty: ignore[invalid-argument-type]
+    )
     if len(artefacts) == 0:
         logger.info("No supported artefacts, aborting.")
         return
 
     logger.info("Found %s supported artefacts to deposit:", len(artefacts))
-    inquirer.checkbox(message="Artefacts to deposit", choices=[(repr(a), a) for a in artefacts])
+    if not noninteractive:
+        selected = inquirer.checkbox(message="Artefacts to deposit", choices=[(repr(a), a) for a in artefacts])
+    else:
+        logger.warning("Depositing all supported artefacts due to noninteractive mode")
+        selected = artefacts
+
     deposited = _deposit_artefacts(
         logger=logger,
         deposit_client=deposit_client,
-        artefacts=artefacts,
+        artefacts=selected,
         access_groups=access_groups,
         unrestricted=unrestricted,
     )

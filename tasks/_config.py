@@ -27,6 +27,7 @@ class ExtraConfig(Config):
         DEPOSIT_CLIENT_SECRET: str
         DEPOSIT_SITE_ID: str
         DEPOSIT_LIBRARY_NAME: str
+        DEPOSIT_GROUPS_MAPPING: dict
         DEPOSIT_PROXY_URL: str | None
 
     def dumps_extra(self) -> ConfigDumpSafe:
@@ -40,6 +41,7 @@ class ExtraConfig(Config):
             "DEPOSIT_CLIENT_SECRET": self.DEPOSIT_CLIENT_SECRET_SAFE,
             "DEPOSIT_SITE_ID": self.DEPOSIT_SITE_ID,
             "DEPOSIT_LIBRARY_NAME": self.DEPOSIT_LIBRARY_NAME,
+            "DEPOSIT_GROUPS_MAPPING": self.DEPOSIT_GROUPS_MAPPING,
             "DEPOSIT_PROXY_URL": self.DEPOSIT_PROXY_URL,
         }
 

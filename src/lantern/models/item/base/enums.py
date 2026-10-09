@@ -10,13 +10,13 @@ class AccessLevel(Enum):
     Where:
     - 'NONE' is a fallback value that should not be needed (as items with no access would not be catalogued)
     - 'UNKNOWN' represents undefined access that will be resolved when accessing the item (legacy measure)
-    - 'BAS_STAFF' represents general access by staff employed by UKRI at BAS
     - 'MAGIC_TEAM' represents team members of the Mapping and Geographic Information Centre (MAGIC) as BAS
+    - 'BAS_STAFF' represents general access by staff employed by UKRI at British Antarctic Survey
     - 'PUBLIC' represents unrestricted public access
     """
 
     UNKNOWN = "unknown"
-    # as per MagicAccessFrameworkPreset
+    # as per MAGIC Access Permissions Framework
     NONE = "none"
     MAGIC_TEAM = "magic_team"
     BAS_STAFF = "bas_staff"

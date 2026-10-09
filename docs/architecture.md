@@ -130,7 +130,7 @@ See the [Checks](/docs/monitoring.md#site-checks) docs for information about the
 
 `lantern.stores`
 
-Stores create, update, read and delete Records in local or remote systems, such as GitLab. They are used in
+Stores create, update and read Records in local or remote systems, such as GitLab. They are used in
 [Repositories](#repositories) in larger [Catalogues](#catalogues).
 
 They provide access to Records, and MAY implement the records access protocol required by [Sites](#sites). They MAY

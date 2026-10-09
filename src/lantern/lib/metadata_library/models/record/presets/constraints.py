@@ -1,6 +1,8 @@
 from lantern.lib.metadata_library.models.record.elements.common import Constraint
 from lantern.lib.metadata_library.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode
 
+# Permissions
+
 OPEN_ACCESS = Constraint(
     type=ConstraintTypeCode.ACCESS,
     restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
@@ -16,7 +18,7 @@ CLOSED_ACCESS = Constraint(
 BAS_STAFF = Constraint(
     type=ConstraintTypeCode.ACCESS,
     restriction_code=ConstraintRestrictionCode.RESTRICTED,
-    statement="Closed Access (BAS Staff)",
+    statement="Closed Access (British Antarctic Survey staff only)",
 )
 
 MAGIC_TEAM = Constraint(
@@ -24,6 +26,8 @@ MAGIC_TEAM = Constraint(
     restriction_code=ConstraintRestrictionCode.RESTRICTED,
     statement="Closed Access (British Antarctic Survey, Mapping and Geographic Information Centre (MAGIC) staff only)",
 )
+
+# Licences
 
 OGL_V3 = Constraint(
     type=ConstraintTypeCode.USAGE,

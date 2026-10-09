@@ -1251,6 +1251,59 @@ class TestConstraints:
         assert len(result) == len(expected)
         assert result == expected
 
+    @pytest.mark.parametrize(
+        ("conditions", "expected"),
+        [
+            (
+                {"constraints": test_filter_a},
+                [test_filter_b, test_filter_c, test_filter_d],
+            ),
+            (
+                {"constraints": [test_filter_a, test_filter_b]},
+                [test_filter_c, test_filter_d],
+            ),
+            (
+                {"href": "x", "types": ConstraintTypeCode.USAGE},
+                [test_filter_b, test_filter_d],
+            ),
+            (
+                {"href": "x", "restrictions": ConstraintRestrictionCode.RESTRICTED},
+                [test_filter_a, test_filter_b, test_filter_d],
+            ),
+            (
+                {"restrictions": ConstraintRestrictionCode.RESTRICTED},
+                [test_filter_a, test_filter_b],
+            ),
+            (
+                {"types": [ConstraintTypeCode.USAGE, ConstraintTypeCode.ACCESS]},
+                [],
+            ),
+        ],
+    )
+    def test_without(self, conditions: dict, expected: list[Aggregation]):
+        """Can filter out selected constraints by whole constraint and/or href and/or type and/or restriction code."""
+        constraints = Constraints([self.test_filter_a, self.test_filter_b, self.test_filter_c, self.test_filter_d])
+
+        result = constraints.without(**conditions)
+
+        assert len(result) == len(expected)
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Constraints([]), Constraints([test_filter_a])),
+            (Constraints([test_filter_a]), Contacts([test_filter_a])),
+            (Constraints([test_filter_b]), Constraints([test_filter_b, test_filter_a])),
+        ],
+    )
+    def test_ensure(self, before: Constraints, after: Constraints):
+        """Can append a constraint only if needed."""
+        value = self.test_filter_a
+
+        before.ensure(value)
+        assert before == after
+
     def test_structure(self):
         """Can create a Constraints element by converting a list of plain types."""
         expected = Constraints(

@@ -1,4 +1,4 @@
-# Set access permissions in a record's administration metadata
+# Set access permissions in a record's administration, and optionally discovery, metadata
 
 from __future__ import annotations
 
@@ -10,8 +10,17 @@ from typing import TYPE_CHECKING
 import inquirer
 from tasks._shared import dump_records, ensure_admin, init, parse_records, pick_local_record
 
-from lantern.lib.metadata_library.models.record.enums import MagicAccessFrameworkPermission
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.enums import ConstraintTypeCode, MagicAccessFrameworkPermission
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, MAGIC_TEAM, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.constraints import (
+    BAS_STAFF as BAS_STAFF_CONSTRAINT,
+)
+from lantern.lib.metadata_library.models.record.presets.constraints import (
+    MAGIC_TEAM as MAGIC_TEAM_CONSTRAINT,
+)
+from lantern.lib.metadata_library.models.record.presets.constraints import (
+    OPEN_ACCESS as OPEN_ACCESS_CONSTRAINT,
+)
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 
 if TYPE_CHECKING:
@@ -20,10 +29,15 @@ if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1 import Permission
     from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
+    from lantern.lib.metadata_library.models.record.elements.common import Constraints
     from lantern.lib.metadata_library.models.record.record import Record
 
 # Well-known MAGIC access permissions framework presets
-ACCESS_PRESETS = [MagicAccessFrameworkPermission.OPEN_ACCESS, MagicAccessFrameworkPermission.BAS_STAFF]
+ACCESS_PRESETS = [
+    MagicAccessFrameworkPermission.OPEN_ACCESS,
+    MagicAccessFrameworkPermission.BAS_STAFF,
+    MagicAccessFrameworkPermission.MAGIC_TEAM,
+]
 
 
 def _make_permission(preset: MagicAccessFrameworkPermission, comment: str | None) -> Permission:
@@ -32,13 +46,14 @@ def _make_permission(preset: MagicAccessFrameworkPermission, comment: str | None
 
     If preset is None or special 'NONE' name is used, return None (no permission).
     """
-    permission = (
-        BAS_STAFF
-        if preset == MagicAccessFrameworkPermission.BAS_STAFF
-        else OPEN_ACCESS
-        if preset == MagicAccessFrameworkPermission.OPEN_ACCESS
-        else None
-    )
+    permission = None
+    if preset == MagicAccessFrameworkPermission.MAGIC_TEAM:
+        permission = MAGIC_TEAM
+    elif preset == MagicAccessFrameworkPermission.BAS_STAFF:
+        permission = BAS_STAFF
+    elif preset == MagicAccessFrameworkPermission.OPEN_ACCESS:
+        permission = OPEN_ACCESS
+
     if not permission:
         msg = "No supported permission selected."
         raise RuntimeError(msg) from None
@@ -48,6 +63,7 @@ def _make_permission(preset: MagicAccessFrameworkPermission, comment: str | None
 
 
 def _get_cli_args() -> tuple[
+    bool,
     bool,
     Path,
     Path | None,
@@ -69,13 +85,19 @@ def _get_cli_args() -> tuple[
     allowed.
     """
     parser = ArgumentParser(
-        description="Set resource and metadata administration access permissions for a local record."
+        description="Set resource and metadata administration access permissions and aligned discovery access constraints for a local record."
     )
     parser.add_argument(
         "--force",
         "-f",
         action="store_true",
         help="Force path to local record and resource/metadata access permissions to set.",
+    )
+    parser.add_argument(
+        "--constraints",
+        "-c",
+        action="store_true",
+        help="Update discovery access constraints to match administration access permissions.",
     )
     parser.add_argument(
         "--path",
@@ -86,7 +108,7 @@ def _get_cli_args() -> tuple[
     )
     parser.add_argument(
         "--record",
-        "-c",
+        "-o",
         type=Path,
         help="Path to local record config to update. Will interactively prompt if omitted.",
     )
@@ -123,6 +145,7 @@ def _get_cli_args() -> tuple[
 
     return (
         args.force,
+        args.constraints,
         args.path,
         args.record,
         metadata_access,
@@ -133,6 +156,8 @@ def _get_cli_args() -> tuple[
 
 
 def _return_args(
+    force: bool,
+    constraints: bool,
     import_path: Path,
     record_path: Path,
     record: Record,
@@ -140,14 +165,17 @@ def _return_args(
     metadata_comment: str | None,
     resource_permission_t: MagicAccessFrameworkPermission,
     resource_comment: str | None,
-) -> tuple[Path, Record, Permission | None, Permission | None, str]:
+) -> tuple[bool, bool, Path, Record, Permission | None, Permission | None, str]:
+    _con = " --constraints" if constraints else ""
     _mps = f" --metadata-preset {metadata_permission_t.name}"
-    _mc = f" --metadata-comment {metadata_comment}" if metadata_comment else ""
+    _mc = f" --metadata-comment '{metadata_comment}'" if metadata_comment else ""
     _rps = f" --resource-preset {resource_permission_t.name}"
-    _rc = f" --resource-comment {resource_comment}" if resource_comment else ""
-    params = f"task restrict-record --force --path {import_path.resolve()} --record {record_path.resolve()}{_mps}{_mc}{_rps}{_rc}"
+    _rc = f" --resource-comment '{resource_comment}'" if resource_comment else ""
+    params = f"task restrict-record --force{_con} --path {import_path.resolve()} --record {record_path.resolve()}{_mps}{_mc}{_rps}{_rc}"
 
     return (
+        force,
+        constraints,
         import_path,
         record,
         _make_permission(metadata_permission_t, metadata_comment),
@@ -160,6 +188,7 @@ def _get_args(
     logger: logging.Logger,
     cli_args: tuple[
         bool,
+        bool,
         Path,
         Path | None,
         MagicAccessFrameworkPermission,
@@ -167,10 +196,11 @@ def _get_args(
         MagicAccessFrameworkPermission | None,
         str | None,
     ],
-) -> tuple[Path, Record, Permission | None, Permission | None, str]:
+) -> tuple[bool, bool, Path, Record, Permission | None, Permission | None, str]:
     """Get task inputs, interactively if needed/allowed."""
     (
         cli_force,
+        cli_constraints,
         cli_records_path,
         cli_record_path,
         cli_metadata_preset_t,
@@ -179,6 +209,7 @@ def _get_args(
         cli_resource_comment,
     ) = cli_args
 
+    set_constraints = cli_constraints
     import_path = cli_records_path
     record_path = cli_record_path
     metadata_permission_t = cli_metadata_preset_t
@@ -199,6 +230,8 @@ def _get_args(
         )[0][0]
 
         return _return_args(
+            force=True,
+            constraints=set_constraints,
             import_path=import_path,
             record_path=record_path,
             record=record,
@@ -220,6 +253,10 @@ def _get_args(
     resource_permission_t = MagicAccessFrameworkPermission[resource_permission_n]
     resource_comment = inquirer.text("Resource comment (optional)", default=resource_comment or "")
 
+    set_constraints = inquirer.confirm(
+        message="Update metadata/resource access constraints to match permissions?", default=True
+    )
+
     for rp in _record_paths:
         if record.file_identifier == rp[0].file_identifier:
             record_path = rp[1]
@@ -228,6 +265,8 @@ def _get_args(
         msg = f"File for record '{record.file_identifier}' not found"
         raise FileNotFoundError(msg) from None
     return _return_args(
+        force=False,
+        constraints=set_constraints,
         import_path=import_path,
         record_path=record_path,
         record=record,
@@ -245,7 +284,7 @@ def _set_permission(
     metadata_permission: Permission | None,
     resource_permission: Permission | None,
 ) -> None:
-    """Set single access permission in a record, overwriting any possible existing permissions."""
+    """Set single access permission in a record administration metadata, overwriting any existing permissions."""
     admin = ensure_admin(logger=logger, record=record, keys=keys)
     admin.metadata_permissions = [metadata_permission] if metadata_permission else []
     admin.resource_permissions = [resource_permission] if resource_permission else []
@@ -256,6 +295,35 @@ def _set_permission(
         resource_permission,
     )
     set_admin(keys=keys, record=record, admin_meta=admin)
+
+
+def _set_constraint(
+    logger: logging.Logger, constraints: Constraints, permission: Permission, interactive: bool
+) -> Constraints:
+    """Set single access constraint in a record discovery metadata, overwriting any existing access constraints."""
+    mapping = {
+        OPEN_ACCESS: OPEN_ACCESS_CONSTRAINT,
+        BAS_STAFF: BAS_STAFF_CONSTRAINT,
+        MAGIC_TEAM: MAGIC_TEAM_CONSTRAINT,
+    }
+    constraint = mapping[permission]
+
+    existing = constraints.filter(types=ConstraintTypeCode.ACCESS)
+    if len(existing) > 1:
+        logger.warning("Multiple access constraints are not supported, aborting")
+        return constraints
+    if len(existing) == 1:
+        logger.info("One existing access constraint:")
+        logger.info(existing[0])
+        if interactive and not inquirer.confirm(message="Replace existing constraint?", default=True):
+            logger.info("Skipping constraint update")
+            return constraints
+        logger.info("Replacing constraint")
+        constraints = constraints.without(constraints=existing[0])
+    if len(existing) == 0:
+        logger.info("No existing access constraints, setting constraint")
+    constraints.ensure(constraint)
+    return constraints
 
 
 def main() -> None:
@@ -269,7 +337,9 @@ def main() -> None:
     print("\nWARNING: This task will overwrite any existing permissions in selected records.")
 
     cli_args = _get_cli_args()
-    import_path, record, metadata_permission, resource_permission, params = _get_args(logger, cli_args)
+    noninteractive, set_constraints, import_path, record, metadata_permission, resource_permission, params = _get_args(
+        logger, cli_args
+    )
 
     if not metadata_permission and not resource_permission:
         logger.info("No permissions selected, aborting.")
@@ -282,9 +352,26 @@ def main() -> None:
         metadata_permission=metadata_permission,
         resource_permission=resource_permission,
     )
+
+    if set_constraints and metadata_permission:
+        record.metadata.constraints = _set_constraint(
+            logger=logger,
+            constraints=record.metadata.constraints,
+            permission=metadata_permission,
+            interactive=not noninteractive,
+        )
+    if set_constraints and resource_permission:
+        record.identification.constraints = _set_constraint(
+            logger=logger,
+            constraints=record.identification.constraints,
+            permission=resource_permission,
+            interactive=not noninteractive,
+        )
+
+    record.validate()
     dump_records(logger=logger, records=[record], output_path=import_path)
 
-    logger.info("Re-run as: '%s'", params)
+    logger.info("Re-run as: %s", params)
 
 
 if __name__ == "__main__":

@@ -412,7 +412,7 @@ class Record:
         Validate Record against JSON Schemas.
 
         By default, records are validated against the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 schema,
-        plus schemas matched from any domain consistency elements. Set `use_profiles = False`to disable.
+        plus schemas matched from any domain consistency elements. Set `use_profiles = False` to disable.
 
         Use `force_schemas` to select specific schemas to validate against.
 

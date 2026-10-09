@@ -29,7 +29,7 @@ deprecate-record         Indicate a record is deprecated without a replacement
 supersede-record         Indicate a new record is the successor to another
 issues-record            Set GitLab issues for a record
 admin-record             View administrative metadata for a record
-restrict-record          Set access permissions for a record
+restrict-record          Set access permissions/constraints for a record
 esri-record              Add Esri item distribution options to a record
 
 # multiple records commands
@@ -256,7 +256,7 @@ Examples:
 
 ### `restrict-record`
 
-Set access permissions for a record.
+Set access permissions, and optionally access constraints, for a record.
 
 ```shell
 % task restrict-record --help
@@ -269,7 +269,13 @@ Set access permissions for a record.
 
 > [!NOTE]
 > Resource access permissions are limited to well-known presets from the MAGIC Access Permissions Framework.
-> (Metadata access permissions are locked to the Open Access well-known preset as restricted metadata is not supported).
+>
+> Metadata access permissions are locked to the Open Access well-known preset as restricted metadata is not supported.
+>
+> Multiple access constraints are not supported when aligning Metadata and/or Resource permissions with `--constraints`.
+
+> [!WARNING]
+> Where the `--force` and `--constraints` flags are both set, a single existing constraint will be overwritten.
 <!-- pyml enable md028 -->
 
 Examples:
@@ -277,6 +283,8 @@ Examples:
 ```shell
 # set record config and metadata/resource permissions presets, without interaction
 % task restrict-record --force --record ./import/2ba1206e-31fa-4e9b-ab01-ea6fe7ce3550.json --metadata-preset OPEN_ACCESS --resource-preset BAS_STAFF
+# set resource permissions and update discovery access constraints to match, without interaction
+% task restrict-record --force --constraints --record ./import/c7f56e4d-d5fd-430e-88b3-c4a778fd22a9.json --resource-preset BAS_STAFF --resource-comment '...'
 ```
 
 ### `esri-record`

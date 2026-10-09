@@ -310,14 +310,16 @@ def _import(logger: logging.Logger, cat: BasCatalogue, import_path: Path, branch
     if len(records) == 0:
         return None
 
-    commit_context = get_git_commit_context(branch=branch)
+    commit_context = get_git_commit_context(logger=logger, cat=cat, branch=branch)
     results = import_push(logger=logger, cat=cat, records=list(records.values()), commit_context=commit_context)
     import_clean(logger=logger, records=records, results=results)
     return results
 
 
 @time_task(label="Merge request")
-def _merge_request(logger: logging.Logger, cat: BasCatalogue, issue_href: str, branch: str) -> tuple[str, bool]:
+def _merge_request(
+    logger: logging.Logger, cat: BasCatalogue, issue_href: str, branch: str, identifiers: set[str]
+) -> tuple[str, bool]:
     """
     Ensure merge request exists for changeset.
 
@@ -345,6 +347,9 @@ def _merge_request(logger: logging.Logger, cat: BasCatalogue, issue_href: str, b
     description_lines = [
         f"Created for records related to {issue_href}.",
         "Created by the experimental MAGIC Lantern [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow).",
+        "```",
+        f"% task select-records --force --branch {branch} --record {','.join(identifiers)}",
+        "```",
         "/draft",
         f"/assign {answers['assignee']}",
         f"/assign_reviewer {answers['reviewer']}",
@@ -413,7 +418,8 @@ def _output(
         config=config, cat=cat, env=env, branch=branch, commit=commit, merge_url=merge_url
     )
     print(mr_comment.render())
-    confirm(logger, f"Post comment above to '{merge_url}?")
+    if not inquirer.confirm(message=f"Post comment above to '{merge_url}?", default=True):
+        return
     mr_comment.post()
 
     if not merge_new:
@@ -468,7 +474,9 @@ def main() -> None:
         sys.exit(0)
 
     # create a merge request if needed
-    merge_url, merge_new = _merge_request(logger=logger, cat=catalogue, issue_href=issue_url, branch=branch)
+    merge_url, merge_new = _merge_request(
+        logger=logger, cat=catalogue, issue_href=issue_url, branch=branch, identifiers=identifiers
+    )
 
     # build and check records
     _export(cat=catalogue, env=env, branch=branch, identifiers=identifiers)

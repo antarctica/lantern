@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import inquirer
 from inquirer import Path as InquirerPath
-from tasks._shared import clean_record_configs, init, parse_records
+from tasks._shared import clean_record_configs, confirm, init, parse_records
 
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.repositories.bas import ProtectedGitBranchError
@@ -80,18 +80,45 @@ def get_default_author() -> tuple[str | None, str | None]:
     return name, email
 
 
-def get_git_commit_context(defaults: GitUpsertContext | None = None, branch: str | None = None) -> GitUpsertContext:
-    """Prompt for commit context."""
+def get_git_commit_context(
+    logger: logging.Logger,
+    cat: BasCatalogue,
+    branch: str | None = None,
+    default_branch: str | None = None,
+    defaults: GitUpsertContext | None = None,
+) -> GitUpsertContext:
+    """
+    Prompt for commit context.
+
+    The branch to use is either:
+    - locked (via `branch`) where the branch has already been selected elsewhere
+    - prompted for within this method, excluding a `default_branch` as we don't allow direct commits
+    """
+    if (branch and default_branch) or (not branch and not default_branch):
+        msg = "Either (locked) branch or default branch is required (not either/both)."
+        raise ValueError(msg)
+
     default_name, default_email = get_default_author()
 
-    branch = branch or (defaults.branch if defaults else None)
     title = defaults.title if defaults else None
     message = defaults.message if defaults else None
     author_name = defaults.author_name if defaults and defaults.author_name else default_name or None
     author_email = defaults.author_email if defaults and defaults.author_email else default_email or None
 
+    _new_label = "** New **"
+    if not branch:
+        choices = [_new_label, *[c for c in cat.repo.select_branches() if c != default_branch]]
+        branch = inquirer.list_input(message="Branch", choices=choices)
+    if branch == _new_label:
+        branch = str(inquirer.text(message="Branch"))
+        if "#" in branch:
+            # handle GitLab issue references (e.g. 'group/project#issue')
+            logger.warning("Branch names cannot contain `#`")
+            branch = branch.replace("#", ".")
+            confirm(logger=logger, message=f"Use '{branch}' instead?")
+
     return GitUpsertContext(
-        branch=inquirer.text(message="Branch", default=branch),
+        branch=branch,
         title=inquirer.text(message="Changeset title", default=title),
         message=message or inquirer.editor(message="Changeset message"),
         author_name=inquirer.text(message="Changeset author name", default=author_name),
@@ -100,7 +127,10 @@ def get_git_commit_context(defaults: GitUpsertContext | None = None, branch: str
 
 
 def _get_args(
-    logger: logging.Logger, cli_args: tuple[bool, Path, str | None, str | None, str | None, str | None, str | None]
+    logger: logging.Logger,
+    cat: BasCatalogue,
+    cli_args: tuple[bool, Path, str | None, str | None, str | None, str | None, str | None],
+    default_branch: str,
 ) -> tuple[Path, GitUpsertContext, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_path, cli_branch, cli_title, cli_message, cli_author_name, cli_author_email = cli_args
@@ -116,7 +146,7 @@ def _get_args(
 
     if not cli_force:
         path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
-        context = get_git_commit_context(context)
+        context = get_git_commit_context(logger=logger, cat=cat, default_branch=default_branch, defaults=context)
 
     msg = "Import path, branch and commit details MUST be set or have Git config defaults (for author identity) for this task."
     if not isinstance(path, Path):
@@ -182,10 +212,13 @@ def clean(logger: logging.Logger, records: dict[Path, Record], results: GitUpser
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, catalogue = init()
+    logger, config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, commit_context, params = _get_args(logger=logger, cli_args=cli_args)
+    default_branch = config.STORE_GITLAB_DEFAULT_BRANCH
+    import_path, commit_context, params = _get_args(
+        logger=logger, cat=catalogue, cli_args=cli_args, default_branch=default_branch
+    )
 
     records = load(logger=logger, import_path=import_path)
     commit = push(logger=logger, cat=catalogue, records=list(records.values()), commit_context=commit_context)

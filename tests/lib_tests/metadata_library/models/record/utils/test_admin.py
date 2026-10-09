@@ -100,6 +100,7 @@ class TestParsePermissions:
         ("permissions", "expected"),
         [
             ([], MagicAccessFrameworkPermission.NONE),
+            ([Permission(directory="~nerc", group="~magic-team")], MagicAccessFrameworkPermission.MAGIC_TEAM),
             ([Permission(directory="~nerc", group="~bas-staff")], MagicAccessFrameworkPermission.BAS_STAFF),
             ([Permission(directory="*", group="*")], MagicAccessFrameworkPermission.OPEN_ACCESS),
             (

@@ -147,6 +147,7 @@ class TestItemCore:
         [
             (False, [], AccessLevel.NONE),
             (True, [], AccessLevel.NONE),
+            (True, [Permission(directory="~nerc", group="~magic-team")], AccessLevel.MAGIC_TEAM),
             (True, [Permission(directory="~nerc", group="~bas-staff")], AccessLevel.BAS_STAFF),
             (True, [Permission(directory="*", group="*")], AccessLevel.OPEN_ACCESS),
             (True, [Permission(directory="x", group="x"), Permission(directory="y", group="y")], AccessLevel.UNKNOWN),

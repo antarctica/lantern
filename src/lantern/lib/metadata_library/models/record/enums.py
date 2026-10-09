@@ -305,5 +305,6 @@ class MagicAccessFrameworkPermission(Enum):
     NONE = "(none)"
     CUSTOM_GROUPS = "(custom-groups)"
     # well-known presets
+    MAGIC_TEAM = "MAGIC-TEAM"
     BAS_STAFF = "BAS-STAFF"
     OPEN_ACCESS = "OPEN-ACCESS"

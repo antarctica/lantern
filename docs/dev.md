@@ -507,6 +507,30 @@ To enable additional distribution option formats to be shown within [Catalogue I
    - `tests.resources.stores.fake_records_store.FakeRecordsStore._fake_records`
 5. update the `lantern_tests.templates.macros.test_tabs.TestLicenceTab.test_licence` test
 
+### Adding catalogue permissions
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. if needed, register a well known preset in the current [Access Permissions](/README.md#conformance) framework
+   - then update the 1Password item representing the permissions framework generically
+   - also update the item corresponding to the `X_DEPOSIT_GROUPS_MAPPING` [Config](#development-tasks-config) option
+1. if needed, [Support New Access Permissions](/docs/libraries.md#adding-new-well-known-access-permissions) in the
+   metadata library
+1. update the `lantern.models.item.base.enums.AccessLevel` enum and the associated
+  `lantern_tests.models.item.base.test_item_base.TestItemCore.test_admin_access_level` test
+1. update the `lantern.models.item.arcgis.item.ItemArcGis.sharing_level` mapping as needed and the associated
+   `lantern_tests.models.item.arcgis.test_item_arcgis.TestItemArcGIS.test_sharing_level` test
+1. add a preset specific macro to the `src/lantern/resources/templates/_macros/_tabs/data.html.j2` template
+1. update the `data` macro in the `src/lantern/resources/templates/_macros/tabs.html.j2` template as needed and these
+   associated tests:
+   - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_restricted_access`
+   - `lantern_tests.templates.macros.test_tabs.TestAdminTab.test_item_access`
+   - `lantern_tests.templates.macros.test_tabs.TestAdminTab.test_framework_access`
+1. create a [Test Record](#adding-new-test-records) with access permissions that evaluate to the new preset
+1. regenerate/update any env files to refresh the `X_DEPOSIT_GROUPS_MAPPING` [Config](#development-tasks-config) option
+1. update the [`restrict-record`](#development-tasks) development task
+
 ### Adding catalogue relations
 
 > [!WARNING]

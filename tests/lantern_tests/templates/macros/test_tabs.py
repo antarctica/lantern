@@ -60,7 +60,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, MAGIC_TEAM, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.models.item.base.enums import AccessLevel, Licence
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -72,6 +72,23 @@ if TYPE_CHECKING:
     from lantern.models.item.catalogue.item import ItemCatalogue
     from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
     from lantern.models.record.revision import RecordRevision
+
+
+def _set_access_level_permissions(keys: AdministrationKeys, record: RecordRevision, access_level: AccessLevel) -> None:
+    """Common logic for setting access permissions needed for a desired access level."""
+    permissions = []
+    if access_level == AccessLevel.UNKNOWN:
+        permissions = [Permission(directory="x", group="x")]
+    elif access_level == AccessLevel.MAGIC_TEAM:
+        permissions = [MAGIC_TEAM]
+    elif access_level == AccessLevel.BAS_STAFF:
+        permissions = [BAS_STAFF]
+    elif access_level == AccessLevel.OPEN_ACCESS:
+        permissions = [OPEN_ACCESS]
+    admin_meta = get_admin(keys=keys, record=record)
+    admin_meta.metadata_permissions = permissions
+    admin_meta.resource_permissions = permissions
+    set_admin(keys=keys, record=record, admin_meta=admin_meta)
 
 
 class TestItemsTab:
@@ -330,37 +347,22 @@ class TestDataTab:
     @pytest.mark.parametrize(
         ("value", "expected"),
         [
-            (
-                Constraint(
-                    type=ConstraintTypeCode.ACCESS,
-                    restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-                    statement="Open Access",
-                ),
-                False,
-            ),
-            (
-                Constraint(
-                    type=ConstraintTypeCode.ACCESS,
-                    restriction_code=ConstraintRestrictionCode.RESTRICTED,
-                    statement="Closed Access",
-                ),
-                True,
-            ),
+            (AccessLevel.OPEN_ACCESS, None),
+            (AccessLevel.MAGIC_TEAM, "This item is restricted to MAGIC team members"),
+            (AccessLevel.BAS_STAFF, "This item is restricted to BAS staff"),
+            (AccessLevel.UNKNOWN, "This item requires permission to access"),
+            (AccessLevel.NONE, "This item requires permission to access"),
         ],
     )
     def test_restricted_access(
         self,
         fx_item_cat_model_min: ItemCatalogue,
-        fx_item_cat_model_open: ItemCatalogue,
         fx_admin_meta_keys: AdministrationKeys,
-        value: Constraint,
-        expected: bool,
+        value: AccessLevel,
+        expected: str | None,
     ):
-        """Shows restricted access panel if item is restricted."""
-        model = fx_item_cat_model_min
-        if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
-            model = fx_item_cat_model_open
-        model._record.distribution.append(
+        """Can get expected restricted access panel if applicable."""
+        fx_item_cat_model_min._record.distribution.append(
             Distribution(
                 distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
@@ -370,12 +372,12 @@ class TestDataTab:
                 ),
             )
         )
-        model._record.identification.constraints = Constraints([value])
-        html = BeautifulSoup(render_item_catalogue(model), parser="html.parser", features="lxml")
+        _set_access_level_permissions(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, access_level=value)
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         result = html.select_one("#data-restricted-info")
         if expected:
-            assert result is not None
+            assert expected in result.text
         else:
             assert result is None
 
@@ -1647,7 +1649,8 @@ class TestAdminTab:
         assert result.text.strip() == expected
 
     @pytest.mark.parametrize(
-        "value", [AccessLevel.UNKNOWN, AccessLevel.NONE, AccessLevel.BAS_STAFF, AccessLevel.OPEN_ACCESS]
+        "value",
+        [AccessLevel.UNKNOWN, AccessLevel.NONE, AccessLevel.MAGIC_TEAM, AccessLevel.BAS_STAFF, AccessLevel.OPEN_ACCESS],
     )
     def test_item_access(
         self, fx_item_cat_model_min: ItemCatalogue, fx_admin_meta_keys: AdministrationKeys, value: AccessLevel
@@ -1657,19 +1660,7 @@ class TestAdminTab:
 
         Specifically based on `lantern.models.item.base.enums.AccessLevel`.
         """
-        permissions = []
-        if value == AccessLevel.UNKNOWN:
-            permissions = [Permission(directory="x", group="x")]
-        elif value == AccessLevel.BAS_STAFF:
-            permissions = [BAS_STAFF]
-        elif value == AccessLevel.OPEN_ACCESS:
-            permissions = [OPEN_ACCESS]
-
-        admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
-        admin_meta.metadata_permissions = permissions
-        admin_meta.resource_permissions = permissions
-        set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
-
+        _set_access_level_permissions(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, access_level=value)
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
         result_metadata = html.select_one("#admin-metadata-access")
         assert result_metadata.text.strip() == str(value.name)
@@ -1681,6 +1672,7 @@ class TestAdminTab:
         [
             MagicAccessFrameworkPermission.NONE,
             MagicAccessFrameworkPermission.CUSTOM_GROUPS,
+            MagicAccessFrameworkPermission.MAGIC_TEAM,
             MagicAccessFrameworkPermission.BAS_STAFF,
             MagicAccessFrameworkPermission.OPEN_ACCESS,
         ],
@@ -1699,11 +1691,12 @@ class TestAdminTab:
         permissions = []
         if value == MagicAccessFrameworkPermission.CUSTOM_GROUPS:
             permissions = [Permission(directory="x", group="x")]
+        elif value == MagicAccessFrameworkPermission.MAGIC_TEAM:
+            permissions = [MAGIC_TEAM]
         elif value == MagicAccessFrameworkPermission.BAS_STAFF:
             permissions = [BAS_STAFF]
         elif value == MagicAccessFrameworkPermission.OPEN_ACCESS:
             permissions = [OPEN_ACCESS]
-
         admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
         admin_meta.metadata_permissions = permissions
         admin_meta.resource_permissions = permissions

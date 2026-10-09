@@ -13,7 +13,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.constraints import OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # Open-access records to test all supported licences.
 
@@ -42,6 +42,8 @@ ogl_record.identification.constraints = Constraints(
         OGL_V3,
     ]
 )
+# add related peers
+ogl_record.identification.aggregations.extend(relate_records(ogl_record.file_identifier, groups=["licences"]))
 
 cc_record = make_record(
     open_access=True,
@@ -62,6 +64,8 @@ cc_record.identification.constraints = Constraints(
         ),
     ]
 )
+# add related peers
+cc_record.identification.aggregations.extend(relate_records(cc_record.file_identifier, groups=["licences"]))
 
 ops_record = make_record(
     open_access=False,
@@ -86,6 +90,8 @@ ops_record.identification.constraints = Constraints(
         ),
     ]
 )
+# add related peers
+ops_record.identification.aggregations.extend(relate_records(ops_record.file_identifier, groups=["licences"]))
 
 magic_products_record = make_record(
     open_access=False,
@@ -110,6 +116,10 @@ magic_products_record.identification.constraints = Constraints(
         ),
     ]
 )
+# add related peers
+magic_products_record.identification.aggregations.extend(
+    relate_records(magic_products_record.file_identifier, groups=["licences"])
+)
 
 rights_reversed_record = make_record(
     open_access=True,
@@ -129,6 +139,10 @@ rights_reversed_record.identification.constraints = Constraints(
             statement="All rights for this information are reserved. View the (Local) All Rights Reserved v1 licence, https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/, for more information.",
         ),
     ]
+)
+# add related peers
+rights_reversed_record.identification.aggregations.extend(
+    relate_records(rights_reversed_record.file_identifier, groups=["licences"])
 )
 
 copernicus_sentinel_record = make_record(
@@ -155,4 +169,8 @@ copernicus_sentinel_record.identification.contacts = Contacts(
         make_magic_role({ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER}),
         Contact(organisation=ContactIdentity(name="European Commission"), role={ContactRoleCode.RIGHTS_HOLDER}),
     ]
+)
+# add related peers
+copernicus_sentinel_record.identification.aggregations.extend(
+    relate_records(copernicus_sentinel_record.file_identifier, groups=["licences"])
 )

@@ -1,7 +1,7 @@
 from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for testing a superseded catalogue item.
 
@@ -12,3 +12,5 @@ record = make_record(
     title="Test Resource - Product marked as superseded",
     abstract="Item to test a Product which has been superseded is presented correctly.",
 )
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["lifecycle"]))

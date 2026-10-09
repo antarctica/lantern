@@ -22,7 +22,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.constraints import CLOSED_ACCESS, MAGIC_PRODUCTS_V1
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from tests.resources.admin_keys import test_keys
-from tests.resources.records.utils import make_record, relate_products
+from tests.resources.records.utils import make_record, relate_records
 
 # A restricted record for testing a catalogue item restricted to BAS Staff.
 
@@ -31,10 +31,10 @@ record = make_record(
     file_identifier="1481464a-521c-49d8-ac0b-c7ade9303bcd",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Product restricted to a custom set of groups",
-    abstract="Item to test a Product with a restricted access constraint based on custom groups is presented correctly.",
+    abstract="Item to test a Product configured with unknown/custom restrictions is presented correctly.",
 )
 # add related peers
-record.identification.aggregations.extend(relate_products(record.file_identifier))
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["restrictions"]))
 
 # change access and licence
 record.identification.constraints = Constraints([CLOSED_ACCESS, MAGIC_PRODUCTS_V1])

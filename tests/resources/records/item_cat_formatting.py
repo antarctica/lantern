@@ -1,5 +1,5 @@
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for testing all supported formatting options.
 
@@ -178,3 +178,6 @@ record = make_record(
     purpose="Item to test all supported Product properties are recognised and presented correctly.",
 )
 record.identification.other_citation_details = other_citation_details
+
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["others"]))

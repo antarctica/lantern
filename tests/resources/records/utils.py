@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime
+from typing import Literal
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
@@ -111,23 +112,70 @@ def make_minimal_open_record(record: RecordRevision) -> None:
     record.data_quality.domain_consistency = DomainConsistencies([])
 
 
-def relate_products(file_identifier: str) -> Aggregations:
+def relate_records(
+    file_identifier: str,
+    groups: list[Literal["min_max", "lifecycle", "restrictions", "product_types", "others", "data", "licences"]],
+) -> Aggregations:
     """
     Make aggregations to relate records together.
 
-    Superseded product ('7e3611a6-8dbf-4813-aaf9-dadf9decff5b') excluded as it's covered by another aggregation type.
+    Automatically excludes self relations.
+
+    Groups are used to focus on closely related records, unless 'all' is used.
     """
-    product_ids = [
-        "a59b5c5b-b099-4f01-b670-3800cb65e666",  # webMapProduct
-        "8422d4e7-654f-4fbb-a5e0-4051ee21418e",  # mapProduct
-        "30825673-6276-4e5a-8a97-f97f2094cd25",  # product (all)
-        "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",  # product (min)
+    restrictions = [
         "b0e92ec2-b018-4f9f-a1e1-bc0fe195619f",  # product (min, Open Access)
+        "3b08401d-3dbb-4751-a930-21ca0eced88b",  # product (restricted, MAGIC Team)
         "57327327-4623-4247-af86-77fb43b7f45b",  # product (restricted, BAS Staff)
         "1481464a-521c-49d8-ac0b-c7ade9303bcd",  # product (restricted, Custom Groups)
+    ]
+    product_types = [
+        "a59b5c5b-b099-4f01-b670-3800cb65e666",  # webMapProduct
+        "8422d4e7-654f-4fbb-a5e0-4051ee21418e",  # mapProduct
         "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",  # paperMapProduct
         "09dbc743-cc96-46ff-8449-1709930b73ad",  # paperMapProduct (diff)
     ]
+    lifecycle = [
+        "9edd97d9-3df6-4aff-b356-87d23c9f655f",  # continuous (live)
+        "0116d9fe-19c0-4d7f-a5a8-67a8ffed7da2",  # deprecated
+        "7e3611a6-8dbf-4813-aaf9-dadf9decff5b",  # superseded
+    ]
+    min_max_types = [
+        "30825673-6276-4e5a-8a97-f97f2094cd25",  # product (all)
+        "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",  # product (min)
+    ]
+    others = [
+        "cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",  # checks report
+        "e0df252c-fb8b-49ff-9711-f91831b66ea2",  # formatting
+    ]
+    data = [
+        "f90013f6-2893-4c72-953a-a1a6bc1919d7",  # data formats
+        "e0743576-e05d-49cd-b7bf-01a0b3ad0430",  # datasets as layers
+    ]
+    licences = [
+        "589408f0-f46b-4609-b537-2f90a2f61243",  # OGL
+        "4ba929ac-ca32-4932-a15f-38c1640c0b0f",  # CC
+        "5ab58461-5ba7-404d-a904-2b4efcb7556e",  # Ops Mapping (deprecated)
+        "60c05109-d15e-4b43-9e36-d4fd9d7c606b",  # MAGIC Products
+        "c993ea2b-d44e-4ca0-9007-9a972f7dd117",  # all rights reserved
+        "43287219-40aa-47fd-809e-21b50773a052",  # Copernicus Sentinel v1
+    ]
+
+    targets = []
+    if "restrictions" in groups:
+        targets.extend(restrictions)
+    if "product_types" in groups:
+        targets.extend(product_types)
+    if "lifecycle" in groups:
+        targets.extend(lifecycle)
+    if "min_max" in groups:
+        targets.extend(min_max_types)
+    if "others" in groups:
+        targets.extend(others)
+    if "data" in groups:
+        targets.extend(data)
+    if "licences" in groups:
+        targets.extend(licences)
 
     return Aggregations(
         [
@@ -135,7 +183,7 @@ def relate_products(file_identifier: str) -> Aggregations:
                 identifier=Identifier(identifier=pid, namespace=CATALOGUE_NAMESPACE),
                 association_type=AggregationAssociationCode.CROSS_REFERENCE,
             )
-            for pid in product_ids
+            for pid in targets
             if pid != file_identifier
         ]
     )

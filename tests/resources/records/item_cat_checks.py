@@ -16,7 +16,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record to test all distinct verification distribution options and a DOI identifier.
 
@@ -239,3 +239,6 @@ record.distribution = Distributions(
         san_access,
     ],
 )
+
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["others"]))

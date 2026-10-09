@@ -19,29 +19,29 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF as BAS_STAFF_PERMISSION
-from lantern.lib.metadata_library.models.record.presets.constraints import BAS_STAFF, MAGIC_PRODUCTS_V1
+from lantern.lib.metadata_library.models.record.presets.admin import MAGIC_TEAM as MAGIC_TEAM_PERMISSION
+from lantern.lib.metadata_library.models.record.presets.constraints import MAGIC_PRODUCTS_V1, MAGIC_TEAM
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_records
 
-# A restricted record for testing a catalogue item restricted to BAS Staff.
+# A restricted record for testing a catalogue item restricted to MAGIC.
 
 record = make_record(
     open_access=False,
-    file_identifier="57327327-4623-4247-af86-77fb43b7f45b",
+    file_identifier="3b08401d-3dbb-4751-a930-21ca0eced88b",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
-    title="Test Resource - Product restricted to BAS Staff",
-    abstract="Item to test a Product configured as restricted to BAS staff is presented correctly.",
+    title="Test Resource - Product restricted to MAGIC Team",
+    abstract="Item to test a Product configured as restricted to MAGIC team members is presented correctly.",
 )
 # add related peers
 record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["restrictions"]))
 
 # change access and licence
-record.identification.constraints = Constraints([BAS_STAFF, MAGIC_PRODUCTS_V1])
+record.identification.constraints = Constraints([MAGIC_TEAM, MAGIC_PRODUCTS_V1])
 # add admin metadata to reflect access
 keys = test_keys()
-admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[BAS_STAFF_PERMISSION])
+admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[MAGIC_TEAM_PERMISSION])
 set_admin(keys=keys, record=record, admin_meta=admin)
 
 # add example distribution to test restricted state handling
@@ -73,6 +73,36 @@ record.distribution = Distributions(
         Distribution(
             distributor=distributor,
             format=Format(
+                format="ArcGIS 3D Scene Layer",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
+            ),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="s",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                    title="ArcGIS Online",
+                    description="Access information as an ArcGIS 3D scene layer.",
+                )
+            ),
+        ),
+        Distribution(
+            distributor=distributor,
+            format=Format(
+                format="ArcGIS 3D Scene Service",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
+            ),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="s",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="ArcGIS Online",
+                    description="Access information as an ArcGIS 3D scene service.",
+                )
+            ),
+        ),
+        Distribution(
+            distributor=distributor,
+            format=Format(
                 format="GeoJSON",
                 href="https://www.iana.org/assignments/media-types/application/geo+json",
             ),
@@ -83,22 +113,6 @@ record.distribution = Distributions(
                     function=OnlineResourceFunctionCode.DOWNLOAD,
                     title="GeoJSON",
                     description="Access information as a GeoJSON file.",
-                ),
-            ),
-        ),
-        Distribution(
-            distributor=distributor,
-            format=Format(
-                format="PDF",
-                href="https://www.iana.org/assignments/media-types/application/pdf",
-            ),
-            transfer_option=TransferOption(
-                size=Size(unit="bytes", magnitude=321 * 1024 * 1024),
-                online_resource=OnlineResource(
-                    href="x",
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                    title="PDF",
-                    description="Access information as a PDF file.",
                 ),
             ),
         ),

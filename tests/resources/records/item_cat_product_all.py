@@ -44,7 +44,7 @@ from lantern.lib.metadata_library.models.record.utils.admin import get_admin, se
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
-from tests.resources.records.utils import make_record, relate_products
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for a product with all supported fields.
 
@@ -292,8 +292,8 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.PROJECT,
     )
 )
-# add related peers
-record.identification.aggregations.extend(relate_products(record.file_identifier))
+# add cross-references
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["min_max"]))
 # add a superseded peer
 record.identification.aggregations.append(
     Aggregation(

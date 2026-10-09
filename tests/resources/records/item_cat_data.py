@@ -25,7 +25,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.catalogue.enums import DistributionType
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record to test all supported data formats.
 
@@ -451,7 +451,7 @@ distributions = {
                 href="wm",
                 function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
-                description="Access information as an ArcGIS scene service.",
+                description="Access information as an ArcGIS web map.",
             )
         ),
     ),
@@ -560,3 +560,6 @@ record.identification.aggregations.append(
 )
 
 record.distribution = Distributions(distributions.values())
+
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["data"]))

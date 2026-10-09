@@ -6,7 +6,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     ProgressCode,
 )
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for testing a deprecated catalogue item.
 
@@ -25,3 +25,6 @@ record.identification.abstract += dedent("""\
 > [!WARNING]
 > This item is deprecated and should not be used.
 """)
+
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["lifecycle"]))

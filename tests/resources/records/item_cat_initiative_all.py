@@ -21,7 +21,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for an initiative with all supported fields.
 
@@ -125,6 +125,8 @@ record.identification.graphic_overviews = GraphicOverviews(
 
 # reset aggregations to add project members
 record.identification.aggregations = Aggregations([])
+# add cross-references
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["min_max"]))
 for initiative_member in initiative_members:
     record.identification.aggregations.append(
         Aggregation(

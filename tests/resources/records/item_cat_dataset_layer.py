@@ -6,7 +6,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access dataset acting as a layer used in a web map product.
 
@@ -26,3 +26,5 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.MAP_LAYER,
     )
 )
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["data"]))

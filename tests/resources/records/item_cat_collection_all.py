@@ -24,7 +24,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_records
 
 # An open-access record for a collection with all supported fields.
 
@@ -45,6 +45,7 @@ collection_members = [
     "7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
     "cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
     "fd126357-0f88-4b89-81b8-fe33654ef045",
+    "3b08401d-3dbb-4751-a930-21ca0eced88b",
     "c31720da-8c10-496a-893d-f003f09151e9",
     "a59b5c5b-b099-4f01-b670-3800cb65e666",
     "8422d4e7-654f-4fbb-a5e0-4051ee21418e",
@@ -156,6 +157,9 @@ record.identification.graphic_overviews = GraphicOverviews(
 
 # reset collection members
 record.identification.aggregations = Aggregations([])
+# add cross-references
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["min_max"]))
+# add collection members
 for collection_member in collection_members:
     record.identification.aggregations.append(
         Aggregation(

@@ -33,7 +33,7 @@ from lantern.lib.metadata_library.models.record.presets.constraints import OPEN_
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.resources.records.utils import make_record, relate_products
+from tests.resources.records.utils import make_record, relate_records
 
 # A trio of open-access records for a paper map product with two, mostly similar, sides.
 
@@ -116,7 +116,10 @@ combined.identification.identifiers.append(
 combined.identification.edition = "1"
 combined.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 combined.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-combined.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+combined.identification.dates.publication = Date(
+    date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR
+)
+combined.identification.dates.released = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.spatial_resolution = 400_000
 set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, combined)
 
@@ -153,7 +156,7 @@ combined.identification.aggregations.extend(
         ),
     ]
 )
-combined.identification.aggregations.extend(relate_products(combined.file_identifier))
+combined.identification.aggregations.extend(relate_records(combined.file_identifier, groups=["product_types"]))
 combined.identification.extents = Extents(
     [
         Extent(
@@ -177,7 +180,8 @@ side_a = make_record(
 side_a.identification.edition = "1"
 side_a.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 side_a.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-side_a.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+side_a.identification.dates.publication = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+side_a.identification.dates.released = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.spatial_resolution = 400_000
 set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_a)
 side_a.identification.constraints = constraints
@@ -236,7 +240,8 @@ side_b = make_record(
 side_b.identification.edition = "1"
 side_b.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 side_b.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-side_b.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+side_b.identification.dates.publication = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+side_b.identification.dates.released = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.spatial_resolution = 400_000
 set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_b)
 side_b.identification.constraints = constraints

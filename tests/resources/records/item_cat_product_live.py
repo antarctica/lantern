@@ -9,7 +9,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from tests.resources.records.utils import make_minimal_open_record, make_record
+from tests.resources.records.utils import make_minimal_open_record, make_record, relate_records
 
 # A record for an open product considered to be 'live' in terms of update frequency.
 
@@ -40,3 +40,5 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.COLLECTION,
     )
 )
+# add related peers
+record.identification.aggregations.extend(relate_records(record.file_identifier, groups=["lifecycle"]))

@@ -239,6 +239,16 @@ To add support for a new ISO element within Records:
    2. amend variants in `test_loop` as needed (include all possible options in complete variant)
 10. amend list of unsupported properties in `/docs/data-model.md#record-limitations` as needed
 
+### Adding new well known access permissions
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. update the `lantern.lib.metadata_library.models.record.enums.MagicAccessFrameworkPermission` enum
+1. add a preset in `lantern.lib.metadata_library.models.record.presets.admin` (for administration metadata)
+1. add a preset in `lantern.lib.metadata_library.models.record.presets.constraints` (for discovery metadata)
+1. update `lantern.lib.metadata_library.models.record.utils.admin.parse_framework_permissions` and associated tests
+
 ## MAGIC Resource Distribution
 
 `lantern.lib.magic_distribution`

@@ -250,6 +250,15 @@
   </ul>
 {% endmacro %}
 
+{% macro restricted_magic_team() %}
+  {% call com.alert(shape='box', variant='yellow') %}
+    <p class="text-lg {{ com.font_bolder_classes() }}">This item is restricted to MAGIC team members</p>
+    {{ _restricted_common() }}
+    <p>You will need to be part of the Mapping and Geographic Information Centre (MAGIC) to access this item.</p>
+    <p>Other BAS, NERC and UKRI staff do not have access.</p>
+  {% endcall %}
+{% endmacro %}
+
 {% macro restricted_bas_staff() %}
   {% call com.alert(shape='box', variant='yellow') %}
     <p class="text-lg {{ com.font_bolder_classes() }}">This item is restricted to BAS staff</p>

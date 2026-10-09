@@ -24,7 +24,9 @@
           {% endfor %}
         </div>
         <aside id="data-restricted-info" class="col-span-1">
-          {% if data.access_level == 'BAS_STAFF' %}
+          {% if data.access_level == 'MAGIC_TEAM' %}
+            {{ data_tab.restricted_magic_team() }}
+          {% elif data.access_level == 'BAS_STAFF' %}
             {{ data_tab.restricted_bas_staff() }}
           {% else %}
             {{ data_tab.restricted_unknown() }}

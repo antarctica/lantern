@@ -53,6 +53,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updated Algolia, Scalar and Sentry vendored JS dependencies
 * `search-configure` development task
 * Dedicated search test suite to consistently check expected functionality and index settings
+* MAGIC Team well known access permissions preset
 
 ### Fixed
 

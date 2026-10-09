@@ -19,6 +19,12 @@ BAS_STAFF = Constraint(
     statement="Closed Access (BAS Staff)",
 )
 
+MAGIC_TEAM = Constraint(
+    type=ConstraintTypeCode.ACCESS,
+    restriction_code=ConstraintRestrictionCode.RESTRICTED,
+    statement="Closed Access (British Antarctic Survey, Mapping and Geographic Information Centre (MAGIC) staff only)",
+)
+
 OGL_V3 = Constraint(
     type=ConstraintTypeCode.USAGE,
     restriction_code=ConstraintRestrictionCode.LICENSE,

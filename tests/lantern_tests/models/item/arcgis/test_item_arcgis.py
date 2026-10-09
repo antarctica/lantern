@@ -233,6 +233,7 @@ class TestItemArcGIS:
             ([], SharingLevel.PRIVATE),
             ([Permission(directory="*", group="*")], SharingLevel.EVERYONE),
             ([Permission(directory="~nerc", group="~bas-staff")], SharingLevel.ORG),
+            ([Permission(directory="~nerc", group="~magic-team")], SharingLevel.PRIVATE),
             ([Permission(directory="x", group="x"), Permission(directory="y", group="y")], SharingLevel.PRIVATE),
         ],
     )

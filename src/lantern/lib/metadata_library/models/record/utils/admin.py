@@ -13,7 +13,7 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
 )
 
 from lantern.lib.metadata_library.models.record.enums import MagicAccessFrameworkPermission
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, MAGIC_TEAM, OPEN_ACCESS
 
 if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
@@ -41,6 +41,8 @@ def parse_framework_permissions(permissions: list[Permission]) -> MagicAccessFra
     """Evaluate access permissions against supported permissions from the MAGIC Access Permissions Framework (v1)."""
     if len(permissions) == 0:
         return MagicAccessFrameworkPermission.NONE
+    if permissions == [MAGIC_TEAM]:
+        return MagicAccessFrameworkPermission.MAGIC_TEAM
     if permissions == [BAS_STAFF]:
         return MagicAccessFrameworkPermission.BAS_STAFF
     if permissions == [OPEN_ACCESS]:

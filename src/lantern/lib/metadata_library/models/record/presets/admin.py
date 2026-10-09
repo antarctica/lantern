@@ -11,3 +11,9 @@ BAS_STAFF = Permission(
     group="~bas-staff",
     comment="Restricted to staff employed at the British Antarctic Survey.",
 )
+
+MAGIC_TEAM = Permission(
+    directory="~nerc",
+    group="~magic-team",
+    comment="Restricted to British Antarctic Survey (BAS), Mapping and Geographic Information Centre (MAGIC) team members.",
+)

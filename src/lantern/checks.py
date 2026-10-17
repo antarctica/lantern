@@ -172,11 +172,12 @@ class CheckRunner:
             return
 
         start = time.monotonic()
-        if self._check.type in (
+        if self._check.type in [
             CheckType.INFO_ARCGIS_LAYER,
-            CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.INFO_ARCGIS_WEB_SCENE,
+            CheckType.INFO_ARCGIS_WEB_MAP,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
-        ):
+        ]:
             self._check_arcgis_api()
         else:
             self._check_url()
@@ -239,7 +240,11 @@ class Checker:
                 # Add presigned access URL to access restricted content
                 artefact = magic_resource_client.lookup_artefact(check.url)
                 check.access_url = artefact.presigned_url
-            if check.type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
+            if check.type in [
+                CheckType.INFO_ARCGIS_LAYER,
+                CheckType.INFO_ARCGIS_WEB_SCENE,
+                CheckType.INFO_ARCGIS_WEB_MAP,
+            ]:
                 # Check item page via ArcGIS sharing API
                 self._logger.info("[%s] Processing check for ArcGIS item page: %s", check.file_identifier, check.url)
                 item_id = check.url.split("id=")[-1]

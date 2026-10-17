@@ -61,15 +61,15 @@ record.distribution.append(
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format=DistributionType.ARCGIS_WEBMAP.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+            format=DistributionType.ARCGIS_WEB_MAP.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
         ),
         transfer_option=TransferOption(
             online_resource=OnlineResource(
                 href="wm",
                 function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
-                description="Access information as an ArcGIS scene service.",
+                description="Access information as an ArcGIS web map.",
             )
         ),
     )

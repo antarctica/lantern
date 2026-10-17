@@ -26,7 +26,7 @@ Item to test distribution related CheckType enum members:
 - open/regular files
 - ArcGIS Layers
 - ArcGIS Services
-- ArcGIS Web Maps
+- ArcGIS Web Scenes and Maps
 - NORA file
 - SharePoint file
 - BAS published maps purchasing
@@ -78,7 +78,6 @@ arc_layer_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
-    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
 ]
 arc_layer_url = "https://example.com/x"
 arc_layer_distributions = [
@@ -105,7 +104,6 @@ arc_service_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
-    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
 ]
 arc_service_url = "https://example.com/x"
 arc_service_distributions = [
@@ -127,11 +125,27 @@ arc_service_distributions = [
     for arc_service in arc_service_formats
 ]
 
-arcgis_webmap = Distribution(
+arcgis_web_scene = Distribution(
     distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     format=Format(
         format="-",
-        href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+        href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene",
+    ),
+    transfer_option=TransferOption(
+        online_resource=OnlineResource(
+            href="x",
+            function=OnlineResourceFunctionCode.INFORMATION,
+            title="-",
+            description="Verify distribution as an ArcGIS web scene item.",
+        )
+    ),
+)
+
+arcgis_web_map = Distribution(
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+    format=Format(
+        format="-",
+        href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
     ),
     transfer_option=TransferOption(
         online_resource=OnlineResource(
@@ -231,7 +245,8 @@ record.distribution = Distributions(
         *file_distributions,
         *arc_layer_distributions,
         *arc_service_distributions,
-        arcgis_webmap,
+        arcgis_web_scene,
+        arcgis_web_map,
         nora_file,
         sharepoint_other_file,
         sharepoint_magic_resource_file,

@@ -258,13 +258,13 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
             format=DistributionType.ARCGIS_VECTOR_TILE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
         ),
-        ArcGisItemType.SCENE_SERVICE: Format(
-            format=DistributionType.ARCGIS_SCENE_LAYER.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
+        ArcGisItemType.WEB_SCENE: Format(
+            format=DistributionType.ARCGIS_WEB_SCENE.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene",
         ),
         ArcGisItemType.WEB_MAP: Format(
-            format=DistributionType.ARCGIS_WEBMAP.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+            format=DistributionType.ARCGIS_WEB_MAP.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
         ),
     }
     item_description = {
@@ -272,7 +272,7 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
         ArcGisItemType.OGCFEATURESERVER: "Access information as an ArcGIS OGC feature layer.",
         ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile layer.",
         ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile layer.",
-        ArcGisItemType.SCENE_SERVICE: "Access information as an ArcGIS 3D scene layer.",
+        ArcGisItemType.WEB_SCENE: "Access information as an ArcGIS web scene.",
         ArcGisItemType.WEB_MAP: "Access information as an ArcGIS web map",
     }
 
@@ -299,7 +299,6 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
         ArcGisItemType.OGCFEATURESERVER: "Access information as an OGC API feature service.",
         ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile service.",
         ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile service.",
-        ArcGisItemType.SCENE_SERVICE: "Access information as an ArcGIS 3D scene service.",
     }
 
     item_type = arcgis_item.properties.item_type
@@ -319,7 +318,7 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
             ),
         )
     ]
-    if item_type != item_type.WEB_MAP:
+    if item_type not in [item_type.WEB_SCENE, item_type.WEB_MAP]:
         distributions.append(
             Distribution(
                 distributor=ESRI_DISTRIBUTOR,

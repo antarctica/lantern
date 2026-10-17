@@ -356,7 +356,7 @@ distributions = {
             )
         ),
     ),
-    "ArcGIS Scene Layer": Distribution(
+    "ArcGIS Web Scene": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -377,48 +377,15 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format=DistributionType.ARCGIS_SCENE_LAYER.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
+            format=DistributionType.ARCGIS_WEB_SCENE.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene",
         ),
         transfer_option=TransferOption(
             online_resource=OnlineResource(
-                href="s",
+                href="ws",
                 function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
-                description="Access information as an ArcGIS 3D scene layer.",
-            )
-        ),
-    ),
-    "ArcGIS Scene Service": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="ArcGIS 3D Scene Service",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="s",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an ArcGIS 3D scene service.",
+                description="Access information as an ArcGIS web scene.",
             )
         ),
     ),
@@ -443,8 +410,8 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format=DistributionType.ARCGIS_WEBMAP.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+            format=DistributionType.ARCGIS_WEB_MAP.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
         ),
         transfer_option=TransferOption(
             online_resource=OnlineResource(

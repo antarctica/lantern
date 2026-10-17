@@ -219,7 +219,8 @@ class TestRunCheck:
             CheckType.DOWNLOADS_OPEN,
             CheckType.INFO_ARCGIS_LAYER,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
-            CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.INFO_ARCGIS_WEB_SCENE,
+            CheckType.INFO_ARCGIS_WEB_MAP,
         ],
     )
     def test_run(
@@ -228,11 +229,12 @@ class TestRunCheck:
         """Can run a CheckRunner with the correct check method."""
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
         mocker.patch.object(CheckRunner, "_check_arcgis_api", side_effect=RuntimeError)
-        if check_type in (
+        if check_type in [
             CheckType.INFO_ARCGIS_LAYER,
-            CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.INFO_ARCGIS_WEB_SCENE,
+            CheckType.INFO_ARCGIS_WEB_MAP,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
-        ):
+        ]:
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_api", return_value=None)
 

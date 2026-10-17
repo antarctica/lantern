@@ -261,14 +261,13 @@ class TestDataTab:
             ),
             (
                 [
-                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
-                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
+                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene",
                 ],
-                "ArcGIS 3D Scenes",
+                "ArcGIS Web Scenes",
             ),
             (
                 [
-                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
                 ],
                 "ArcGIS Web Maps",
             ),

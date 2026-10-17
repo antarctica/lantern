@@ -184,10 +184,10 @@ class BoundingBox:
     [2] https://www.datypic.com/sc/niem21/e-gmd_EX_GeographicBoundingBox.html
     """
 
-    west_longitude: float
-    east_longitude: float
-    south_latitude: float
-    north_latitude: float
+    west_longitude: float  # X min
+    east_longitude: float  # X max
+    south_latitude: float  # Y min
+    north_latitude: float  # Y max
 
 
 @dataclass(kw_only=True)

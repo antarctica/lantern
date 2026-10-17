@@ -371,7 +371,7 @@ def main() -> None:
     record.validate()
     dump_records(logger=logger, records=[record], output_path=import_path)
 
-    logger.info("Re-run as: %s", params)
+    logger.info('Re-run as: "%s"', params)
 
 
 if __name__ == "__main__":

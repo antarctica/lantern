@@ -254,13 +254,16 @@ Manually:
 
 ### Power Automate item enquires
 
-Manually:
-
-- import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
-- set the 'secret' property value in the body of the 'turnstile-verify' action to the
-   [Cloudflare Turnstile](#cloudflare-turnstile) secret key from 1Password
-- for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
-   authentication header in the 'create-issue' action
+- from Power Automate -> *My Flows* -> *Import* -> *Import Package (legacy)*:
+  - select the `resources/flows/lantern-item-enquires.zip` package
+- from *My Flows* -> (imported flow) -> *Edit*
+  - set the 'secret' property value in the body of the 'turnstile-verify' action to the
+    [Cloudflare Turnstile](#cloudflare-turnstile) secret key from 1Password
+  - for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
+     authentication header in the 'create-issue' action
+- from *My Flows* -> (imported flow) -> *Turn On*
+- from *My Flows* -> (imported flow) -> *Share*:
+  - co-owners: 'magicdev@bas.ac.uk'
 - set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
 
@@ -302,13 +305,13 @@ Manually:
 
 ## Microsoft Entra
 
-The Microsoft Entra ID (previously Azure Active Directory) app registration used for
+The Microsoft Entra (previously Azure Active Directory) app registration used for
 [Monitoring Checks](/docs/monitoring.md#magic-resource-distribution-service-checks) is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 IaC will:
 
-- register an Entra app registration project
+- register an Entra app registration
 - generate an application password as a client secret
 - store details about the app registration and client secret in 1Password
 

@@ -70,6 +70,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Wrong logger used in some dev tasks
 * Ensuring record changes from `zap-records` development tasks validate
 * Styling to ensure visual separation between consecutive admonition elements
+* Refactored ArcGIS web map and web scene distribution options
 
 ### Changed
 

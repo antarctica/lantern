@@ -12,10 +12,10 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
-    ArcGisSceneLayer,
     ArcGisServiceLayerDistribution,
     ArcGisVectorTileLayer,
     ArcGisWebMap,
+    ArcGisWebScene,
     BasPublishedMap,
     BasSan,
     Csv,
@@ -98,7 +98,7 @@ class FakeArcGisDistributionType(ArcGisDistribution):
     @property
     def format_type(self) -> DistributionType:
         """Format."""
-        return DistributionType.ARCGIS_WEBMAP
+        return DistributionType.ARCGIS_WEB_MAP
 
 
 class FakeArcGISLayerServiceDistributionType(ArcGisServiceLayerDistribution):
@@ -166,10 +166,12 @@ class TestDistribution:
 class TestArcGISDistribution:
     """Test base ArcGIS based Catalogue distribution."""
 
+    format_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map"
+
     def test_label(self):
         """Can get generic label based on format."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.label == dist.format_type.value
@@ -177,7 +179,7 @@ class TestArcGISDistribution:
     def test_description(self):
         """Cannot get non-applicable optional description."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.description is None
@@ -185,7 +187,7 @@ class TestArcGISDistribution:
     def test_size(self):
         """Cannot get non-applicable optional size."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.size == ""
@@ -193,7 +195,7 @@ class TestArcGISDistribution:
     def test_item_link(self):
         """Can get link to ArcGIS layer."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.item_link == Link(value="x", href="x", external=True)
@@ -201,7 +203,7 @@ class TestArcGISDistribution:
     def test_action(self):
         """Can get action link."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.action == Link(value="Add to GIS", href=None)
@@ -210,7 +212,7 @@ class TestArcGISDistribution:
     def test_action_variant(self, restricted: bool, expected: str):
         """Can get action variant."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
             restricted=restricted,
         )
@@ -223,7 +225,7 @@ class TestArcGISDistribution:
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
             restricted=restricted,
         )
@@ -232,7 +234,7 @@ class TestArcGISDistribution:
     def test_access_target(self):
         """Can get action target."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         assert dist.access_target == "#item-data-info-eA"
@@ -241,7 +243,7 @@ class TestArcGISDistribution:
     def test_access_target_no_item_link(self):
         """Cannot get access target if item link it contains is not defined."""
         dist = FakeArcGisDistributionType(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"),
+            option=_make_dist(self.format_href),
             other_options=[],
         )
         dist._layer.transfer_option.online_resource.href = None
@@ -604,54 +606,28 @@ class TestDistributionArcGisVectorTileLayer:
         assert result == expected
 
 
-class TestDistributionArcGisSceneLayer:
-    """Test ArcGIS Scene Layer catalogue distribution."""
+class TestDistributionArcGisWebScene:
+    """Test ArcGIS Web Scene catalogue distribution."""
 
     def test_init(self):
         """Can create a distribution."""
-        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene")
-        others = [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")]
+        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene")
+        others = []
 
-        dist = ArcGisSceneLayer(main, others)
-        assert dist.format_type == DistributionType.ARCGIS_SCENE_LAYER
-
-    @pytest.mark.parametrize(
-        ("main", "others", "expected"),
-        [
-            (
-                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene"),
-                [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")],
-                True,
-            ),
-            (
-                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene"),
-                [_make_dist("x")],
-                False,
-            ),
-            (
-                _make_dist("x"),
-                [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")],
-                False,
-            ),
-            (_make_dist("x"), [_make_dist("y")], False),
-        ],
-    )
-    def test_matches(self, main: RecordDistribution, others: list[Distribution], expected: bool):
-        """Can determine if a record distribution matches this catalogue distribution."""
-        result = ArcGisSceneLayer.matches(main, others)
-        assert result == expected
+        dist = ArcGisWebScene(main, others)
+        assert dist.format_type == DistributionType.ARCGIS_WEB_SCENE
 
 
-class TestDistributionArcGisWebmap:
+class TestDistributionArcGisWebMap:
     """Test ArcGIS Web Map catalogue distribution."""
 
     def test_init(self):
         """Can create a distribution."""
-        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap")
+        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map")
         others = []
 
         dist = ArcGisWebMap(main, others)
-        assert dist.format_type == DistributionType.ARCGIS_WEBMAP
+        assert dist.format_type == DistributionType.ARCGIS_WEB_MAP
 
 
 class TestDistributionCsv:

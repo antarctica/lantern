@@ -370,30 +370,35 @@ class ArcGisRasterTileLayer(ArcGisServiceLayerDistribution):
         return DistributionType.ARCGIS_RASTER_TILE_LAYER
 
 
-class ArcGisSceneLayer(ArcGisServiceLayerDistribution):
+class ArcGisWebScene(ArcGisDistribution):
     """
-    ArcGIS Scene Layer distribution option.
+    ArcGIS Web Scene distribution option.
 
-    Consisting of a 3D scene service and layer option.
+    Does not include a service so cannot use ArcGIS base class.
     """
 
-    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene"
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_variant = "primary"
+        self._unrestricted_btn_icon = "fa-regular fa-mountains"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
         """Whether this class matches the distribution option."""
-        target_hrefs = [
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
-            cls.service_media_href,
-        ]
-        return ArcGisServiceLayerDistribution._matches(
-            target_hrefs=target_hrefs, option=option, other_options=other_options
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene"
         )
 
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.ARCGIS_SCENE_LAYER
+        return DistributionType.ARCGIS_WEB_SCENE
+
+    @property
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Open in GIS", href=None)
 
 
 class ArcGisWebMap(ArcGisDistribution):
@@ -413,13 +418,13 @@ class ArcGisWebMap(ArcGisDistribution):
         """Whether this class matches the distribution option."""
         return (
             option.format is not None
-            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map"
         )
 
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.ARCGIS_WEBMAP
+        return DistributionType.ARCGIS_WEB_MAP
 
     @property
     def action(self) -> Link:

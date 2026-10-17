@@ -48,7 +48,8 @@ class CheckType(Enum):
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
     INFO_ARCGIS_LAYER = "ArcGIS Layer"
-    INFO_ARCGIS_WEBMAP = "ArcGIS Web Map"
+    INFO_ARCGIS_WEB_SCENE = "ArcGIS Web Scene"
+    INFO_ARCGIS_WEB_MAP = "ArcGIS Web Map"
 
 
 class CheckState(Enum):
@@ -157,7 +158,10 @@ class DistributionChecks:
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
     ]
-    _arcgis_webmap_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
+    _arcgis_web_map_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map"
+    _arcgis_web_scene_sigil: Final[str] = (
+        "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene"
+    )
     _bas_published_maps_sigil: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"
     _nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
     _magic_resource_sigal: Final[str] = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/"
@@ -196,8 +200,10 @@ class DistributionChecks:
             # From most to least specific
             if transfer_href == self._bas_published_maps_sigil:
                 type_ = CheckType.BAS_PUBLISHED_MAP
-            elif format_href == self._arcgis_webmap_sigil:
-                type_ = CheckType.INFO_ARCGIS_WEBMAP
+            elif format_href == self._arcgis_web_scene_sigil:
+                type_ = CheckType.INFO_ARCGIS_WEB_SCENE
+            elif format_href == self._arcgis_web_map_sigil:
+                type_ = CheckType.INFO_ARCGIS_WEB_MAP
             elif format_href in self._arcgis_layer_sigils:
                 type_ = CheckType.INFO_ARCGIS_LAYER
             elif format_href in self._arcgis_service_sigils:

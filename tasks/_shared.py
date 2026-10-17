@@ -149,6 +149,7 @@ def parse_records(
     records: list[tuple[ParseRecordType, Path]] = []
 
     for config_path in _parse_configs(search_path, glob_pattern=glob_pattern):
+        logger.debug("Evaluating record config: '%s'", config_path[1].resolve())
         config, path = config_path
         try:
             record = RecordClass.loads(config)

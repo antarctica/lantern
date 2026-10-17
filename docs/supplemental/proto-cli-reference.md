@@ -303,6 +303,7 @@ Examples:
 ```shell
 # set source record config and target item, without interaction
 % task esri-record --force --record ./import/af4acf4d-af76-46f8-bc6a-928cf72fa9ae.json --target 27a7eda22cf249748502ddfc3d31d6bf
+% task esri-record --force --record ./import/07a2f1fc-d2a1-4397-96d4-6d0792467ca7.json --target https://maps.arcgis.com/home/item.html?id=4aad456e13d24c27a11fb05426332823#overview'
 ```
 
 ## Multiple records commands

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -70,6 +71,9 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) 
     import_path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path))
     logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
+    if not _record_paths:
+        logger.error("No valid records available, aborting.")
+        sys.exit(0)
     record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
     for rp in _record_paths:

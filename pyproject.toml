@@ -330,6 +330,7 @@ exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
     "@abstractmethod",
+    '^[ \t]*@(?:[\w]+\.)*overload\b',  # matches typing.overload() stubs
     '^[ \t]*\.\.\.[ \t]*$',  # matches '...' used in Protocol method stubs, which have no runtime behaviour to test
 ]
 

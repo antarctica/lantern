@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://x.arcgis.com/x/arcgis/rest/services/ogc_features_closed/OGCFeatureServer?f=json&token=x
+  response:
+    body:
+      string: '{}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - Content-Type, Authorization, X-Esri-Authorization
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Request-Context
+      Cache-Control:
+      - private, max-age=30, s-maxage=30
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '462'
+      Content-Type:
+      - application/json; charset=utf-8
+      Last-Modified:
+      - Fri, 17 May 2024 17:05:36 GMT
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - X-Esri-Authorization
+      X-Cache:
+      - PRIVATE_NOSTORE
+      x-fd-int-roxy-purgeid:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

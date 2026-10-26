@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://tiles.arcgis.com/tiles/x/arcgis/rest/services/raster_tiles_closed/MapServer?f=json&token=x
+  response:
+    body:
+      string: '{"capabilities":"Map,TilesOnly,Tilemap"}'
+    headers:
+      Cache-Control:
+      - private, no-transform, max-age=0, s-maxage=0
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '1702'
+      Content-Type:
+      - application/json;charset=utf-8
+      Last-Modified:
+      - Sat, 17 Oct 2026 17:18:41 GMT
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin,Accept-Encoding,Authorization,X-Esri-Authorization
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR95-P1
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Powered-By:
+      - ArcGIS-Online-Hosted-Services
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

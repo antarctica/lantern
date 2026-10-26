@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://x.arcgis.com/x/arcgis/rest/services/feature_service_open/FeatureServer?f=json
+  response:
+    body:
+      string: '{}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - Content-Type, Authorization, X-Esri-Authorization
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Request-Context
+      Cache-Control:
+      - public, max-age=30, s-maxage=30
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '1338'
+      Content-Type:
+      - application/json; charset=utf-8
+      Last-Modified:
+      - Sat, 17 Oct 2026 18:40:56 GMT
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - X-Esri-Authorization
+      X-Cache:
+      - TCP_MISS
+      x-fd-int-roxy-purgeid:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -55,6 +55,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Dedicated search test suite to consistently check expected functionality and index settings
 * MAGIC Team well known access permissions preset
 * `ensure()` and `without()` utility methods for resource and metadata constraints
+* Initial support for ArcGIS service as artefacts
 
 ### Fixed
 

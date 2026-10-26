@@ -106,7 +106,7 @@ interactions:
     status:
       code: 200
       message: OK
-  # creating artefact
+  # creating artefact to check
 - request:
     body: null
     headers:

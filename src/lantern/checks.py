@@ -218,6 +218,7 @@ class Checker:
         E.g. To include authentication or construct an alternative access URL.
         """
         magic_resource_client = MagicResourceDistributionClient(
+            logger=self._logger,
             tenant_id=self._config.CHECKS_MAGIC_RESOURCES_TENANT_ID,
             app_client_id=self._config.CHECKS_MAGIC_RESOURCES_CLIENT_ID,
             app_client_secret=self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET,

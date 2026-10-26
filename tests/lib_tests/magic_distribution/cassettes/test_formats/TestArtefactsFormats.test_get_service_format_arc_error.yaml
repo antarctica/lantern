@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://example.com/?f=json
+  response:
+    body:
+      string: '{"error":{"code":0}}'
+    headers:
+      Cache-Control:
+      - must-revalidate,max-age=0,public
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '974'
+      Content-Type:
+      - application/json;charset=utf-8
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR82-P3
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

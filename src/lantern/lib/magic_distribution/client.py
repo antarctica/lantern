@@ -4,21 +4,22 @@ import contextlib
 from base64 import urlsafe_b64encode
 from functools import cached_property
 from http import HTTPMethod, HTTPStatus
-from typing import TYPE_CHECKING, Any, cast
+from json import JSONDecodeError
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import requests
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
+from requests.exceptions import HTTPError
 
 from lantern.lib.magic_distribution.models.artefact import (
     ArtefactFile,
     ArtefactLocalFile,
     ArtefactSharePointFile,
 )
-from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata, ResourceMetadata
+from lantern.lib.magic_distribution.types import ArtefactMetadata, ResourceMetadata
+from lantern.lib.magic_distribution.utils import HTTPBearerTokenAuth
 
 if TYPE_CHECKING:
+    import logging
     from pathlib import Path
 
 
@@ -55,12 +56,31 @@ class ArtefactPermissionsNotSupportedError(Exception):
     """Raised when trying to deposit an artefact with unsupported permissions."""
 
 
+class DuplicateArtefactError(Exception):
+    """
+    Raised when an artefact ID is already in use.
+
+    Based on artefact ID violating unique metadata constraint.
+    """
+
+    def __init__(self, artefact_id: str) -> None:
+        self.artefact_id = artefact_id
+        super().__init__(f"Artefact with {artefact_id!r} already exists.")
+
+
 class MagicResourceDistributionClient:
     """
-    Client to deposit resource distribution artefacts in the MAGIC Resource Distribution SharePoint Online site.
+    Lightweight client to deposit and manage artefacts in the MAGIC Resource Distribution SharePoint Online site.
 
-    Supports creating directories, uploading files (via an upload session if needed) and setting required list metadata
-    using the Microsoft Graph API. Does not support updating or removing existing artefacts.
+    Supports:
+    - creating directories
+    - uploading files (via an upload session if needed)
+    - setting required list metadata and permissions
+    - fetching file information and contents
+
+    Does not support updating existing artefacts (see `docs/libraries.md` for other limitations).
+
+    Uses the MS Graph API directly to avoid the complexity and overhead of a full MS Graph SDK.
 
     List metadata is specific to MAGIC Resource Distribution libraries (as per the MagicDistributionMetadata typed dict).
 
@@ -69,6 +89,7 @@ class MagicResourceDistributionClient:
 
     def __init__(
         self,
+        logger: logging.Logger,
         tenant_id: str,
         app_client_id: str,
         app_client_secret: str,
@@ -82,6 +103,7 @@ class MagicResourceDistributionClient:
         self._max_simple_upload_size = 250 * 1024 * 1024  # 250MB max size for small uploads
         self._upload_chunk_size = 50 * 1024 * 1024  # 50MB per chunk for large uploads
 
+        self._logger = logger
         self._tenant_id = tenant_id
         self._client_id = app_client_id
         self._client_secret = app_client_secret
@@ -89,19 +111,15 @@ class MagicResourceDistributionClient:
         self._library_name = library_name
         self._proxy_base = proxy_url
 
-        self._session = Session()
-        retries = Retry(
-            total=0,
-            backoff_factor=0.2,
-            status_forcelist=[400],
-            allowed_methods={"POST", "PATCH", "PUT", "GET"},
-            raise_on_status=False,
-        )
-        self._session.mount(prefix=self._graph_base, adapter=HTTPAdapter(max_retries=retries))
-
     @cached_property
     def _graph_token(self) -> str:
-        """Get Microsoft Graph access token."""
+        """
+        Get Microsoft Graph access token.
+
+        Using OAuth client credentials flow via AuthLib. Access token is cached for the lifetime of the client.
+        """
+        self._logger.info("Acquiring token for Entra app registration %s", self._client_id)
+
         response = requests.post(
             f"https://login.microsoftonline.com/{self._tenant_id}/oauth2/v2.0/token",
             data={
@@ -113,23 +131,30 @@ class MagicResourceDistributionClient:
             timeout=10,
         )
         response.raise_for_status()
+        self._logger.info("Token acquired")
         return response.json()["access_token"]
 
     @cached_property
     def _drive_id(self) -> str:
         """Get Microsoft Graph Drive ID."""
-        return self._get_drive_id(site_id=self._site_id, library_name=self._library_name)
+        self._logger.info("Getting drive ID for library '%s' in site %s", self._library_name, self._site_id)
+        drive_id = self._get_drive_id(site_id=self._site_id, library_name=self._library_name)
+        self._logger.info("Drive ID: %s", drive_id)
+        return drive_id
 
-    def _request(
-        self,
-        method: HTTPMethod,
-        url: str,
-        **kwargs: Any,
-    ) -> requests.Response:
+    def _request(self, method: HTTPMethod, url: str, **kwargs: Any) -> requests.Response:
         """Make HTTP request with default timeout, header for bearer token and retry logic via session."""
         timeout = kwargs.pop("timeout", self._timeout)
-        headers = kwargs.pop("headers", {"Accept": "application/json", "Authorization": f"Bearer {self._graph_token}"})
-        return self._session.request(method.value, url, headers=headers, timeout=timeout, **kwargs)
+        headers = kwargs.pop("headers", {"Accept": "application/json"})
+        self._logger.debug("Calling [%s] %s", method.value, url)
+        return requests.request(
+            method.value,
+            url,
+            headers=headers,
+            timeout=timeout,
+            auth=HTTPBearerTokenAuth(token=self._graph_token),
+            **kwargs,
+        )
 
     def _get_drive_id(self, site_id: str, library_name: str) -> str:
         """
@@ -137,7 +162,7 @@ class MagicResourceDistributionClient:
 
         Returns an MS Graph `drive` [1].
 
-        [1] https://learn.microsoft.com/en-us/graph/api/resources/drive
+        [1] https://learn.microsoft.com/en-us/graph/api/resources/site#relationships
         """
         resp = self._request(HTTPMethod.GET, url=f"{self._graph_base}/sites/{site_id}/drives")
         if resp.status_code == HTTPStatus.FORBIDDEN:
@@ -152,13 +177,26 @@ class MagicResourceDistributionClient:
             raise DriveNotFoundError() from None
         return drive_id
 
-    def _get_drive_item(self, drive_path: str | None = None, drive_url: str | None = None) -> dict:
+    @overload
+    def _get_drive_item(self, *, item_id: str, item_path: None = None, item_url: None = None) -> dict: ...
+
+    @overload
+    def _get_drive_item(self, *, item_id: None = None, item_path: str, item_url: None = None) -> dict: ...
+
+    @overload
+    def _get_drive_item(self, *, item_id: None = None, item_path: None = None, item_url: str) -> dict: ...
+
+    def _get_drive_item(
+        self, *, item_id: str | None = None, item_path: str | None = None, item_url: str | None = None
+    ) -> dict:
         """
-        Get Drive Item for file path or access URL if it exists.
+        Get Drive Item by ID, file path or access URL if it exists.
+
+        E.g. for a known drive item, use `item_id='x'`
 
         E.g. for https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt, use either:
-        - `drive_path='folder/sub-folder/file.txt'`
-        - `drive_url='https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt'`
+        - `item_path='folder/sub-folder/file.txt'`
+        - `item_url='https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt'`
 
         The Graph `/shares` endpoint [2] is used where a `drive_url` is used. This supports both sharing
         ('https://x.sharepoint.com/:b:/r/sites/...') and direct ('https://x.sharepoint.com/sites/...') links.
@@ -170,23 +208,43 @@ class MagicResourceDistributionClient:
         [1] https://learn.microsoft.com/en-us/graph/api/resources/driveitem
         [2] https://learn.microsoft.com/en-us/graph/api/shares-get
         """
-        if drive_path and drive_url:
-            msg = "Drive path or URL required, both supplied."
+        if sum(value is not None for value in (item_id, item_path, item_url)) > 1:
+            msg = "Only one of Drive Item ID, path or URL allowed, multiple supplied."
             raise ValueError(msg) from None
 
-        if drive_path:
-            graph_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{drive_path}"
-        elif drive_url:
-            share_url = "u!" + urlsafe_b64encode(drive_url.encode("utf-8")).decode().rstrip("=")
+        if item_id:
+            graph_url = f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}"
+            self._logger.info("Fetching drive item info by ID %s", item_id)
+        elif item_path:
+            graph_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{item_path}"
+            self._logger.info("Fetching drive item info by path %s", item_path)
+        elif item_url:
+            share_url = "u!" + urlsafe_b64encode(item_url.encode("utf-8")).decode().rstrip("=")
             graph_url = f"{self._graph_base}/shares/{share_url}/driveItem"
+            self._logger.info("Fetching drive item info by URL %s", item_url)
+            self._logger.debug("Encoded sharing URL: %s", share_url)
         else:
-            msg = "Drive path or URL required, neither supplied."
+            msg = "Drive Item ID, path or URL required, none supplied."
             raise ValueError(msg) from None
 
         resp = self._request(HTTPMethod.GET, url=graph_url)
-        if resp.status_code == HTTPStatus.NOT_FOUND or (drive_url and resp.status_code == HTTPStatus.FORBIDDEN):
+        if resp.status_code == HTTPStatus.NOT_FOUND or (item_url and resp.status_code == HTTPStatus.FORBIDDEN):
             raise DriveItemNotFoundError() from None
         return resp.json()
+
+    def _delete_drive_item(self, item_id: str) -> None:
+        """
+        Delete Microsoft Graph Drive Item by ID.
+
+        Skips recycling bin soft delete.
+
+        [1] https://learn.microsoft.com/en-us/graph/api/driveitem-permanentdelete
+        """
+        self._logger.info("Permanently deleting drive item: %s", item_id)
+        resp = self._request(
+            HTTPMethod.POST, url=f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}/permanentDelete"
+        )
+        resp.raise_for_status()
 
     def _get_metadata(self, item_id: str) -> ResourceMetadata | ArtefactMetadata:
         """
@@ -200,6 +258,7 @@ class MagicResourceDistributionClient:
 
         [1] https://learn.microsoft.com/en-us/graph/api/resources/fieldvalueset
         """
+        self._logger.info("Fetching metadata for drive item: %s", item_id)
         resp = self._request(
             HTTPMethod.GET, url=f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}/listItem/fields"
         )
@@ -211,20 +270,38 @@ class MagicResourceDistributionClient:
 
     def _set_metadata(self, item_id: str, metadata: ResourceMetadata | ArtefactMetadata) -> None:
         """
-        Set required list fields on a Drive item.
+        Set required list fields on a Drive Item.
 
-        Expected to be specific to the MAGIC Resource Distribution service SharePoint libraries as per the
-        `lantern.lib.magic_distribution.models.metadata.ResourceMetadata` or `ArtefactMetadata` typed dicts.
+        Values are expected to be specific to the MAGIC Resource Distribution service SharePoint libraries, as per the
+        `lantern.lib.magic_distribution.types.ResourceMetadata` or `ArtefactMetadata` typed dicts.
+
+        Raises a `DuplicateArtefactError` where the `artefact_id` field value is already in use.
         """
-        self._request(
-            HTTPMethod.PATCH,
-            url=f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}/listItem/fields",
-            json=metadata,
-        ).raise_for_status()
+        self._logger.info("Setting metadata for drive item: %s", item_id)
+        self._logger.debug(metadata)
+        try:
+            self._request(
+                HTTPMethod.PATCH,
+                url=f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}/listItem/fields",
+                json=metadata,
+            ).raise_for_status()
+        except HTTPError as e:
+            try:
+                body = e.response.json() if e.response is not None else {}
+            except JSONDecodeError as e2:
+                raise e2 from e
+
+            error = body.get("error") if isinstance(body, dict) else None
+            message = error.get("message") if isinstance(error, dict) else None
+            if message == "One or more fields with unique constraints already has the provided value.":
+                # Artefact ID is the only unique constraint, so metadata is assumed to be ArtefactMetadata.
+                self._logger.warning("Duplicate artefact ID: %s", metadata.get("artefact_id"))
+                raise DuplicateArtefactError(artefact_id=metadata["artefact_id"]) from e  # ty: ignore[invalid-key]
+            raise
 
     def _get_permissions(self, item_id: str) -> list:
         """
-        Get current permission applied to a Drive item.
+        Get permissions currently applied to a Drive Item.
 
         This includes permissions set by default, including the SharePoint site owners/members/visitors groups and
         site collection admins.
@@ -239,6 +316,7 @@ class MagicResourceDistributionClient:
         [2] https://learn.microsoft.com/en-us/graph/api/resources/identity
         [3] https://learn.microsoft.com/en-us/graph/api/resources/sharepointidentityset
         """
+        self._logger.info("Getting permissions for drive item: %s", item_id)
         resp = self._request(
             HTTPMethod.GET, url=f"{self._graph_base}/drives/{self._drive_id}/items/{item_id}/permissions"
         )
@@ -247,16 +325,19 @@ class MagicResourceDistributionClient:
 
     def _set_permissions(self, item_id: str, groups: set[str]) -> None:
         """
-        Grant selected groups read access to a Drive item.
+        Grant selected groups read access to a Drive Item.
 
-        Checks existing_groups permissions first. Where the item is a folder, access applies to its contents by default.
+        Checks existing group permissions first. Where the item is a folder, access applies to its contents by default.
 
         Requires a list of group IDs as identifiers [1].
 
         [1] https://learn.microsoft.com/en-us/graph/api/resources/identity
         """
+        self._logger.info("Setting group permissions for drive item: %s", item_id)
+        self._logger.debug(groups)
         if not groups:
-            # Catch when no permissions to assign (SharePoint returns an error if no recipients are provided)
+            # catch when no permissions to assign (SharePoint returns an error if no recipients are provided)
+            self._logger.error("Empty groups set provided which would trigger a SharePoint error.")
             return
 
         existing_permissions = self._get_permissions(item_id)
@@ -264,7 +345,8 @@ class MagicResourceDistributionClient:
             p["grantedToV2"]["group"]["id"] for p in existing_permissions if "group" in p.get("grantedToV2", {})
         }
         if groups.issubset(existing_groups):
-            # All requested groups already have permissions, skip
+            # all requested groups already have permission, skip
+            self._logger.info("Existing permissions include target groups, no changes needed.")
             return
 
         self._request(
@@ -284,13 +366,16 @@ class MagicResourceDistributionClient:
 
         Where the folder already exists, permissions and metadata are NOT updated (the folder will need recreating).
         """
+        self._logger.info("Ensuring a folder exists for resource ID: %s", resource_id)
         check_resp = self._request(
             HTTPMethod.GET, url=f"{self._graph_base}/drives/{self._drive_id}/root:/{resource_id}"
         )
         if check_resp.status_code == HTTPStatus.OK:
             # Already exists
+            self._logger.info("Folder exists for resource ID: %s", resource_id)
             return
 
+        self._logger.info("Creating folder for resource ID: %s", resource_id)
         create_resp = self._request(
             HTTPMethod.POST,
             url=f"{self._graph_base}/drives/{self._drive_id}/root/children",
@@ -308,7 +393,8 @@ class MagicResourceDistributionClient:
         self._set_permissions(item_id=item_id, groups=access_groups)
 
     def _create_sharepoint_artefact(self, drive_item: dict) -> ArtefactSharePointFile:
-        """Create SharePoint Artefact from a Drive item and associated list metadata."""
+        """Create SharePoint Artefact from a Drive Item and associated List Fields."""
+        self._logger.info("Constructing artefact for Drive Item: %s", drive_item)
         metadata = cast("ArtefactMetadata", self._get_metadata(drive_item["id"]))
         return ArtefactSharePointFile(drive_item=drive_item, list_metadata=metadata, proxy_base=self._proxy_base)
 
@@ -318,6 +404,7 @@ class MagicResourceDistributionClient:
 
         Returns the uploaded drive item.
         """
+        self._logger.info("Uploading artefact file '%s' directly", artefact.name)
         file_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{drive_path}"
         upload_resp = self._request(HTTPMethod.PUT, url=f"{file_url}:/content", timeout=300, data=artefact.data)
         upload_resp.raise_for_status()
@@ -329,6 +416,7 @@ class MagicResourceDistributionClient:
 
         Returns the uploaded drive item.
         """
+        self._logger.info("Uploading artefact file '%s' via chunked session", artefact.name)
         file_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{drive_path}"
 
         # Create upload session
@@ -348,6 +436,7 @@ class MagicResourceDistributionClient:
         while bytes_uploaded < file_size:
             chunk_end = min(bytes_uploaded + chunk_size, file_size)
             chunk_data = artefact.data[bytes_uploaded:chunk_end]
+            self._logger.debug("Uploading chunk %s/%s", bytes_uploaded, file_size)
 
             headers = {
                 "Content-Length": str(len(chunk_data)),
@@ -375,13 +464,14 @@ class MagicResourceDistributionClient:
         Will crash where the resource directory does not exist. Call `_create_resource_folder()` first or ideally
         `deosit_artefact()` for an e2e upload.
         """
+        self._logger.info("Ensuring artefact file '%s' is uploaded", artefact.name)
         drive_path = f"{artefact.resource_id}/{artefact.name}"
 
-        # Check if file already exists with matching hash
+        # Check if file already exists with matching name and hash
         with contextlib.suppress(DriveItemNotFoundError):
-            existing_item = self._get_drive_item(drive_path)
+            existing_item = self._get_drive_item(item_path=drive_path)
             if existing_item and existing_item["file"]["hashes"]["quickXorHash"] == artefact.quickxor:
-                # File already exists with matching hash, skip upload
+                self._logger.info("Artefact with matching hash already exists, skipping")
                 return self._create_sharepoint_artefact(drive_item=existing_item)
 
         # Choose upload method based on file size
@@ -396,10 +486,17 @@ class MagicResourceDistributionClient:
 
         # Set metadata
         item_id = drive_item["id"]
-        self._set_metadata(
-            item_id=item_id,
-            metadata={**artefact.deposit_metadata, "unrestricted": unrestricted},
-        )
+        try:
+            self._set_metadata(
+                item_id=item_id,
+                metadata={**artefact.deposit_metadata, "unrestricted": unrestricted},
+            )
+        except DuplicateArtefactError as e:
+            # Rollback upload for a file with the same content (and therefore hash and therefore artefact ID) as an
+            # existing file (i.e. same content different names), as this will fail the unique artefact ID constraint.
+            self._logger.exception("Cannot set duplicate artefact ID metadata, rolling back upload", exc_info=e)
+            self._delete_drive_item(item_id)
+            raise
 
         return self._create_sharepoint_artefact(drive_item=drive_item)
 
@@ -407,6 +504,7 @@ class MagicResourceDistributionClient:
         self, artefact: ArtefactFile, access_groups: set[str], unrestricted: bool
     ) -> ArtefactSharePointFile:
         """Upload a file artefact within a resource folder."""
+        self._logger.info("Depositing artefact '%s'", artefact.artefact_id)
         if not unrestricted and not access_groups:
             msg = "Access groups may not be empty unless unrestricted (to avoid artefacts with no permissions)."
             raise ArtefactPermissionsNotSupportedError(msg) from None
@@ -418,10 +516,24 @@ class MagicResourceDistributionClient:
 
     def lookup_artefact(self, url: str) -> ArtefactSharePointFile:
         """Get an artefact based on a direct (non-proxied) URL."""
-        return self._create_sharepoint_artefact(drive_item=self._get_drive_item(drive_url=url))
+        self._logger.info("Finding artefact available at URL '%s'", url)
+        return self._create_sharepoint_artefact(drive_item=self._get_drive_item(item_url=url))
+
+    def get_resource_artefacts(self, resource_id: str) -> list[ArtefactSharePointFile]:
+        """Get all artefacts for a resource."""
+        self._logger.info("Fetching any artefacts for resource ID '%s'", resource_id)
+        resp = self._request(
+            HTTPMethod.GET,
+            url=f"{self._graph_base}/drives/{self._drive_id}/root:/{resource_id}:/children",
+        )
+        resp.raise_for_status()
+        return [
+            self._create_sharepoint_artefact(drive_item=item) for item in resp.json().get("value", []) if "file" in item
+        ]
 
     def download_artefact(self, artefact: ArtefactSharePointFile, path: Path) -> ArtefactLocalFile:
         """Download an artefact to a local path."""
+        self._logger.info("Downloading contents of artefact '%s' to '%s'", artefact.artefact_id, path.resolve())
         with self._request(HTTPMethod.GET, url=artefact.presigned_url, stream=True) as resp:
             resp.raise_for_status()
             with path.open("wb") as f:

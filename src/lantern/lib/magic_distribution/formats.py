@@ -6,15 +6,21 @@ from functools import cached_property
 from json import JSONDecodeError
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Final, NamedTuple, cast
+from urllib.parse import parse_qs, urlsplit
 from zipfile import ZipFile
 
 import geojson
+import requests
 from PIL import Image, UnidentifiedImageError
+from requests import Response
+
+from lantern.lib.arcgis.utils import ArcGISAuthError, ArcGISRequestError, check_arcgis_error, ensure_query_param
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from PIL.TiffImagePlugin import TiffImageFile
+    from requests.auth import AuthBase
 
 Image.MAX_IMAGE_PIXELS = None  # We routinely need to handle large rasters
 
@@ -25,6 +31,14 @@ class ArtefactFormatUnknownError(Exception):
 
 class ArtefactFormatNotSupportedError(Exception):
     """Raised when a requested ArtefactFormat is known but unsupported."""
+
+
+class ArtefactInaccessibleError(Exception):
+    """
+    Raised when a requested artefact cannot be accessed and its format cannot be checked.
+
+    E.g. a file or service that requires authentication to access.
+    """
 
 
 class ArtefactFormatLabel(Enum):
@@ -53,8 +67,7 @@ class ArtefactFormatLabel(Enum):
     ARCGIS_RASTER_TILE_LAYER = "arcgis_raster_tile_layer"
     ARCGIS_VECTOR_TILE_SERVICE = "arcgis_vector_tile_service"
     ARCGIS_VECTOR_TILE_LAYER = "arcgis_vector_tile_layer"
-    ARCGIS_SCENE_SERVICE = "arcgis_scene_service"
-    ARCGIS_SCENE_LAYER = "arcgis_scene_layer"
+    ARCGIS_WEB_SCENE = "arcgis_web_scene"
     ARCGIS_WEB_MAP = "arcgis_web_map"
 
 
@@ -230,15 +243,6 @@ class ArtefactFormats:
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ),
         ArtefactFormat(
-            ArtefactFormatLabel.ARCGIS_SCENE_SERVICE,
-            "ArcGIS 3D Scene Service",
-            None,
-            None,
-            [],
-            [],
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
-        ),
-        ArtefactFormat(
             ArtefactFormatLabel.ARCGIS_FEATURE_LAYER,
             "ArcGIS Feature Layer",
             None,
@@ -275,30 +279,42 @@ class ArtefactFormats:
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
         ),
         ArtefactFormat(
-            ArtefactFormatLabel.ARCGIS_SCENE_LAYER,
-            "ArcGIS 3D Scene Layer",
-            None,
-            None,
-            [],
-            [],
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
-        ),
-        ArtefactFormat(
             ArtefactFormatLabel.ARCGIS_WEB_MAP,
             "ArcGIS Web Map",
             None,
             None,
             [],
             [],
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+map",
+        ),
+        ArtefactFormat(
+            ArtefactFormatLabel.ARCGIS_WEB_SCENE,
+            "ArcGIS Web Scene",
+            None,
+            None,
+            [],
+            [],
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+web+scene",
         ),
     ]
 
     @classmethod
-    def get_label(cls, label: ArtefactFormatLabel) -> ArtefactFormat:
+    def get_by_label(cls, label: ArtefactFormatLabel) -> ArtefactFormat:
         """Get supported format by internal label."""
         for format_ in [*cls.file_formats, *cls.service_formats]:
             if format_.label == label:
+                return format_
+        raise ArtefactFormatUnknownError() from None
+
+    @classmethod
+    def get_by_registration(cls, registration_uri: str) -> ArtefactFormat:
+        """
+        Get supported format by registered media type URI.
+
+        E.g. from a distribution option format.
+        """
+        for format_ in [*cls.file_formats, *cls.service_formats]:
+            if format_.registration == registration_uri:
                 return format_
         raise ArtefactFormatUnknownError() from None
 
@@ -466,17 +482,19 @@ class ArtefactFormats:
         - ArtefactFormatNotSupportedError: where a file is a known format but not supported (e.g. non-georeferenced)
 
         Intended for parsing/validating file uploads or script arguments where only a binary pass/fail is needed.
+
+        This 'None or Raise' pattern is used for consistency with `Record.validate()`.
         """
-        geojson_exts = cls.get_label(ArtefactFormatLabel.GEOJSON).extensions
-        geotiff_exts = cls.get_label(ArtefactFormatLabel.GEOTIFF).extensions
-        gpkg_z_exts = cls.get_label(ArtefactFormatLabel.GEOPACKAGE_ZIP).extensions
-        shp_z_exts = cls.get_label(ArtefactFormatLabel.SHAPEFILE_ZIP).extensions
+        geojson_exts = cls.get_by_label(ArtefactFormatLabel.GEOJSON).extensions
+        geotiff_exts = cls.get_by_label(ArtefactFormatLabel.GEOTIFF).extensions
+        gpkg_z_exts = cls.get_by_label(ArtefactFormatLabel.GEOPACKAGE_ZIP).extensions
+        shp_z_exts = cls.get_by_label(ArtefactFormatLabel.SHAPEFILE_ZIP).extensions
 
         file_ext = cls._get_file_extension(file=file, name=name)
 
-        if file_ext not in [ext for format_ in cls.file_formats for ext in format_.extensions]:
+        if file_ext not in {ext for format_ in cls.file_formats for ext in format_.extensions}:
             raise ArtefactFormatUnknownError() from None
-        if file_ext not in [*geojson_exts, *geotiff_exts, *gpkg_z_exts, *shp_z_exts]:
+        if file_ext not in {*geojson_exts, *geotiff_exts, *gpkg_z_exts, *shp_z_exts}:
             return  # known, unambiguous, format
 
         with cls._open_binary(file) as f:
@@ -506,7 +524,7 @@ class ArtefactFormats:
 
         Intended for use in Artefact classes.
         """
-        geopdf_format = cls.get_label(ArtefactFormatLabel.GEOPDF)
+        geopdf_format = cls.get_by_label(ArtefactFormatLabel.GEOPDF)
         file_ext = cls._get_file_extension(file=file, name=name)
 
         cls.check_file_supported(file=file, name=name)  # may raise ArtefactFormatUnknown or NotSupported errors
@@ -514,6 +532,177 @@ class ArtefactFormats:
         # explicitly check for GeoPDFs as they don't have a distinct file extension and we allow non-GeoPDFs
         if file_ext in geopdf_format.extensions:
             with cls._open_binary(file) as f:
-                return geopdf_format if cls._check_file_geopdf(f) else cls.get_label(ArtefactFormatLabel.PDF)
+                return geopdf_format if cls._check_file_geopdf(f) else cls.get_by_label(ArtefactFormatLabel.PDF)
 
         return next(_format for _format in cls.file_formats if file_ext in _format.extensions)
+
+    @classmethod
+    def _check_arcgis_error(cls, res: requests.Response) -> None:
+        """Interpret ArcGIS endpoint errors within the context of determining a service format."""
+        try:
+            check_arcgis_error(res)
+        except ArcGISAuthError as e:
+            raise ArtefactInaccessibleError() from e
+        except ArcGISRequestError as e:
+            raise ArtefactFormatUnknownError() from e
+
+    @classmethod
+    def _check_arcgis_headers(cls, res: requests.Response) -> bool:
+        """
+        Check if a response contains headers related to ArcGIS services.
+
+        Used as a corroborating hint that an endpoint should be interpreted as an ArcGIS service.
+        """
+        if (
+            "ArcGIS Online" in [s.strip() for s in res.headers.get("Server", "").split(",")]
+            or res.headers.get("x-powered-by", "") == "ArcGIS-Online-Hosted-Services"
+        ):
+            return True
+        if any(
+            header in res.headers
+            for header in (
+                "x-arcgis-trace-id",
+                "x-arcgis-correlation-id",
+                "x-arcgis-instance",
+                "x-arcgis-instance-id",
+                "x-arcgis-upstream",
+            )
+        ):
+            return True
+        return "x-esri-authorization" in ",".join(
+            {res.headers.get(h, "").lower() for h in ("access-control-allow-headers", "vary")}
+        )
+
+    @classmethod
+    def check_service_supported(cls, endpoint: str, endpoint_auth: AuthBase | None = None) -> None:
+        """
+        Check if a service is supported based on an endpoint URL.
+
+        Wrapper around `get_service_format` returning None rather than a format if supported. Intended for
+        parsing/validating service references where only a binary pass/fail is needed.
+
+        This 'None or Raise' pattern is used for consistency with `Record.validate()`.
+
+        Raises:
+        - ArtefactFormatUnknownError: where a service type is an unsupported
+        - ArtefactFormatNotSupportedError: where a service type is known but specifically not supported
+        """
+        _ = cls.get_service_format(endpoint=endpoint, endpoint_auth=endpoint_auth)
+
+    @staticmethod
+    def get_arcgis_item_format(item_type: str, item_type_keywords: set[str]) -> ArtefactFormat:
+        """
+        Determine if ArcGIS item type and item type keywords relates to a supported format.
+
+        `item_type_keywords` should be returned as a set of strings.
+
+        Raises `ArtefactFormatUnknownError` if not supported.
+        """
+        item_type = item_type.lower()
+        item_type_keywords = {k.lower() for k in item_type_keywords}
+        # as per https://developers.arcgis.com/rest/users-groups-and-items/items-and-item-types/
+        if item_type == "feature service":
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_FEATURE_LAYER)
+        if item_type == "ogcfeatureserver":
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_OGC_FEATURES_LAYER)
+        if (
+            item_type == "map service"
+            and {"wmts", "hosted service"}.issubset(item_type_keywords)
+            and "dynamic" not in item_type_keywords
+        ):
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_RASTER_TILE_LAYER)
+        if item_type == "vector tile service":
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_VECTOR_TILE_LAYER)
+        if item_type == "web scene":
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_WEB_SCENE)
+        if item_type == "web map":
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_WEB_MAP)
+        raise ArtefactFormatUnknownError()
+
+    @staticmethod
+    def _classify_arcgis_service(response: Response) -> ArtefactFormat | None:
+        """Determine if endpoint response relates to an ArcGIS service format."""
+        endpoint = urlsplit(response.url).path
+
+        if endpoint.endswith("/FeatureServer"):
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE)
+        if endpoint.endswith("/OGCFeatureServer"):
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_OGC_FEATURES_SERVICE)
+        if endpoint.endswith("/VectorTileServer"):
+            return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_VECTOR_TILE_SERVICE)
+        if endpoint.endswith("/MapServer"):
+            # MapServers are ambiguous so check JSON payload
+            try:
+                data = response.json()
+            except JSONDecodeError as e:
+                raise ArtefactFormatUnknownError() from e
+            if "TilesOnly" in str(data.get("capabilities", "")).split(","):
+                return ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_RASTER_TILE_SERVICE)
+
+        return None
+
+    @staticmethod
+    def _classify_arcgis_item(response: Response, endpoint_auth: AuthBase | None = None) -> ArtefactFormat | None:
+        """Determine if endpoint response relates to an ArcGIS item format."""
+        query = parse_qs(urlsplit(response.url).query, keep_blank_values=False)
+
+        if not response.url.split("?")[0].endswith("/item.html") or "id" not in query:
+            raise ArtefactFormatUnknownError()
+
+        item_url = f"https://www.arcgis.com/sharing/rest/content/items/{query['id'][0]}"
+        item_res = requests.get(url=item_url, auth=endpoint_auth, params={"f": "json"}, timeout=10)
+        item_res.raise_for_status()
+        ArtefactFormats._check_arcgis_error(item_res)
+        item_data = item_res.json()
+        try:
+            return ArtefactFormats.get_arcgis_item_format(
+                item_type=item_data.get("type", "").strip().lower(),
+                item_type_keywords={t.lower() for t in item_data.get("typeKeywords", [])},
+            )
+        except ArtefactFormatUnknownError:
+            return None
+
+    @classmethod
+    def get_service_format(cls, endpoint: str, endpoint_auth: AuthBase | None = None) -> ArtefactFormat:
+        """
+        Get the format for a supported service endpoint.
+
+        Requires:
+        - services are accessible via a URL
+
+        Assumes:
+        - services use HTTP as a protocol
+        - services are RESTful and support JSON as a response content type
+
+        Supports:
+        - optional authentication
+
+        Implicitly checks service type/format is supported.
+
+        Raises one of these exceptions if not supported:
+        - `ArtefactFormatUnknownError`
+        - `ArtefactFormatNotSupportedError`
+        - `ArtefactInaccessibleError` (where endpoint requires unprovided or unsatisfactory authentication)
+
+        Intended for use in Artefact classes.
+        """
+        url = ensure_query_param(url=endpoint, name="f", value="json")  # as only ArcGIS services are supported
+        res = requests.get(url=url, auth=endpoint_auth, headers={"Accept": "application/json"}, timeout=10)
+        res.raise_for_status()
+
+        # as only ArcGIS services/items are supported
+        cls._check_arcgis_error(res)
+        if not cls._check_arcgis_headers(res):
+            raise ArtefactFormatUnknownError()
+
+        # try as ArcGIS service, determining format via endpoint URL and JSON payload
+        arc_service = cls._classify_arcgis_service(res)
+        if arc_service:
+            return arc_service
+
+        # try as ArcGIS item, determining format via sharing API
+        arc_item = cls._classify_arcgis_item(response=res, endpoint_auth=endpoint_auth)
+        if arc_item:
+            return arc_item
+
+        raise ArtefactFormatUnknownError()

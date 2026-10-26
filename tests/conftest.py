@@ -33,13 +33,14 @@ from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
+from lantern.lib.arcgis.client import ArcGisClient
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
 from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
-from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata
+from lantern.lib.magic_distribution.types import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
@@ -661,25 +662,6 @@ def fx_item_algolia_object_min() -> ObjectRecord:
         "restricted": True,
     }
     return obj
-
-
-@pytest.fixture()
-def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
-    """Minimal ArcGIS Item properties instance."""
-    return ArcGisItemProperties(title="x", item_type=ArcGisItemType.FEATURE_SERVICE, metadata="x")
-
-
-@pytest.fixture()
-def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> ArcGisItem:
-    """Minimal ArcGIS Item instance."""
-    return ArcGisItem(
-        id="x",
-        owner="x",
-        org_id="x",
-        url="x",
-        properties=fx_lib_arcgis_item_properties,
-        sharing_level=ArcGisSharingLevel.PRIVATE,
-    )
 
 
 @pytest.fixture()
@@ -1326,13 +1308,14 @@ def fx_lib_artefact_sharepoint() -> ArtefactSharePointFile:
 
 
 @pytest.fixture()
-def fx_lib_magic_dist_client(mocker: MockerFixture) -> MagicResourceDistributionClient:
+def fx_lib_magic_dist_client(mocker: MockerFixture, fx_logger: logging.Logger) -> MagicResourceDistributionClient:
     """
     MAGIC Resource Distribution service SharePoint client, with fake credentials.
 
     Mocks getting MS Graph access token.
     """
     client = MagicResourceDistributionClient(
+        logger=fx_logger,
         tenant_id="x",
         app_client_id="x",
         app_client_secret="x",  # noqa: S106
@@ -1341,4 +1324,43 @@ def fx_lib_magic_dist_client(mocker: MockerFixture) -> MagicResourceDistribution
     )
     mocker.patch.object(type(client), "_graph_token", new_callable=PropertyMock, return_value="x")
     mocker.patch.object(type(client), "_drive_id", new_callable=PropertyMock, return_value="x")
+    return client
+
+
+@pytest.fixture()
+def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
+    """
+    Minimal ArcGIS Item properties instance.
+
+    Contains invalid additional/external metadata.
+    """
+    return ArcGisItemProperties(title="x", item_type=ArcGisItemType.FEATURE_SERVICE, metadata="x")
+
+
+@pytest.fixture()
+def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> ArcGisItem:
+    """Minimal ArcGIS Item instance."""
+    return ArcGisItem(
+        id="x",
+        owner="x",
+        org_id="x",
+        url="x",
+        properties=fx_lib_arcgis_item_properties,
+        sharing_level=ArcGisSharingLevel.PRIVATE,
+    )
+
+
+@pytest.fixture()
+def fx_lib_arcgis_client(mocker: MockerFixture, fx_logger: logging.Logger) -> ArcGisClient:
+    """
+    ArcGIS client, with fake credentials.
+
+    Mocks getting ArcGIS access token.
+    """
+    client = ArcGisClient(
+        logger=fx_logger,
+        app_client_id="x",
+        app_client_secret="x",  # noqa: S106
+    )
+    mocker.patch.object(type(client), "_access_token", new_callable=PropertyMock, return_value="x")
     return client

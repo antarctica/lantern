@@ -1,15 +1,23 @@
+from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
-from typing import IO
+from typing import IO, Final
 
 import pytest
+import requests
+from _pytest.mark import ParameterSet
+from pytest_httpserver import HTTPServer
+from pytest_mock import MockerFixture
+from werkzeug import Response
 
+from lantern.lib.arcgis.utils import ArcGISAuthError, ArcGISRequestError, HTTPArcGISTokenAuth
 from lantern.lib.magic_distribution.formats import (
     ArtefactFormat,
     ArtefactFormatLabel,
     ArtefactFormatNotSupportedError,
     ArtefactFormats,
     ArtefactFormatUnknownError,
+    ArtefactInaccessibleError,
 )
 
 
@@ -31,30 +39,43 @@ class TestArtefactsFormats:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(("label", "expected"), [(ArtefactFormatLabel.CSV, True), ("INVALID", False)])
-    def test_get_label(self, label: ArtefactFormatLabel, expected: bool):
+    def test_get_by_label(self, label: ArtefactFormatLabel, expected: bool):
         """Can get format for a format label enum member if it exists."""
-        manager = ArtefactFormats()
-
         if not expected:
             with pytest.raises(ArtefactFormatUnknownError):
-                manager.get_label(label=label)
+                ArtefactFormats.get_by_label(label=label)
             return
 
-        result = manager.get_label(label=label)
+        result = ArtefactFormats.get_by_label(label=label)
         assert isinstance(result, ArtefactFormat)
+        assert result.label == label
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("registration_uri", "expected_label"),
+        [("https://www.iana.org/assignments/media-types/text/csv", ArtefactFormatLabel.CSV), ("INVALID", False)],
+    )
+    def test_get_by_registration(self, registration_uri: str, expected_label: ArtefactFormatLabel | bool):
+        """Can get format for a media_type enum member if it exists."""
+        if not expected_label:
+            with pytest.raises(ArtefactFormatUnknownError):
+                ArtefactFormats.get_by_registration(registration_uri=registration_uri)
+            return
+
+        result = ArtefactFormats.get_by_registration(registration_uri=registration_uri)
+        assert isinstance(result, ArtefactFormat)
+        assert result.label == expected_label
 
     def test_supported_extensions(self):
         """Can get a flattened set of supported file extensions."""
-        manager = ArtefactFormats()
-        result = manager.supported_extensions
+        result = ArtefactFormats().supported_extensions
         assert isinstance(result, set)
         assert all(isinstance(ext, str) for ext in result)
         assert all(ext.startswith(".") for ext in result)
 
     def test_supported_media_types(self):
         """Can get a flattened set of supported media types."""
-        manager = ArtefactFormats()
-        result = manager.supported_media_types
+        result = ArtefactFormats().supported_media_types
         assert isinstance(result, set)
         assert all(isinstance(mt, str) for mt in result)
         assert all("/" in mt for mt in result)
@@ -75,9 +96,8 @@ class TestArtefactsFormats:
 
         Implicitly checks file is JSON parsable and valid GeoJSON.
         """
-        manager = ArtefactFormats()
         with path.open() as f:
-            assert manager._check_file_geojson(f) is expected
+            assert ArtefactFormats._check_file_geojson(f) is expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -90,9 +110,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_geopdf(self, path: Path, expected: bool):
         """Can check a file is a regular or georeferenced PDF."""
-        manager = ArtefactFormats()
         with path.open(mode="rb") as f:
-            assert manager._check_file_geopdf(f) is expected
+            assert ArtefactFormats._check_file_geopdf(f) is expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -106,9 +125,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_geotiff(self, path: Path, expected: bool):
         """Can check a file is a GeoTiff not a regular Tiff."""
-        manager = ArtefactFormats()
         with path.open(mode="rb") as f:
-            assert manager._check_file_geotiff(f) is expected
+            assert ArtefactFormats._check_file_geotiff(f) is expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -120,9 +138,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_gpkg_zip(self, path: Path, expected: bool):
         """Can check a file is a compressed GeoPackage archive."""
-        manager = ArtefactFormats()
         with path.open(mode="rb") as f:
-            assert manager._check_file_gpkg_zip(f) is expected
+            assert ArtefactFormats._check_file_gpkg_zip(f) is expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -134,9 +151,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_shp_zip(self, path: Path, expected: bool):
         """Can check a file is a Shapefile bundle archive."""
-        manager = ArtefactFormats()
         with path.open(mode="rb") as f:
-            assert manager._check_file_shp_zip(f) is expected
+            assert ArtefactFormats._check_file_shp_zip(f) is expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -145,8 +161,7 @@ class TestArtefactsFormats:
     )
     def test_get_file_extension(self, file: Path | IO[bytes], name: str | None, expected: str):
         """Can get file extension from path or file name."""
-        manager = ArtefactFormats()
-        assert manager._get_file_extension(file=file, name=name) == expected
+        assert ArtefactFormats._get_file_extension(file=file, name=name) == expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -155,9 +170,8 @@ class TestArtefactsFormats:
     )
     def test_get_file_extension_invalid(self, file: Path | IO[bytes], name: str | None):
         """Cannot get file extension with invalid arguments."""
-        manager = ArtefactFormats()
         with pytest.raises(TypeError):
-            assert manager._get_file_extension(file=file, name=name)
+            assert ArtefactFormats._get_file_extension(file=file, name=name)
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("file", [artefacts_path / "csv" / "sample.csv", BytesIO(b"x,y\n1,2")])
@@ -197,8 +211,7 @@ class TestArtefactsFormats:
         - GeoJSON (non-geo JSON unsupported and '.geojson' ext not always used)
         - GeoTiff (non-geo Tiff unsupported)
         """
-        manager = ArtefactFormats()
-        manager.check_file_supported(file=file, name=name)
+        ArtefactFormats.check_file_supported(file=file, name=name)
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -207,10 +220,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_unknown(self, file: Path | IO[bytes], name: str | None):
         """Can determine unknown and supported formats by file extension."""
-        manager = ArtefactFormats()
-
         with pytest.raises(ArtefactFormatUnknownError):
-            manager.check_file_supported(file=file, name=name)
+            ArtefactFormats.check_file_supported(file=file, name=name)
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -224,10 +235,8 @@ class TestArtefactsFormats:
     )
     def test_check_file_unsupported(self, file: Path | IO[bytes]):
         """Can determine known and unsupported formats by file extension and/or archive contents."""
-        manager = ArtefactFormats()
-
         with pytest.raises(ArtefactFormatNotSupportedError):
-            manager.check_file_supported(file=file)
+            ArtefactFormats.check_file_supported(file=file)
 
     @pytest.mark.parametrize(
         ("file", "name", "expected"),
@@ -258,6 +267,315 @@ class TestArtefactsFormats:
         - PDF (both supported)
         - Shapefile archives (to not solely rely on file extension convention)
         """
-        manager = ArtefactFormats()
-        result = manager.get_file_format(file=file, name=name)
+        result = ArtefactFormats.get_file_format(file=file, name=name)
         assert result.label == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("exception", "expected"),
+        [
+            (ArcGISAuthError, ArtefactInaccessibleError),
+            (ArcGISRequestError, ArtefactFormatUnknownError),
+        ],
+    )
+    def test_check_arcgis_error(self, mocker: MockerFixture, exception: Exception, expected: Exception):
+        """Can correctly contextualise ArcGIS API errors."""
+        mocker.patch("lantern.lib.magic_distribution.formats.check_arcgis_error", side_effect=exception)
+        res = mocker.MagicMock(spec_set=requests.Response)
+
+        with pytest.raises(expected):
+            ArtefactFormats._check_arcgis_error(res=res)
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("headers", "expected"),
+        [
+            ({}, False),
+            ({"Server": "ArcGIS Online"}, True),
+            ({"x-powered-by": "ArcGIS-Online-Hosted-Services"}, True),
+            ({"x-arcgis-trace-id": "x"}, True),
+            ({"x-arcgis-correlation-id": "x"}, True),
+            ({"x-arcgis-instance": "x"}, True),
+            ({"x-arcgis-instance-id": "x"}, True),
+            ({"x-arcgis-upstream": "x"}, True),
+            ({"access-control-allow-headers": "x-esri-authorization"}, True),
+            ({"vary": "x-ESRI-authorization, x"}, True),
+        ],
+    )
+    def test_check_arcgis_headers(self, httpserver: HTTPServer, headers: dict, expected: bool):
+        """Can check for ArcGIS related headers in responses."""
+        _route = "/endpoint"
+        httpserver.expect_request(_route).respond_with_response(Response(headers=headers, status=HTTPStatus.OK))
+
+        result = requests.get(httpserver.url_for(_route), timeout=10)
+        assert ArtefactFormats._check_arcgis_headers(res=result) is expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("state", ["supported", "unsupported"])
+    def test_check_service_supported(self, mocker: MockerFixture, state: str) -> bool:
+        """Can check if a service endpoint is supported."""
+        mocker.patch.object(
+            ArtefactFormats,
+            "get_service_format",
+            return_value=ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE),
+        )
+        if state == "supported":
+            ArtefactFormats.check_service_supported(endpoint="x")
+            return
+
+        mocker.patch.object(ArtefactFormats, "get_service_format", side_effect=ArtefactFormatNotSupportedError)
+        with pytest.raises(ArtefactFormatNotSupportedError):
+            ArtefactFormats.check_service_supported(endpoint="x")
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("item_type", "item_type_keywords", "expected"),
+        [
+            (
+                "Feature Service",
+                {
+                    "ArcGIS Server",
+                    "Data",
+                    "Feature Access",
+                    "Feature Service",
+                    "Metadata",
+                    "Service",
+                    "Single layer",
+                    "Hosted Service",
+                },
+                ArtefactFormatLabel.ARCGIS_FEATURE_LAYER,
+            ),
+            (
+                "OGCFeatureServer",
+                {
+                    "Data",
+                    "Feature Service",
+                    "Features",
+                    "Metadata",
+                    "OGC",
+                    "OGC Feature Service",
+                    "Service",
+                    "Hosted Service",
+                },
+                ArtefactFormatLabel.ARCGIS_OGC_FEATURES_LAYER,
+            ),
+            (
+                "Map Service",
+                {"ArcGIS Server", "Data", "Map Service", "Metadata", "Service", "WMTS", "Hosted Service"},
+                ArtefactFormatLabel.ARCGIS_RASTER_TILE_LAYER,
+            ),
+            (
+                "Vector Tile Service",
+                {"Data", "Service", "Vector Tile Service", "ArcGIS Server", "Hosted Service"},
+                ArtefactFormatLabel.ARCGIS_VECTOR_TILE_LAYER,
+            ),
+            (
+                "Web Scene",
+                {
+                    "3D",
+                    "ArcGIS Online",
+                    "Explorer Web Scene",
+                    "Map",
+                    "Online Scene",
+                    "Scene",
+                    "Streaming",
+                    "ViewingMode-Local",
+                    "Web",
+                    "Web Scene",
+                },
+                ArtefactFormatLabel.ARCGIS_WEB_SCENE,
+            ),
+            (
+                "Web Map",
+                {"ArcGIS API for JavaScript", "ArcGIS Online", "Explorer Web Map", "Map", "Online Map", "Web Map"},
+                ArtefactFormatLabel.ARCGIS_WEB_MAP,
+            ),
+        ],
+    )
+    def test_get_arcgis_item_format(self, item_type: str, item_type_keywords: set[str], expected: ArtefactFormatLabel):
+        """Can get supported ArcGIS Portal item formats by item properties."""
+        result = ArtefactFormats.get_arcgis_item_format(item_type=item_type, item_type_keywords=item_type_keywords)
+        assert result.label == expected
+
+    get_service_format_cases: Final[list[ParameterSet]] = [
+        pytest.param(
+            "https://x.arcgis.com/x/arcgis/rest/services/feature_service_open/FeatureServer",
+            False,
+            ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE,
+            id="service-features-open",
+        ),
+        pytest.param(
+            "https://x.arcgis.com/x/arcgis/rest/services/feature_service_closed/FeatureServer",
+            True,
+            ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE,
+            id="service-features-closed",
+        ),
+        pytest.param(
+            "https://x.arcgis.com/x/arcgis/rest/services/ogc_features_open/OGCFeatureServer",
+            False,
+            ArtefactFormatLabel.ARCGIS_OGC_FEATURES_SERVICE,
+            id="service-ogc-features-open",
+        ),
+        pytest.param(
+            "https://x.arcgis.com/x/arcgis/rest/services/ogc_features_closed/OGCFeatureServer",
+            True,
+            ArtefactFormatLabel.ARCGIS_OGC_FEATURES_SERVICE,
+            id="service-ogc-features-closed",
+        ),
+        pytest.param(
+            "https://tiles.arcgis.com/tiles/x/arcgis/rest/services/raster_tiles_open/MapServer",
+            False,
+            ArtefactFormatLabel.ARCGIS_RASTER_TILE_SERVICE,
+            id="service-raster-tiles-open",
+        ),
+        pytest.param(
+            "https://tiles.arcgis.com/tiles/x/arcgis/rest/services/raster_tiles_closed/MapServer",
+            True,
+            ArtefactFormatLabel.ARCGIS_RASTER_TILE_SERVICE,
+            id="service-raster-tiles-closed",
+        ),
+        pytest.param(
+            "https://vectortilex.arcgis.com/x/arcgis/rest/services/vector_tiles_open/VectorTileServer",
+            False,
+            ArtefactFormatLabel.ARCGIS_VECTOR_TILE_SERVICE,
+            id="service-vector-tiles-open",
+        ),
+        pytest.param(
+            "https://tiles.arcgis.com/tiles/x/arcgis/rest/services/vector_tiles_closed/VectorTileServer",
+            True,
+            ArtefactFormatLabel.ARCGIS_VECTOR_TILE_SERVICE,
+            id="service-vector-tiles-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789010",
+            False,
+            ArtefactFormatLabel.ARCGIS_FEATURE_LAYER,
+            id="item-features-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789012",
+            True,
+            ArtefactFormatLabel.ARCGIS_FEATURE_LAYER,
+            id="item-features-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789020",
+            False,
+            ArtefactFormatLabel.ARCGIS_OGC_FEATURES_LAYER,
+            id="item-ogc-features-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789022",
+            True,
+            ArtefactFormatLabel.ARCGIS_OGC_FEATURES_LAYER,
+            id="item-ogc-features-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789030",
+            False,
+            ArtefactFormatLabel.ARCGIS_RASTER_TILE_LAYER,
+            id="item-raster-tiles-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789032",
+            True,
+            ArtefactFormatLabel.ARCGIS_RASTER_TILE_LAYER,
+            id="item-raster-tiles-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789040",
+            False,
+            ArtefactFormatLabel.ARCGIS_VECTOR_TILE_LAYER,
+            id="item-vector-tiles-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789042",
+            True,
+            ArtefactFormatLabel.ARCGIS_VECTOR_TILE_LAYER,
+            id="item-vector-tiles-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789050",
+            False,
+            ArtefactFormatLabel.ARCGIS_WEB_SCENE,
+            id="item-web-scene-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789052",
+            True,
+            ArtefactFormatLabel.ARCGIS_WEB_SCENE,
+            id="item-web-scene-closed",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789060",
+            False,
+            ArtefactFormatLabel.ARCGIS_WEB_MAP,
+            id="item-web-map-open",
+        ),
+        pytest.param(
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789062",
+            True,
+            ArtefactFormatLabel.ARCGIS_WEB_MAP,
+            id="item-web-map-closed",
+        ),
+    ]
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize(("endpoint", "with_auth", "expected"), get_service_format_cases)
+    def test_get_service_format(self, endpoint: str, with_auth: bool, expected: ArtefactFormatLabel):
+        """Can get supported format by service endpoint."""
+        auth = HTTPArcGISTokenAuth(token="x") if with_auth else None  # noqa: S106
+        result = ArtefactFormats.get_service_format(endpoint=endpoint, endpoint_auth=auth)
+        assert result.label == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_get_service_format_arc_error(self):
+        """Cannot get service format where endpoint returns an ArcGIS application error."""
+        with pytest.raises(ArtefactFormatUnknownError):
+            _ = ArtefactFormats.get_service_format(endpoint="https://example.com")
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_get_service_format_not_arc_error(self):
+        """Cannot get service format where endpoint headers don't indicate an ArcGIS application."""
+        with pytest.raises(ArtefactFormatUnknownError):
+            _ = ArtefactFormats.get_service_format(endpoint="https://example.com")
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize(
+        "endpoint",
+        [
+            "https://x.arcgis.com/x/arcgis/rest/services/feature_service_closed/FeatureServer",
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789000",
+        ],
+    )
+    def test_get_service_format_auth_error(self, endpoint: str):
+        """Cannot get service format where required authentication is not included for endpoint."""
+        with pytest.raises(ArtefactInaccessibleError):
+            _ = ArtefactFormats.get_service_format(endpoint=endpoint, endpoint_auth=None)
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize(
+        "endpoint",
+        [
+            "https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/map_image/MapServer",
+            "https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/invalid/MapServer",
+            "https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789000",
+        ],
+    )
+    def test_get_service_format_map_type_error(self, endpoint: str):
+        """
+        Cannot get service format for unsupported ArcGIS map formats.
+
+        'invalid' case used to check service body contains valid JSON to check service capabilities.
+        """
+        with pytest.raises(ArtefactFormatUnknownError):
+            _ = ArtefactFormats.get_service_format(endpoint=endpoint)

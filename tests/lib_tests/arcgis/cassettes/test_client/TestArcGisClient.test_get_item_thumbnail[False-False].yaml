@@ -1,0 +1,98 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://www.arcgis.com/sharing/rest/content/items/y?f=json&token=x
+  response:
+    body:
+      string: '{"id":"y","thumbnail":"thumbnail/ago_downloaded.gif"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=utf-8
+      Expires:
+      - '-1'
+      Pragma:
+      - no-cache
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR5-P4
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://www.arcgis.com/sharing/rest/content/items/y/info/thumbnail/ago_downloaded.gif?w=400&token=x
+  response:
+    body:
+      # Arc default
+      string: !!binary |
+        R0lGODlhBQAFAID/AMDAwAAAACH5BAEAAAAALAAAAAAFAAUAQAIEhI+pWAA7
+    headers:
+      Cache-Control:
+      - max-age=300
+      Connection:
+      - keep-alive
+      Content-Type:
+      - image/gif
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR5-P4
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

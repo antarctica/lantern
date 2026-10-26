@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://www.arcgis.com/sharing/rest/content/items/x/info/thumbnail/thumbnail123.png?w=400&token=x
+  response:
+    body:
+      # simple blue box
+      string: !!binary |
+        R0lGODdhBQAFAIABAAAA/wAAACwAAAAABQAFAAACBISCaPeWBQA7
+    headers:
+      Cache-Control:
+      - max-age=300
+      Connection:
+      - keep-alive
+      Content-Type:
+      - image/png
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR5-P4
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

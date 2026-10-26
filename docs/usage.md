@@ -78,8 +78,8 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 
 ### Depositing record artefacts
 
-To deposit file artefacts in the [MAGIC Resource Distribution](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution)
-service and include in a resource:
+To deposit file artefacts in the [MAGIC Resource Distribution 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution)
+service for adding as a resource distribution option:
 
 - copy file artefacts to the `artefacts/` directory (by default/convention)
 - optionally, run the [`check-artefacts`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
@@ -91,11 +91,16 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 > [!NOTE]
 > Resource access permissions are limited to well-known presets from the MAGIC Access Permissions Framework.
 
+> [!NOTE]
+> Depositing a file with the same contents under a different name (and/or parent resource) as an existing deposit will
+> fail - as artefacts MUST have unique artefact IDs (globally), which are based on file checksums (contents).
+
 > [!WARNING]
 > Do not use full stops in file names as they will be treated as part of the file extension, which are used to
 > determine whether a file is a supported format or not. Unsupported files cannot be deposited.
 >
-> E.g.: `X_2026_v2.2.jpg` will be treated as an unrecognised `.2.jpg` file. Use `X_2026_v2_2.jpg` or similar instead.
+> E.g.: `X_2026_v2.2.jpg` will be treated as an unrecognised `.2.jpg` file format. Use `X_2026_v2_2.jpg` or similar
+> instead.
 <!-- pyml enable md028 -->
 
 ## Updating records

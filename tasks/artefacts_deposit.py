@@ -10,7 +10,7 @@ import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
-from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.client import DuplicateArtefactError, MagicResourceDistributionClient
 from lantern.lib.magic_distribution.formats import ArtefactFormatNotSupportedError, ArtefactFormatUnknownError
 from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
@@ -193,9 +193,14 @@ def _deposit_artefacts(
     deposited = []
     for artefact in artefacts:
         logger.info("Depositing %s ...", repr(artefact))
-        deposited.append(
-            deposit_client.deposit_artefact(artefact=artefact, access_groups=access_groups, unrestricted=unrestricted)
-        )
+        try:
+            deposited.append(
+                deposit_client.deposit_artefact(
+                    artefact=artefact, access_groups=access_groups, unrestricted=unrestricted
+                )
+            )
+        except DuplicateArtefactError:
+            logger.warning("Artefact has already been uploaded under a different name, skipping.")
     return deposited
 
 

@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://www.arcgis.com/sharing/rest/content/items/x/info/metadata/metadata.xml?token=x
+  response:
+    body:
+      string: "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><metadata>\n<mdFileID>f19cab63-8ca1-4d36-817c-b5f3675a1e33</mdFileID>\n<dataIdInfo><idAbs>...</idAbs></dataIdInfo></metadata>"
+    headers:
+      Cache-Control:
+      - max-age=0, must-revalidate
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/xml
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR95-P3
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

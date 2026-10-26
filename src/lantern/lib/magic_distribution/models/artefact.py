@@ -5,7 +5,7 @@ import uuid
 from abc import ABC, abstractmethod
 from base64 import b64encode, urlsafe_b64encode
 from functools import cached_property
-from typing import TYPE_CHECKING, Final, get_type_hints
+from typing import TYPE_CHECKING, Final, get_type_hints, overload
 from urllib.parse import urlencode, urlparse, urlunparse
 
 from quickxorhash import quickxorhash  # ty: ignore[unresolved-import]
@@ -16,11 +16,13 @@ from lantern.lib.magic_distribution.formats import (
     ArtefactFormats,
     ArtefactFormatUnknownError,
 )
-from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata
+from lantern.lib.magic_distribution.types import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.distribution import Format
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 
 
 class ArtefactBase(ABC):
@@ -71,11 +73,6 @@ class ArtefactBase(ABC):
     @abstractmethod
     def name(self) -> str:
         """Artefact name."""
-
-    @property
-    @abstractmethod
-    def size_bytes(self) -> int | None:
-        """Optional artefact size in bytes."""
 
     @abstractmethod
     def validate_format(self) -> None:
@@ -141,46 +138,6 @@ class ArtefactFile(ArtefactBase):
             artefact_sha256=self.sha256,
             unrestricted=False,
         )
-
-
-class ArtefactServicePlaceholder(ArtefactBase):
-    """
-    Artefact representing a service.
-
-    Placeholder implementation to show an alternative to file artefacts.
-    """
-
-    def __init__(
-        self, resource_id: str, artefact_name: str, artefact_url: str, artefact_format: ArtefactFormat
-    ) -> None:
-        super().__init__(resource_id)
-        self._artefact_name = artefact_name
-        self._artefact_url = artefact_url
-        self._artefact_format = artefact_format
-
-    @property
-    def _artefact_hash(self) -> str:
-        """Value to use for constructing the artefact ID."""
-        return urlsafe_b64encode(self._artefact_url.encode()).decode()
-
-    @property
-    def name(self) -> str:
-        """Artefact name."""
-        return self._artefact_name
-
-    @property
-    def format(self) -> ArtefactFormat:
-        """Artefact format."""
-        return self._artefact_format
-
-    @property
-    def size_bytes(self) -> None:
-        """Artefact size in bytes."""
-        return None
-
-    def validate_format(self) -> None:
-        """Check service is a supported type."""
-        raise NotImplementedError() from None
 
 
 class ArtefactLocalFile(ArtefactFile):
@@ -317,7 +274,7 @@ class ArtefactSharePointFile(ArtefactFile):
         except KeyError:
             raise ArtefactFormatUnknownError() from None
         else:
-            return ArtefactFormats.get_label(label)
+            return ArtefactFormats.get_by_label(label)
 
     def validate_format(self) -> None:
         """
@@ -392,3 +349,89 @@ class ArtefactSharePointFile(ArtefactFile):
         if proxy:
             params.update({"url": urlsafe_b64encode(direct.encode()).decode(), "name": self.name})
         return urlunparse(urlparse(base)._replace(query=urlencode(params)))
+
+
+class ArtefactService(ArtefactBase, ABC):
+    """Artefact representing a service."""
+
+    def __init__(self, resource_id: str, artefact_name: str, artefact_url: str) -> None:
+        super().__init__(resource_id)
+        self._artefact_name = artefact_name
+        self._artefact_url = artefact_url
+
+    @property
+    def _artefact_hash(self) -> str:
+        """Value to use for constructing the artefact ID."""
+        return urlsafe_b64encode(self._artefact_url.encode()).decode()
+
+    @property
+    def name(self) -> str:
+        """Artefact name."""
+        return self._artefact_name
+
+
+class ArtefactArcGisService(ArtefactService):
+    """
+    Artefact representing an ArcGIS service.
+
+    Represents both ArcGIS Server services (Feature Services, etc.) and ArcGIS Portal items (web maps, etc.).
+    """
+
+    @overload
+    def __init__(
+        self, resource_id: str, format_label: ArtefactFormatLabel, item: ArcGisItem, service_endpoint: None = None
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self, resource_id: str, format_label: ArtefactFormatLabel, item: None, service_endpoint: str
+    ) -> None: ...
+
+    @overload
+    def __init__(self, resource_id: str, format_label: ArtefactFormatLabel, *, service_endpoint: str) -> None: ...
+
+    def __init__(
+        self,
+        resource_id: str,
+        format_label: ArtefactFormatLabel,
+        item: ArcGisItem | None = None,
+        service_endpoint: str | None = None,
+    ) -> None:
+        param_err = "Either an ArcGIS item or service endpoint is required. Both or neither provided."
+        if item is not None:
+            if service_endpoint is not None:
+                raise ValueError(param_err)
+            name = item.properties.title
+            endpoint = f"https://www.maps.arcgis.com/home/item.html?id={item.id}"
+        elif service_endpoint is not None:
+            name = service_endpoint.rstrip("/").rsplit("/", 2)[-2]
+            endpoint = service_endpoint
+        else:
+            raise ValueError(param_err)
+
+        super().__init__(resource_id=resource_id, artefact_name=name, artefact_url=endpoint)
+        self._format_label = format_label
+
+    def __repr__(self) -> str:
+        """Class representation."""
+        return f"<ArtefactArcGiS: {self.name}, {self.format.name}, {self._artefact_url}>"
+
+    @property
+    def format(self) -> ArtefactFormat:
+        """
+        Artefact format.
+
+        From stated format label.
+
+        This should be determined upstream, either from item type and item type keywords properties for Portal items,
+        or from the capabilities property and URL path fragments for Server services.
+        """
+        return ArtefactFormats.get_by_label(self._format_label)
+
+    def validate_format(self) -> None:
+        """
+        Check file is a supported type.
+
+        May raise `ArtefactFormatUnknownError` if unknown.
+        """
+        ArtefactFormats.get_by_label(self._format_label)

@@ -1,0 +1,102 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://x.maps.arcgis.com/home/item.html?id=12345678901234567890123456789040&f=json
+  response:
+    body:
+      string: "<!DOCTYPE html>"
+    headers:
+      Cache-Control:
+      - private, max-age=0
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '425'
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - text/html
+      Expires:
+      - '-1'
+      Last-Modified:
+      - Thu, 01 Oct 2026 15:53:21 GMT
+      Link:
+      - <https://www.arcgis.com/home/item.html?id=12345678901234567890123456789040&f=json>;rel="canonical"
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=63072000
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR95-P3
+      X-Cache:
+      - Miss from cloudfront
+      X-Cached:
+      - HIT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://www.arcgis.com/sharing/rest/content/items/12345678901234567890123456789040?f=json
+  response:
+    body:
+      string: '{"id":"12345678901234567890123456789040","type":"Vector Tile Service","typeKeywords":["ArcGIS Server","Data","Metadata","Service","Single layer","Vector Tile Service","Hosted Service"]}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=utf-8
+      Expires:
+      - '-1'
+      Pragma:
+      - no-cache
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      Via:
+      - 1.1 x.cloudfront.net (CloudFront)
+      X-Amz-Cf-Pop:
+      - LHR95-P3
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

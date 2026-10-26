@@ -274,11 +274,13 @@ Microsoft Graph API.
 
 ### SharePoint client limitations
 
-- updating permissions on existing files
-- removing existing files
+In addition to [Limitations 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution#limitations) from the MAGIC
+Resource Distribution service:
 
-> [!NOTE]
-> Existing files can be removed and/or metadata/permissions updated manually if needed, via the project issue tracker.
+- permissions on existing files cannot be updated
+
+> [!TIP]
+> Where needed, permissions for existing files can be updated by (manually) removing files then re-depositing them.
 
 ### Artefacts
 

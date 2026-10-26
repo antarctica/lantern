@@ -9,7 +9,7 @@ class ResourceMetadata(TypedDict):
 
 
 class ArtefactMetadata(TypedDict):
-    """SharePoint list metadata required for artefacts."""
+    """SharePoint list metadata required for file artefacts."""
 
     resource_id: str
     artefact_id: str

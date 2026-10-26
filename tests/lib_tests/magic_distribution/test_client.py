@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import csv
+from http import HTTPMethod, HTTPStatus
+from json import JSONDecodeError
 from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
+from pytest_httpserver import HTTPServer, RequestMatcher
+from requests.exceptions import HTTPError
+from werkzeug import Response
 
 from lantern.lib.magic_distribution.client import (
     ArtefactHashMismatchError,
     ArtefactPermissionsNotSupportedError,
     DriveItemNotFoundError,
     DriveNotFoundError,
+    DuplicateArtefactError,
     MagicResourceDistributionClient,
     SiteNotFoundError,
 )
@@ -19,20 +25,34 @@ from lantern.lib.magic_distribution.models.artefact import (
     ArtefactLocalFile,
     ArtefactSharePointFile,
 )
-from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata
+from lantern.lib.magic_distribution.types import ArtefactMetadata
 
 if TYPE_CHECKING:
+    import logging
     from pathlib import Path
 
     from pytest_mock import MockerFixture
 
 
 class TestMagicResourceDistributionClient:
-    """Test MAGIC Resource Distribution service SharePoint client."""
+    """
+    Test MAGIC Resource Distribution service SharePoint client.
 
-    def test_init(self):
+    Tests for this class largely rely on VCR recordings made for real interactions, adapted to use fake entities.
+
+    To test new methods:
+    - configure the test to use real parameters
+    - update the `fx_lib_magic_dist_client` fixture to use real credentials and disable mocks
+    - record the test (see dev.md#pytest-recording)
+    - review the cassette and refactor to use faked values
+    - remove the first two exchanges (for getting an access token and drive ID), which are skipped in the mocked fixture
+    - restore the fixture and re-run the test to confirm
+    """
+
+    def test_init(self, fx_logger: logging.Logger):
         """Can initialise client with required parameters."""
         client = MagicResourceDistributionClient(
+            logger=fx_logger,
             tenant_id="x",
             app_client_id="x",
             app_client_secret="x",  # noqa: S106
@@ -43,9 +63,10 @@ class TestMagicResourceDistributionClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_graph_token(self):
+    def test_graph_token(self, fx_logger: logging.Logger):
         """Can get an MS Graph access token."""
         client = MagicResourceDistributionClient(
+            logger=fx_logger,
             tenant_id="x",
             app_client_id="x",
             app_client_secret="x",  # noqa: S106
@@ -56,9 +77,10 @@ class TestMagicResourceDistributionClient:
         assert len(result) > 0
 
     @pytest.mark.cov()
-    def test_drive_id(self, mocker: MockerFixture):
+    def test_drive_id(self, mocker: MockerFixture, fx_logger: logging.Logger):
         """Can lookup drive ID for configured library and site."""
         client = MagicResourceDistributionClient(
+            logger=fx_logger,
             tenant_id="x",
             app_client_id="x",
             app_client_secret="x",  # noqa: S106
@@ -70,13 +92,29 @@ class TestMagicResourceDistributionClient:
 
         assert client._drive_id == "x"
 
+    @pytest.mark.cov()
+    def test_request(self, fx_lib_magic_dist_client: MagicResourceDistributionClient, httpserver: HTTPServer):
+        """Can attach bearer token and content-type to a request."""
+        _route = "/"
+        _status = HTTPStatus.ACCEPTED
+        httpserver.expect_request(_route).respond_with_response(Response(status=_status))
+
+        fx_lib_magic_dist_client._request(method=HTTPMethod.HEAD, url=httpserver.url_for(_route))
+
+        httpserver.assert_request_made(RequestMatcher(_route))
+        for request, response in httpserver.iter_matching_requests(RequestMatcher(_route)):
+            assert request.headers["Authorization"] == f"Bearer {fx_lib_magic_dist_client._graph_token}"
+            assert request.headers["Accept"] == "application/json"
+            assert response.status_code == _status
+
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.parametrize("site_id", ["x", "missing"])
     @pytest.mark.parametrize("library_name", ["ok", "unknown"])
-    def test_get_drive_id(self, mocker: MockerFixture, site_id: str, library_name: str):
+    def test_get_drive_id(self, mocker: MockerFixture, fx_logger: logging.Logger, site_id: str, library_name: str):
         """Can get the MS Graph Drive ID for a SharePoint library within a site if it or the site exists."""
         client = MagicResourceDistributionClient(
+            logger=fx_logger,
             tenant_id="x",
             app_client_id="x",
             app_client_secret="x",  # noqa: S106
@@ -100,9 +138,10 @@ class TestMagicResourceDistributionClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    @pytest.mark.parametrize("drive_path", [None, "path/ok", "path/unknown"])
+    @pytest.mark.parametrize("item_id", [None, "x", "unknown"])
+    @pytest.mark.parametrize("item_path", [None, "path/ok", "path/unknown"])
     @pytest.mark.parametrize(
-        "drive_url",
+        "item_url",
         [
             None,
             "https://x.sharepoint.com/sites/x/Main/x/file.ext",
@@ -110,25 +149,45 @@ class TestMagicResourceDistributionClient:
         ],
     )
     def test_get_drive_item(
-        self, fx_lib_magic_dist_client: MagicResourceDistributionClient, drive_path: str | None, drive_url: str | None
+        self,
+        fx_lib_magic_dist_client: MagicResourceDistributionClient,
+        item_id: str | None,
+        item_path: str | None,
+        item_url: str | None,
     ):
         """Can get an MS Graph Drive Item within a given Drive at a given path, if it exists."""
-        if drive_path and drive_url:
-            with pytest.raises(ValueError, match=r"Drive path or URL required, both supplied."):
-                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+        if sum(value is not None for value in (item_id, item_path, item_url)) > 1:
+            with pytest.raises(ValueError, match=r"Only one of Drive Item ID, path or URL allowed, multiple supplied."):
+                fx_lib_magic_dist_client._get_drive_item(item_id=item_id, item_path=item_path, item_url=item_url)
             return
-        if not drive_path and not drive_url:
-            with pytest.raises(ValueError, match=r"Drive path or URL required, neither supplied."):
-                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+        if not item_id and not item_path and not item_url:
+            with pytest.raises(ValueError, match=r"Drive Item ID, path or URL required, none supplied."):
+                fx_lib_magic_dist_client._get_drive_item(item_path=item_path, item_url=item_url)
             return
 
-        if drive_path == "path/unknown" or drive_url == "https://x.sharepoint.com/sites/x/Main/x/unknown":
+        if (
+            item_id == "unknown"
+            or item_path == "path/unknown"
+            or item_url == "https://x.sharepoint.com/sites/x/Main/x/unknown"
+        ):
             with pytest.raises(DriveItemNotFoundError):
-                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+                fx_lib_magic_dist_client._get_drive_item(item_id=item_id, item_path=item_path, item_url=item_url)
             return
 
-        drive_id = fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+        drive_id = fx_lib_magic_dist_client._get_drive_item(item_id=item_id, item_path=item_path, item_url=item_url)
         assert len(drive_id) > 0
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_delete_drive_item(self, fx_lib_magic_dist_client: MagicResourceDistributionClient):
+        """Can delete an MS Graph Drive Item within a given Drive at a given path, if it exists."""
+        item_id = "x"
+
+        fx_lib_magic_dist_client._delete_drive_item(item_id=item_id)
+
+        # check
+        with pytest.raises(DriveItemNotFoundError):
+            fx_lib_magic_dist_client._get_drive_item(item_id=item_id)
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -147,7 +206,11 @@ class TestMagicResourceDistributionClient:
     @pytest.mark.vcr
     @pytest.mark.block_network
     def test_set_metadata(self, fx_lib_magic_dist_client: MagicResourceDistributionClient):
-        """Can set artefact metadata for a file as MS Graph list columns associated with a Drive Item."""
+        """
+        Can set artefact metadata for a file as MS Graph list columns associated with a Drive Item.
+
+        Note: conflict handling (for the artefact_id unique constraint) is tested in `test_upload_artefact` (conflict).
+        """
         expected = ArtefactMetadata(
             resource_id="x",
             artefact_id="x",
@@ -159,6 +222,22 @@ class TestMagicResourceDistributionClient:
 
         check = fx_lib_magic_dist_client._get_metadata(item_id="x")
         assert check["artefact_fmt"] == expected["artefact_fmt"]
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_set_metadata_invalid_error(self, fx_lib_magic_dist_client: MagicResourceDistributionClient):
+        """Cannot detect unique constraint error if error is not JSON encoded."""
+        with pytest.raises(JSONDecodeError):
+            fx_lib_magic_dist_client._set_metadata(item_id="x", metadata={})
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_set_metadata_other_error(self, fx_lib_magic_dist_client: MagicResourceDistributionClient):
+        """Can pass through non-constraint errors."""
+        with pytest.raises(HTTPError):
+            fx_lib_magic_dist_client._set_metadata(item_id="x", metadata={})
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -209,7 +288,7 @@ class TestMagicResourceDistributionClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    @pytest.mark.parametrize("state", ["new", "existing", "updated", "hash-miss", "broken-large"])
+    @pytest.mark.parametrize("state", ["new", "existing", "updated", "hash-miss", "broken-large", "conflict"])
     def test_upload_artefact(
         self,
         tmp_path: Path,
@@ -220,10 +299,14 @@ class TestMagicResourceDistributionClient:
         """
         Can upload big and small files as Drive Items where they don't exist or match hash value.
 
-        Implicitly tests `_upload_small_file()` and `_upload_big_file()` ('updated') methods.
+        Implicitly tests:
+        - `_upload_small_file()` and `_upload_big_file()` ['updated' case] methods
+        - `_set_metadata()` where duplicate artefact IDs are encountered ['conflict' case]
 
-        'hash_miss' checks an edge case where the remote file has a different hash to the original (see cassette).
-        'broken-large' checks an edge case where a chunked large upload fails to upload an empty file.
+        Tests these edge cases:
+        - 'hash_miss' where the remote file has a different hash to the original (see cassette)
+        - 'broken-large' where a chunked large upload fails to upload an empty file
+        - 'conflict' where an artefact with the same hash but different name is uploaded (duplicate artefact ID)
         """
         if state == "updated":
             with fx_lib_artefact_file._artefact.open(mode="a") as f:
@@ -244,6 +327,14 @@ class TestMagicResourceDistributionClient:
 
         if state == "hash-miss":
             with pytest.raises(ArtefactHashMismatchError):
+                _ = fx_lib_magic_dist_client._upload_artefact(artefact=fx_lib_artefact_file, unrestricted=False)
+            return
+
+        if state == "conflict":
+            fx_lib_artefact_file._artefact = fx_lib_artefact_file._artefact.rename(
+                fx_lib_artefact_file._artefact.with_stem("file-alt")
+            )
+            with pytest.raises(DuplicateArtefactError):
                 _ = fx_lib_magic_dist_client._upload_artefact(artefact=fx_lib_artefact_file, unrestricted=False)
             return
 
@@ -292,6 +383,15 @@ class TestMagicResourceDistributionClient:
         mocker.patch.object(fx_lib_magic_dist_client, "_get_drive_item", return_value=None)
 
         assert fx_lib_magic_dist_client.lookup_artefact(url="x") == fx_lib_artefact_sharepoint
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.cov()
+    def test_get_resource_artefacts(self, fx_lib_magic_dist_client: MagicResourceDistributionClient):
+        """Can get all artefacts associated with a resource ID."""
+        results = fx_lib_magic_dist_client.get_resource_artefacts(resource_id="x")
+        assert len(results) > 0
+        assert all(isinstance(r, ArtefactSharePointFile) for r in results)
 
     @pytest.mark.vcr
     @pytest.mark.block_network

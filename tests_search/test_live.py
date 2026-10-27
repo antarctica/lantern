@@ -1,4 +1,5 @@
 from algoliasearch.search.client import SearchClientSync
+from algoliasearch.search.models import SearchResponse
 from dotenv import dotenv_values
 
 from lantern.config import Config
@@ -26,7 +27,25 @@ class TestLiveSearch:
             api_key=env["LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY"],
         )
 
+    def _query(self, query: str) -> SearchResponse:
+        """Helper to query the search index."""
+        return self._client.search_single_index(
+            index_name=self._index, search_params={"query": query, "analytics": False}
+        )
+
     def test_empty_query(self):
-        """An empty query returns at least some results."""
-        results = self._client.search_single_index(index_name=self._index, search_params={})
-        assert len(results.hits) > 0
+        """Can get at least some results for an empty (unfiltered) query."""
+        result = self._query(query="")
+        assert len(result.hits) > 0
+
+    def test_exact_match(self):
+        """Can get an expected result for a known, unique, item title."""
+        result = self._query(query="Falkland Islands overview map")
+        assert len(result.hits) == 1
+        assert result.hits[0].object_id == "a39d3502-55a1-4e18-8f67-fcf14b23485e"
+
+    def test_misspelt_match(self):
+        """Can get an expected result for a known, unique, misspelt item title."""
+        result = self._query(query="Fallkand Inlands overveiw map")
+        assert len(result.hits) == 1
+        assert result.hits[0].object_id == "a39d3502-55a1-4e18-8f67-fcf14b23485e"

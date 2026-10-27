@@ -443,8 +443,12 @@ class Identifiers(list[Identifier]):
         return [converter.unstructure(identifier) for identifier in self]
 
     def filter(self, namespace: str) -> Identifiers:
-        """Filter identifiers by namespace."""
+        """Filter identifiers by namespace, returning matching identifiers."""
         return Identifiers([identifier for identifier in self if identifier.namespace == namespace])
+
+    def without(self, namespace: str) -> Identifiers:
+        """Filter identifiers by namespace, returning non-matching identifiers."""
+        return Identifiers([identifier for identifier in self if identifier.namespace != namespace])
 
     def ensure(self, identifier: Identifier) -> None:
         """Add identifier without creating duplicates."""
@@ -669,24 +673,20 @@ class Constraints(list[Constraint]):
         """
         Filter constraints by exact match, href and/or type(s) and/or restriction(s), returning non-matching constraints.
 
-        Conditions use logical AND, i.e. constraints will be returned unless they match a href and type(s) if specified.
-        Types/restrictions use logical OR for multiple values.
+        Conditions use logical AND. Types and restrictions use logical OR for multiple values.
 
-        Combining exact matches to exclude (via `constraints`) with other conditions will give unexpected results and
-        isn't supported.
+        Combining exact matches to exclude (via `constraints`) with other conditions is unsupported.
         """
         constraints = [constraints] if isinstance(constraints, Constraint) else constraints
         types = [types] if isinstance(types, ConstraintTypeCode) else types
         restrictions = [restrictions] if isinstance(restrictions, ConstraintRestrictionCode) else restrictions
 
         return Constraints(
-            c
-            for c in self
+            constraint
+            for constraint in self
             if not (
-                (constraints is None or c in constraints)
-                and (href is None or c.href == href)
-                and (types is None or c.type in types)
-                and (restrictions is None or c.restriction_code in restrictions)
+                (constraints is None or constraint in constraints)
+                and constraint.matches_filter(href=href, types=types, restrictions=restrictions)
             )
         )
 

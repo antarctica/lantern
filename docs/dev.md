@@ -56,7 +56,7 @@ To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
    group to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#amazon-web-services)
 2. as a GitLab administrator impersonating the GitLab bot user, create a
    [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: `lantern-conwat`
+   - token name: `lantern-dev-$USER` (e.g. `lantern-dev-conwat)
    - scopes: *api*
 3. for [Trusted Publishing](/docs/architecture.md#trusted-publishing):
    - ensure you can access the catalogue directory within the Ops Data Store web root

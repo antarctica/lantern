@@ -116,3 +116,11 @@ UKRI_RIGHTS_HOLDER = Contact(
     ),
     role={ContactRoleCode.RIGHTS_HOLDER},
 )
+
+PDC_DISTRIBUTOR = make_bas_role(
+    roles={ContactRoleCode.DISTRIBUTOR},
+    team_name="UK Polar Data Centre",
+    team_email="PDCServiceDesk@bas.ac.uk",
+    team_url="https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
+    team_url_title="UK Polar Data Centre (UK PDC)",
+)

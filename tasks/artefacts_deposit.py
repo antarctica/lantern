@@ -306,6 +306,7 @@ def main() -> None:
     """Entrypoint."""
     logger, config, _catalogue = init()
     deposit_client = MagicResourceDistributionClient(
+        logger=logger,
         tenant_id=config.DEPOSIT_TENANT_ID,
         app_client_id=config.DEPOSIT_CLIENT_ID,
         app_client_secret=config.DEPOSIT_CLIENT_SECRET,

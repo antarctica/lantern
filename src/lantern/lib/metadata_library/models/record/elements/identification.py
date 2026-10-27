@@ -139,7 +139,7 @@ class Aggregations(list[Aggregation]):
         initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
     ) -> Aggregations:
         """
-        Filter aggregations by namespace, identifier and/or association(s) and/or initiative(s).
+        Filter aggregations by namespace, identifier and/or association(s) and/or initiative(s), returning matching constraints.
 
         Conditions use logical AND, i.e. aggregations must match a namespace and association(s) if specified.
         Associations/initiatives use logical OR for multiple values.
@@ -155,6 +155,33 @@ class Aggregations(list[Aggregation]):
                     namespace=namespace, identifiers=identifiers, associations=associations, initiatives=initiatives
                 )
             ]
+        )
+
+    def without(
+        self,
+        namespace: str | None = None,
+        identifiers: str | list[str] | None = None,
+        associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
+        initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
+    ) -> Aggregations:
+        """
+        Filter aggregations by namespace, identifier(s), association(s) and/or initiative(s), returning non-matching aggregations.
+
+        Conditions use logical AND; multiple associations or initiatives use logical OR.
+        """
+        identifiers = [identifiers] if isinstance(identifiers, str) else identifiers
+        associations = [associations] if isinstance(associations, AggregationAssociationCode) else associations
+        initiatives = [initiatives] if isinstance(initiatives, AggregationInitiativeCode) else initiatives
+
+        return Aggregations(
+            aggregation
+            for aggregation in self
+            if not aggregation.matches_filter(
+                namespace=namespace,
+                identifiers=identifiers,
+                associations=associations,
+                initiatives=initiatives,
+            )
         )
 
     def ensure(self, aggregation: Aggregation) -> None:

@@ -401,6 +401,41 @@ class TestAggregations:
         assert result == unordered(expected)
 
     @pytest.mark.parametrize(
+        ("conditions", "expected"),
+        [
+            (
+                {"namespace": "x", "associations": AggregationAssociationCode.CROSS_REFERENCE},
+                [test_filter_b, test_filter_d],
+            ),
+            (
+                {"namespace": "x", "initiatives": AggregationInitiativeCode.CAMPAIGN},
+                [test_filter_a, test_filter_b, test_filter_d],
+            ),
+            (
+                {"identifiers": ["y"]},
+                [test_filter_a, test_filter_b, test_filter_c, test_filter_d],
+            ),
+            (
+                {"initiatives": AggregationInitiativeCode.CAMPAIGN},
+                [test_filter_a, test_filter_b],
+            ),
+            (
+                {"associations": [AggregationAssociationCode.CROSS_REFERENCE, AggregationAssociationCode.SERIES]},
+                [],
+            ),
+        ],
+    )
+    def test_without(self, conditions: dict, expected: list[Aggregation]):
+        """Can filter out aggregations matching namespace and/or identifier(s) and/or association(s) and/or initiative(s)."""
+        aggregations = Aggregations(
+            [self.test_filter_a, self.test_filter_b, self.test_filter_c, self.test_filter_d, self.test_filter_e]
+        )
+
+        result = aggregations.without(**conditions)
+
+        assert result == unordered(expected)
+
+    @pytest.mark.parametrize(
         ("excluded", "expected"),
         [
             (None, [test_filter_a.identifier.identifier]),

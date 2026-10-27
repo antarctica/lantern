@@ -66,6 +66,26 @@ class TestArtefactsFormats:
         assert isinstance(result, ArtefactFormat)
         assert result.label == expected_label
 
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("label", "expected"),
+        [(ArtefactFormatLabel.CSV, True), (ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE, False)],
+    )
+    def test_is_for_file(self, label: ArtefactFormatLabel, expected: bool):
+        """Can determine if an ArtefactFormat relates to file types."""
+        format_ = ArtefactFormats.get_by_label(label)
+        assert ArtefactFormats.is_for_file(format_) == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("label", "expected"),
+        [(ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE, True), (ArtefactFormatLabel.CSV, False)],
+    )
+    def test_is_for_service(self, label: ArtefactFormatLabel, expected: bool):
+        """Can determine if an ArtefactFormat relates to service types."""
+        format_ = ArtefactFormats.get_by_label(label)
+        assert ArtefactFormats.is_for_service(format_) == expected
+
     def test_supported_extensions(self):
         """Can get a flattened set of supported file extensions."""
         result = ArtefactFormats().supported_extensions

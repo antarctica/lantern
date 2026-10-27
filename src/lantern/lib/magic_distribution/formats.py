@@ -347,6 +347,16 @@ class ArtefactFormats:
         """
         return {type_ for format_ in self.file_formats for type_ in format_.media_types}
 
+    @classmethod
+    def is_for_file(cls, format_: ArtefactFormat) -> bool:
+        """Whether format represents a file format as opposed to a service."""
+        return format_ in cls.file_formats
+
+    @classmethod
+    def is_for_service(cls, format_: ArtefactFormat) -> bool:
+        """Whether format represents a service format as opposed to a file."""
+        return format_ in cls.service_formats
+
     @staticmethod
     def _check_file_geojson(file: IO[bytes]) -> bool:
         """Check if a JSON file is GeoJSON."""

@@ -164,6 +164,33 @@ class TestDistributions:
         before.ensure(value)
         assert before == after
 
+    _test_filter_to = transfer_option = TransferOption(
+        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+    )
+    _test_filter_db = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR})
+    test_filter_a = Distribution(
+        format=Format(format="x", href="a"), distributor=_test_filter_db, transfer_option=_test_filter_to
+    )
+    test_filter_b = Distribution(
+        format=Format(format="x", href="b"), distributor=_test_filter_db, transfer_option=_test_filter_to
+    )
+    test_filter_c = Distribution(
+        format=Format(format="x", href="c"), distributor=_test_filter_db, transfer_option=_test_filter_to
+    )
+
+    @pytest.mark.parametrize(
+        ("formats", "expected"),
+        [
+            ([], Distributions([])),
+            ("a", Distributions([test_filter_a])),
+            (["a", "b"], Distributions([test_filter_a, test_filter_b])),
+        ],
+    )
+    def test_filter(self, formats: str | list[str], expected: Distributions):
+        """Can filter distribution options by format href values."""
+        value = Distributions([self.test_filter_a, self.test_filter_b, self.test_filter_c])
+        assert value.filter(format_hrefs=formats) == expected
+
     def test_structure(self):
         """Can create a Distribution options container by converting a list of plain types."""
         expected = Distributions(

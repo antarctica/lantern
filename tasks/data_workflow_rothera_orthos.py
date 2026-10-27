@@ -1166,6 +1166,7 @@ def main() -> None:
     s3 = init_s3(config)
     cdn_client = S3Exporter(logger=logger, s3=s3, bucket=cdn_bucket, parallel_jobs=1)
     deposit_client = MagicResourceDistributionClient(
+        logger=logger,
         tenant_id=config.DEPOSIT_TENANT_ID,
         app_client_id=config.DEPOSIT_CLIENT_ID,
         app_client_secret=config.DEPOSIT_CLIENT_SECRET,

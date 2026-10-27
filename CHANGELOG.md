@@ -73,6 +73,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Ensuring record changes from `zap-records` development tasks validate
 * Styling to ensure visual separation between consecutive admonition elements
 * Refactored ArcGIS web map and web scene distribution options
+* Additional filtering methods for distribution options, identifiers and aggregations in BAS Metadata Library lib
+* PDC contact preset in BAS Metadata Library lib
 
 ### Changed
 

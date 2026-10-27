@@ -143,3 +143,8 @@ class Distributions(list[Distribution]):
             return
 
         self.append(distribution)
+
+    def filter(self, format_hrefs: str | list[str]) -> Distributions:
+        """Filter distribution options by format href values."""
+        format_hrefs: list[str] = [format_hrefs] if isinstance(format_hrefs, str) else format_hrefs
+        return Distributions([d for d in self if d.format and d.format.href and d.format.href in format_hrefs])

@@ -872,6 +872,15 @@ class TestIdentifiers:
         result = identifiers.filter(identifier.namespace)
         assert result == expected
 
+    def test_without_namespace(self):
+        """Can filter identifiers to exclude a namespace."""
+        identifier = Identifier(identifier="x", href="x", namespace="a")
+        identifiers = Identifiers([identifier, Identifier(identifier="x", href="x", namespace="b")])
+        expected = Identifiers([Identifier(identifier="x", href="x", namespace="b")])
+
+        result = identifiers.without(identifier.namespace)
+        assert result == expected
+
     test_ensure_id = Identifier(identifier="x", href="x", namespace="x")
 
     @pytest.mark.parametrize(

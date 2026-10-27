@@ -134,6 +134,7 @@ workflow-rothera-orthos = { cmd = "python -m tasks.data_workflow_rothera_orthos"
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 deprecate-record = { cmd = "python -m tasks.record_deprecate", help = "Indicate a record is deprecated without a replacement" }
 supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
+retire-record = { cmd = "python -m tasks.record_retire", help = "Indicate a record is retired and no longer available" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
 restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions/constraints for a record" }

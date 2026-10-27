@@ -27,6 +27,7 @@ workflow-rothera-orthos  Process Rothera progress monitoring orthomosaics
 clone-record             Clone record from cache into import directory
 deprecate-record         Indicate a record is deprecated without a replacement
 supersede-record         Indicate a new record is the successor to another
+retire-record            Indicate a record is retired and no longer available
 issues-record            Set GitLab issues for a record
 admin-record             View administrative metadata for a record
 restrict-record          Set access permissions/constraints for a record
@@ -170,7 +171,9 @@ Indicate a new record is deprecated but still available for use.
 ```
 
 > [!TIP]
-> See the [`supersede-record`](#supersede-record) command to if the record has a replacement/successor.
+> See the [`supersede-record`](#supersede-record) command if the record has a replacement/successor.
+>
+> See the [`retire-record`](#retire-record) command if the record should no longer be used.
 
 These fields are updated in the record:
 
@@ -219,6 +222,34 @@ Examples:
 ```shell
 # set current and successor records, without interaction
 % task supersede-record --force --current 76c35d79-3611-4a12-adbc-8a1ce45200df --successor ./import/88d2ff3f-b159-42a4-826d-183c5c5dde70.json
+```
+
+### `retire-record`
+
+Indicate a new record is retired and unavailable for use.
+
+```shell
+% task retire-record --help
+```
+
+> [!TIP]
+> See the [`deprecate-record`](#supersede-record) command if the record is still available for use.
+
+These fields are updated in the record:
+
+- `identification.dates.unavailable` (set to the current date)
+- `identification.maintenance.progress` (set as retired)
+- `identification.abstract` (caution that record is retired)
+- `identification.distribution` (any options removed)
+
+> [!NOTE]
+> Distribution options are only removed from the record, not underlying data access systems or other external resources.
+
+Examples:
+
+```shell
+# set record without interaction and a custom message
+% task retire-record --force --record ./import/542c4a8a-acb9-4139-8c44-87263a86709a.json --message 'See ... for an alternative.'
 ```
 
 ### `issues-record`

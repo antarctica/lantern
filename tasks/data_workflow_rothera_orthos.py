@@ -38,18 +38,8 @@ from lantern.lib.magic_distribution.models.artefact import (
     ArtefactLocalFile,
     ArtefactSharePointFile,
 )
-from lantern.lib.metadata_library.models.record.elements.common import (
-    Constraints,
-    Date,
-    Dates,
-    OnlineResource,
-)
+from lantern.lib.metadata_library.models.record.elements.common import Constraints, Date, Dates
 from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
-from lantern.lib.metadata_library.models.record.elements.distribution import (
-    Distribution,
-    Size,
-    TransferOption,
-)
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Extent,
     Extents,
@@ -61,7 +51,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ContactRoleCode,
     HierarchyLevelCode,
-    OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import (
     BAS_STAFF as BAS_STAFF_PERMISSION,
@@ -75,7 +64,7 @@ from lantern.lib.metadata_library.models.record.presets.aggregations import (
 )
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagic
 from lantern.lib.metadata_library.models.record.presets.constraints import BAS_STAFF, MAGIC_PRODUCTS_V1
-from lantern.lib.metadata_library.models.record.presets.contacts import MICROSOFT_DISTRIBUTOR, make_bas_role
+from lantern.lib.metadata_library.models.record.presets.contacts import make_bas_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 
@@ -556,16 +545,9 @@ def _file_artefact_distribution_options(event: EventProvisioned) -> None:
     for artefact in [event.geotiff_file_artefact, event.jpeg_file_artefact]:
         cde_ref = event.cde_ref_geotiff if artefact.format_label == ArtefactFormatLabel.GEOTIFF else event.cde_ref_jpeg
         description = f"BAS Construction Partners CDE reference: {cde_ref}" if cde_ref else None
-        dist_opt = Distribution(
-            format=artefact.distribution_format,
-            distributor=MICROSOFT_DISTRIBUTOR,
-            transfer_option=TransferOption(
-                size=Size(unit="bytes", magnitude=artefact.size_bytes),
-                online_resource=OnlineResource(
-                    href=artefact.url, description=description, function=OnlineResourceFunctionCode.DOWNLOAD
-                ),
-            ),
-        )
+
+        dist_opt = artefact.distribution_option
+        dist_opt.transfer_option.online_resource.description = description
         event.record.distribution.ensure(dist_opt)
 
 

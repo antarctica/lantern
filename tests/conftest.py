@@ -39,7 +39,12 @@ from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemPrope
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
-from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
+from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
+from lantern.lib.magic_distribution.models.artefact import (
+    ArtefactArcGisService,
+    ArtefactLocalFile,
+    ArtefactSharePointFile,
+)
 from lantern.lib.magic_distribution.types import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
@@ -1348,6 +1353,14 @@ def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> A
         properties=fx_lib_arcgis_item_properties,
         sharing_level=ArcGisSharingLevel.PRIVATE,
     )
+
+
+@pytest.fixture()
+def fx_lib_arcgis_service_artefact(fx_lib_arcgis_item: ArcGisItem) -> ArtefactArcGisService:
+    """Service artefact for an ArcGIS Item."""
+    format_label_item = ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_FEATURE_LAYER).label
+
+    return ArtefactArcGisService(resource_id="x", item=fx_lib_arcgis_item, format_label=format_label_item)
 
 
 @pytest.fixture()

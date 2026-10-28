@@ -13,11 +13,7 @@ from tasks._shared import dump_records, init, parse_records, pick_local_record
 from lantern.lib.magic_distribution.client import DuplicateArtefactError, MagicResourceDistributionClient
 from lantern.lib.magic_distribution.formats import ArtefactFormatNotSupportedError, ArtefactFormatUnknownError
 from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
-from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Size, TransferOption
-from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.presets.contacts import MICROSOFT_DISTRIBUTOR
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 
@@ -214,19 +210,7 @@ def _update_record(logger: logging.Logger, record: Record, artefacts: list[Artef
 
     for artefact in artefacts:
         logger.info("Adding distribution option for %s ...", repr(artefact))
-        dist_opt = Distribution(
-            format=artefact.distribution_format,
-            transfer_option=TransferOption(
-                online_resource=OnlineResource(
-                    href=artefact.url,
-                    title=artefact.format.name,
-                    description=artefact.format.description,
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                ),
-                size=Size(unit="bytes", magnitude=artefact.size_bytes),
-            ),
-            distributor=MICROSOFT_DISTRIBUTOR,
-        )
+        dist_opt = artefact.distribution_option
 
         if dist_opt in record.distribution:
             logger.info("Distribution option is already in record, skipping")

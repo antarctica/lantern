@@ -89,6 +89,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring checks for MAGIC Resource Distribution hosted files to use SharePoint client
 * Refactoring BAS (un)trusted sub-catalogues to not inherit from `BaseCatalogue` to avoid poor fit
 * Refactoring `Site` to use a record access protocol, decoupling from using a `Store` directly
+* Improving `zap-records` to stage artefacts for deposit where using legacy hosting
 
 ### Removed
 

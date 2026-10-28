@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import requests
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from tasks._shared import dump_records, init, parse_records
 
@@ -615,9 +616,38 @@ def _set_metadata_maintenance(logger: logging.Logger, records: list[Record]) -> 
             logger.info("Maintenance frequency set to %s.", _frequency.name)
 
 
+def _pull_artefacts(logger: logging.Logger, records: list[Record], artefacts_path: Path) -> list[str]:
+    """Download any file distribution options using legacy hosting and report a list of paths to delete."""
+    _prefix_url = "https://files.bas.ac.uk/felnne_download"
+    _delete_urls = []
+
+    for record in records:
+        for dist_opt in record.distribution:
+            if dist_opt.transfer_option.online_resource.href.startswith(_prefix_url):
+                href = dist_opt.transfer_option.online_resource.href
+                logger.info("Dist option references scratch hosting, downloading...")
+                logger.info(href)
+                res = requests.get(url=href, timeout=30)
+
+                path = artefacts_path / str(record.file_identifier) / href.split("/")[-1]
+                logger.info("Saving as: %s", path.resolve())
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with path.open(mode="wb") as f:
+                    f.write(res.content)
+
+                _delete_urls.append(href)
+                dist_opt.transfer_option.online_resource.href = ""
+
+    return [f"~/external_html{url.replace(_prefix_url, '')}" for url in _delete_urls]
+
+
 def process_zap_records(
-    logger: logging.Logger, records: list[Record], catalogue: BasCatalogue, admin_keys: AdministrationKeys
-) -> list[Record]:
+    logger: logging.Logger,
+    records: list[Record],
+    catalogue: BasCatalogue,
+    admin_keys: AdministrationKeys,
+    base_path: Path,
+) -> tuple[list[Record], list[str]]:
     """
     Process records as needed.
 
@@ -626,6 +656,7 @@ def process_zap_records(
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
+
     _add_metadata_constraints(logger=logger, records=records)
     _fix_dates(logger=logger, records=records)
     _add_rights_holder(logger=logger, records=records)
@@ -639,6 +670,7 @@ def process_zap_records(
     _set_metadata_maintenance(logger=logger, records=records)
     _process_distribution_formats(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
+    files_to_delete = _pull_artefacts(logger=logger, records=records, artefacts_path=base_path.joinpath("artefacts"))
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_resource_constraints(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(
@@ -649,7 +681,7 @@ def process_zap_records(
     for record in [*records, *additional_records]:
         record.validate()
 
-    return additional_records
+    return additional_records, files_to_delete
 
 
 def parse_zap_records(
@@ -687,14 +719,23 @@ def main() -> None:
     """Entrypoint."""
     logger, config, catalogue = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
+    base_path = Path(__file__).parent.parent
 
-    input_path = Path("./import")
+    input_path = base_path / "./import"
     logger.info("Loading records from: '%s'", input_path.resolve())
     record_paths = parse_zap_records(logger=logger, admin_keys=admin_keys, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
-    records.extend(process_zap_records(logger=logger, records=records, catalogue=catalogue, admin_keys=admin_keys))
+    _records, files_to_delete = process_zap_records(
+        logger=logger, records=records, catalogue=catalogue, admin_keys=admin_keys, base_path=base_path
+    )
+    records.extend(_records)
     dump_records(logger=logger, records=records, output_path=input_path)
     clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
+
+    if files_to_delete:
+        logger.warning("Delete these files on the SAN:")
+        for f in files_to_delete:
+            logger.info(f)
 
 
 if __name__ == "__main__":

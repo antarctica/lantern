@@ -96,6 +96,17 @@ def _check_artefacts(logger: logging.Logger, artefacts_path: Path) -> list[Resul
     return results
 
 
+def _format_results(logger: logging.Logger, results: list[Result]) -> None:
+    """Return artefact check results."""
+    fmt_padding = max(len(s) for s in [str(x.format.name if x.format else "") for x in results]) + 1
+
+    for result in results:
+        fmt = result.format.name if result.format else ""
+        logger.info("%s %s %s %s", result.status, fmt.ljust(fmt_padding, " "), result.path.resolve(), result.msg or "")
+        if result.status != "✅":
+            logger.info("  ext: %s", result.ext)
+
+
 def main() -> None:
     """Entrypoint."""
     logger, _config, _catalogue = init()
@@ -104,13 +115,7 @@ def main() -> None:
     artefacts_path, params = _get_args(cli_args=cli_args)
 
     results = _check_artefacts(logger=logger, artefacts_path=artefacts_path)
-    fmt_padding = max(len(s) for s in [str(x.format.name if x.format else "") for x in results]) + 1
-
-    for result in results:
-        fmt = result.format.name if result.format else ""
-        logger.info("%s %s %s %s", result.status, fmt.ljust(fmt_padding, " "), result.path.resolve(), result.msg or "")
-        if result.status != "✅":
-            logger.info("  ext: %s", result.ext)
+    _format_results(logger=logger, results=results)
 
     logger.info("Re-run as: '%s'", params)
 

@@ -15,6 +15,7 @@ from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, get_record, init
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
+from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record as CatalogueRecord
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
     from lantern.catalogues.bas import BasCatalogue
-    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, str | None, str | None, str | None]:
@@ -66,7 +66,6 @@ def _get_cli_args() -> tuple[bool, Path, str | None, str | None, str | None]:
 
 
 def _get_args(
-    logger: logging.Logger,
     cat: BasCatalogue,
     cli_args: tuple[bool, Path, str | None, str | None, str | None],
 ) -> tuple[Path, str, str, str, str]:
@@ -113,8 +112,14 @@ def _clone_record(
     Replaces the metadata datestamp, file identifier, catalogue identifier and administrative metadata identifier only.
 
     Other references to the original record such as other identifiers, citations, etc. are not changed.
+
+    Source record is downgraded to base metadata library `Record` if needed for consistency and to support workflows
+    that need to work with records that don't yet meet additional Catalogue requirements.
     """
     logger.info("Cloning record [%s] as [%s]", source_record.file_identifier, new_identifier)
+
+    if isinstance(source_record, CatalogueRecord):
+        source_record = Record.loads(source_record.dumps(strip_admin=False))
     cloned_record = deepcopy(source_record)
 
     # datestamp
@@ -136,10 +141,7 @@ def _clone_record(
     admin_meta.id = cloned_record.file_identifier
     set_admin(keys=admin_keys, record=cloned_record, admin_meta=admin_meta)
 
-    # validate against catalogue requirements
-    record = CatalogueRecord.loads(cloned_record.dumps(strip_admin=False))
-    record.validate()
-
+    cloned_record.validate()
     return cloned_record
 
 
@@ -148,7 +150,7 @@ def main() -> None:
     logger, config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, source_ref, target_id, params = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    import_path, branch, source_ref, target_id, params = _get_args(cat=catalogue, cli_args=cli_args)
 
     source_record = get_record(logger=logger, cat=catalogue, reference=source_ref, branch=branch)
     target_identifier = _get_new_identifier(identifier=target_id)

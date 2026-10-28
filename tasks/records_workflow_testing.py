@@ -271,7 +271,16 @@ def _zap(logger: logging.Logger, cat: BasCatalogue, admin_keys: AdministrationKe
         record.hierarchy_level = HierarchyLevelCode(ptype)
         logger.info("Hierarchy level set to '%s' for record [%s].", record.hierarchy_level, record.file_identifier)
 
-    records.extend(zap_process_records(logger=logger, records=records, catalogue=cat, admin_keys=admin_keys))
+    _base_path = Path(__file__).parent.parent
+    records.extend(
+        zap_process_records(
+            logger=logger,
+            records=records,
+            catalogue=cat,
+            admin_keys=admin_keys,
+            base_path=_base_path,
+        )[0]
+    )
     zap_dump_records(logger=logger, records=records, output_path=import_path)
     zap_clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
 
@@ -347,9 +356,7 @@ def _merge_request(
     description_lines = [
         f"Created for records related to {issue_href}.",
         "Created by the experimental MAGIC Lantern [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow).",
-        "```",
-        f"% task select-records --force --branch {branch} --record {','.join(identifiers)}",
-        "```",
+        f"```\ntask select-records --force --branch {branch} --record {','.join(identifiers)}\n```",
         "/draft",
         f"/assign {answers['assignee']}",
         f"/assign_reviewer {answers['reviewer']}",

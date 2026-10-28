@@ -52,7 +52,7 @@ def _get_cli_args() -> tuple[bool, bool, Path, Path | None, Path | None]:
         "-p",
         type=Path,
         default=Path("./import"),
-        help="Directory to save current and successor records to. Will use default if omitted.",
+        help="Directory to save updated records to. Will use default if omitted.",
     )
     parser.add_argument(
         "--record",

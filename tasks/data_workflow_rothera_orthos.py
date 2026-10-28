@@ -535,9 +535,13 @@ def _supersede_records(logger: logging.Logger, events: list[EventProvisioned]) -
             successor.file_identifier if successor else "Nothing",
         )
         if predecessor:
-            process_predecessor(logger=logger, record=predecessor.record, successor=subject.record, replace=False)  # ty: ignore[invalid-argument-type]
+            process_predecessor(
+                logger=logger, record=predecessor.record, successor=subject.record, replace_collections=False
+            )  # ty: ignore[invalid-argument-type]
         if successor:
-            process_successor(logger=logger, record=successor.record, predecessor=subject.record, replace=False)  # ty: ignore[invalid-argument-type]
+            process_successor(
+                logger=logger, record=successor.record, predecessor=subject.record, replace_collections=False
+            )  # ty: ignore[invalid-argument-type]
 
 
 def _file_artefact_distribution_options(event: EventProvisioned) -> None:

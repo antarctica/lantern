@@ -15,7 +15,7 @@ from tasks._shared import dump_records, get_record, init, parse_records, pick_lo
 from tasks.records_zap import revise_record
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Aggregations
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
@@ -24,13 +24,14 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_revision_of
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.models.item.base.item import ItemBase
+from lantern.models.record.const import ALIAS_NAMESPACE
 from lantern.models.record.record import Record
 
 if TYPE_CHECKING:
     from lantern.catalogues.bas import BasCatalogue
 
 
-def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | None]:
+def _get_cli_args() -> tuple[bool, bool, bool, Path, str | None, str | None, Path | None]:
     """Get command line arguments."""
     parser = ArgumentParser(description="Indicate a record is a successor to an existing record.")
     parser.add_argument(
@@ -40,10 +41,16 @@ def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | No
         help="Force save path, branch and current identifier to defaults, and successor record selection to CLI argument.",
     )
     parser.add_argument(
-        "--replace",
-        "-r",
+        "--replace-in-collections",
+        "-rc",
         action="store_true",
         help="Replace references to current record in collections with successor Will keep both if omitted.",
+    )
+    parser.add_argument(
+        "--replace-aliases",
+        "-ra",
+        action="store_true",
+        help="Move aliases from current record to successor Will keep both if omitted.",
     )
     parser.add_argument(
         "--path",
@@ -72,19 +79,36 @@ def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | No
         help="Optional path to successor record config file. Will interactively prompt if omitted.",
     )
     args = parser.parse_args()
-    return args.force, args.replace, args.path, args.branch, args.current, args.successor
+    return (
+        args.force,
+        args.replace_in_collections,
+        args.replace_aliases,
+        args.path,
+        args.branch,
+        args.current,
+        args.successor,
+    )
 
 
 def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
-    cli_args: tuple[bool, bool, Path, str | None, str | None, Path | None],
-) -> tuple[Path, str, str, Record, bool, str]:
+    cli_args: tuple[bool, bool, bool, Path, str | None, str | None, Path | None],
+) -> tuple[Path, str, str, Record, bool, bool, str]:
     """Get task inputs, interactively if needed/allowed."""
-    cli_force, cli_replace, cli_path, cli_branch, cli_current_ref, cli_successor_path = cli_args
+    (
+        cli_force,
+        cli_replace_collections,
+        cli_replace_aliases,
+        cli_path,
+        cli_branch,
+        cli_current_ref,
+        cli_successor_path,
+    ) = cli_args
 
     path = cli_path
-    replace = cli_replace
+    replace_collections = cli_replace_collections
+    replace_aliases = cli_replace_aliases
     branch = cli_branch or cat.repo.gitlab_default_branch
     current_ref = cli_current_ref
     successor_path = cli_successor_path or None
@@ -101,8 +125,12 @@ def _get_args(
         current_ref = inquirer.text(message="Current record reference", default=current_ref)
         if not successor_path:
             successor_record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
-        replace: bool = (
+        replace_collections: bool = (
             inquirer.list_input("Replace references to current record?", choices=["Yes", "No"], default="Yes") == "Yes"
+        )
+        replace_aliases: bool = (
+            inquirer.list_input("Move aliases from current record to successor?", choices=["Yes", "No"], default="Yes")
+            == "Yes"
         )
     else:
         if cli_successor_path is None:
@@ -128,13 +156,16 @@ def _get_args(
     except KeyError:
         msg = f"File for record '{successor_record.file_identifier}' not found"
         raise FileNotFoundError(msg) from None
-    _replace = " --replace" if replace else ""
-    params = f"task supersede-record --force{_replace} --path {path.resolve()} --branch {branch} --current {current_ref} --successor {successor_path.resolve()}"
+    _replace_c = " --replace-in-collections" if replace_collections else ""
+    _replace_a = " --replace-aliases" if replace_aliases else ""
+    params = f"task supersede-record --force{_replace_c}{_replace_a} --path {path.resolve()} --branch {branch} --current {current_ref} --successor {successor_path.resolve()}"
 
-    return path, branch, current_ref, successor_record, replace, params
+    return path, branch, current_ref, successor_record, replace_collections, replace_aliases, params
 
 
-def process_successor(logger: logging.Logger, record: Record, predecessor: Record, replace: bool) -> None:
+def process_successor(
+    logger: logging.Logger, record: Record, predecessor: Record, replace_collections: bool, replace_aliases: bool
+) -> None:
     """
     Update successor record.
 
@@ -142,6 +173,7 @@ def process_successor(logger: logging.Logger, record: Record, predecessor: Recor
     - updates metadata datestamp
     - adds a 'revisionOf' aggregation referencing the predecessor record
     - copies over any collection aggregations from the predecessor record, if not already present
+    - copies over any alias identifiers from the predecessor record, if not already present
     - sanity checks the successor record has a different citation, edition and identifiers
     """
     revise_record(record)
@@ -156,24 +188,21 @@ def process_successor(logger: logging.Logger, record: Record, predecessor: Recor
     for agg in collection_aggregations:
         record.identification.aggregations.ensure(agg)
 
-    # Ensure edition (if replaced), citation and any identifiers are different
-    errors = []
-    if replace and record.identification.edition == predecessor.identification.edition:
-        errors.append("Editions must be different.")
-    if record.identification.other_citation_details == predecessor.identification.other_citation_details:
-        errors.append("Citations must be different.")
-    if any(identifier in predecessor.identification.identifiers for identifier in record.identification.identifiers):
-        errors.append("Identifiers must be different.")
-    if errors:
-        raise ValueError(" ".join(errors)) from None
+    if replace_aliases:
+        logger.info("Copying missing alias identifiers")
+        for alias in predecessor.identification.identifiers.filter(namespace=ALIAS_NAMESPACE):
+            record.identification.identifiers.ensure(alias)
 
 
-def process_predecessor(logger: logging.Logger, record: Record, successor: Record, replace: bool) -> None:
+def process_predecessor(
+    logger: logging.Logger, record: Record, successor: Record, replace_collections: bool, replace_aliases: bool
+) -> None:
     """
     Update predecessor record.
 
     Steps:
-    - if replaced, removes collection aggregations which now belong to the successor
+    - if collections replaced, removes collection aggregations which now belong to the successor
+    - if aliases replaced, removes alias identifiers which now belong to the successor
     - sets resource maintenance progress to superseded
     - sets a superseded date
     - appends a free text note to the abstract that the item has been superseded
@@ -187,17 +216,26 @@ def process_predecessor(logger: logging.Logger, record: Record, successor: Recor
     changed = False
     successor_item = ItemBase(record=successor)
 
-    # Filter out collection_aggregations
+    # Filter out collection aggregations
     collection_aggregations = record.identification.aggregations.filter(
         associations=AggregationAssociationCode.LARGER_WORK_CITATION, initiatives=AggregationInitiativeCode.COLLECTION
     )
-    if replace and collection_aggregations:
+    if replace_collections and collection_aggregations:
         changed = True
         logger.info("Removing collection aggregations from predecessor")
         logger.info("Predecessor contained %s collection aggregations", len(collection_aggregations))
-        record.identification.aggregations = Aggregations(
-            [r for r in record.identification.aggregations if r not in collection_aggregations]
+        record.identification.aggregations = record.identification.aggregations.without(
+            associations=AggregationAssociationCode.LARGER_WORK_CITATION,
+            initiatives=AggregationInitiativeCode.COLLECTION,
         )
+
+    # Filter out aliases
+    aliases = record.identification.identifiers.filter(namespace=ALIAS_NAMESPACE)
+    if replace_aliases and aliases:
+        changed = True
+        logger.info("Removing alias identifiers from predecessor")
+        logger.info("Predecessor contained %s alias identifiers", len(aliases))
+        record.identification.identifiers = record.identification.identifiers.without(namespace=ALIAS_NAMESPACE)
 
     # Set superseded status
     if record.identification.dates.superseded is None:
@@ -306,24 +344,55 @@ def _process_collections(
     return [Record.loads(value=c.dumps(strip_admin=False)) for c in collections]  # return as catalogue records
 
 
+def _check_unique(predecessor: Record, successor: Record, replace_collections: bool) -> None:
+    """Ensure edition (if replaced), citation and any identifiers are different."""
+    errors = []
+    if replace_collections and successor.identification.edition == predecessor.identification.edition:
+        errors.append("Editions must be different.")
+    if successor.identification.other_citation_details == predecessor.identification.other_citation_details:
+        errors.append("Citations must be different.")
+    if any(identifier in predecessor.identification.identifiers for identifier in successor.identification.identifiers):
+        errors.append("Identifiers must be different.")
+    if errors:
+        raise ValueError(" ".join(errors)) from None
+
+
 def main() -> None:
     """Entrypoint."""
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, current_ref, successor, replace, params = _get_args(
+    import_path, branch, current_ref, successor, replace_collections, replace_aliases, params = _get_args(
         logger=logger, cat=catalogue, cli_args=cli_args
     )
     _predecessor = get_record(logger=logger, cat=catalogue, reference=current_ref, branch=branch)
     predecessor = Record.loads(value=_predecessor.dumps(strip_admin=False))
 
     # update order is significant as collection aggregations may be moved from predecessor to successor
-    process_successor(logger=logger, record=successor, predecessor=predecessor, replace=replace)
-    process_predecessor(logger=logger, record=predecessor, successor=successor, replace=replace)
+    process_successor(
+        logger=logger,
+        record=successor,
+        predecessor=predecessor,
+        replace_collections=replace_collections,
+        replace_aliases=replace_aliases,
+    )
+    process_predecessor(
+        logger=logger,
+        record=predecessor,
+        successor=successor,
+        replace_collections=replace_collections,
+        replace_aliases=replace_aliases,
+    )
     collections = _process_collections(
-        logger=logger, catalogue=catalogue, branch=branch, record=successor, predecessor=predecessor, replace=replace
+        logger=logger,
+        catalogue=catalogue,
+        branch=branch,
+        record=successor,
+        predecessor=predecessor,
+        replace=replace_collections,
     )
 
+    _check_unique(predecessor=predecessor, successor=successor, replace_collections=replace_collections)
     dump_records(logger=logger, output_path=import_path, records=[predecessor, successor, *collections])
 
     logger.info("Re-run as: '%s'", params)

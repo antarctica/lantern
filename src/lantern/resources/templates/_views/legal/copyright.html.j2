@@ -5,50 +5,81 @@
 {% set header_main = "Copyright Policy" %}
 {% set toc = {
   "copyright-notice": "Copyright notice",
-  "copyright-items": "Item copyright",
+  "copyright-resources": "Resource copyright",
+  "copyright-metadata": "Metadata copyright",
+  "copyright-website": "Other content",
   "copyright-questions": "Questions about copyright",
   "changelog": "Changes to this policy",
   }
 %}
 {% block legal_content %}
   {% call legal.policy_section(slug='copyright-notice', title='Copyright notice') %}
+    <p>Content on this website is subject to copyright protection.</p>
     <p>
-      Most content on this website is subject to copyright protection and is published under the
+      This website contains information about resources such as datasets, maps and online services from a range of
+      providers and authors. Different copyright arrangements may apply to:
+    </p>
+    <ul class="list-disc pl-5">
+      <li>the resource itself; and</li>
+     <li>the metadata that describes the resource.</li>
+    </ul>
+    <p>Check the information provided on each item page to understand which arrangements apply.</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='copyright-resources', title='Resource copyright') %}
+    <p>
+      Copyright for a resource, including downloadable files and online services, varies from item to item.
+      Each item page may include a <em>licence</em> tab explaining how the resource may be used and who the copyright holder is.
+    </p>
+    {% call com.alert(shape='side', variant='yellow') %}
+      <p>Where no copyright information is provided, all rights are reserved.</p>
+    {% endcall %}
+  {% endcall %}
+
+  {% call legal.policy_section(slug='copyright-metadata', title='Metadata copyright') %}
+    <p>
+      Copyright for the metadata that describes a resource, including the title, description and other information, also varies item to item.
+      Each item page includes an <em>additional information</em> tab, which may include a link to a metadata licence.
+    </p>
+    {% call com.alert(shape='side', variant='yellow') %}
+      <p>Where no copyright information is provided, all rights are reserved.</p>
+    {% endcall %}
+  {% endcall %}
+
+  {% call legal.policy_section(slug='copyright-website', title='Other content') %}
+    <p>
+      Other pages in this website (such as guides, the home page etc.), are published under the
       {{ com.ext_link_a(href='http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/', value="Open Government Licence (OGL)") }},
       which explains any exempted content.
     </p>
-    <p>Most content is owned by {{ com.ext_link_a(href='https://www.ukri.org/', value="UK Research and Innovation (UKRI)") }}, to which the
+    <p>
+      This content is owned by {{ com.ext_link_a(href='https://www.ukri.org/', value="UK Research and Innovation (UKRI)") }}, to which the
       {{ com.ext_link_a(href='https://www.bas.ac.uk/', value="British Antarctic Survey (BAS)") }}, and its parent the
-      {{ com.ext_link_a(href='https://www.ukri.org/councils/nerc/', value="Natural Environment Research Council (NERC)") }}, both belong.</p>
-    <p>Where content has different copyright arrangements, we’ll credit the author and/or copyright holder as appropriate.</p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='copyright-items', title='Item copyright') %}
-    <p>
-      This website contains pages providing information about items (covering a range of material from maps to
-      online services), from a variety of providers and authors (including external organisations).
+      {{ com.ext_link_a(href='https://www.ukri.org/councils/nerc/', value="Natural Environment Research Council (NERC)") }}, both belong.
     </p>
     <p>
-      Copyright for these items, and any files or related information this website may link to, varies item to item.
-      Each item page includes a licence tab explaining the copyright arrangements applicable for that item.
+      Where any content has different copyright arrangements, we’ll credit the copyright holder and explain any
+      arrangements as appropriate.
     </p>
-    <p><strong>This copyright policy is limited to these information pages, not the items themselves.</strong></p>
   {% endcall %}
 
-    {% call legal.policy_section(slug='copyright-questions', title='Questions about copyright') %}
-      <p>
-        If you have a question about copyright for an item (a map, dataset, etc.), please use the contact tab on its
-        item page so your question is sent to the team that manages it.
-      </p>
-      <p>
-        If your question relates to this website more generally, please contact us by
-        {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='submitting feedback') }}.
-      </p>
+  {% call legal.policy_section(slug='copyright-questions', title='Questions about copyright') %}
+    <p>
+      If you have a question about copyright for an item (a map, dataset, etc.), please follow the instructions in the
+      <em>contact</em> tab on its item page so your question is sent to the team that manages it.
+    </p>
+    <p>
+      If your question relates to this website more generally, please contact us by
+      {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='submitting feedback') }}.
+    </p>
   {% endcall %}
 
   {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
+    {% call legal.policy_subsection(title='2026-10-27') %}
+      <p>Clarifying how copyright applies to items vs item metadata vs other website pages.</p>
+    {% endcall %}
     {% call legal.policy_subsection(title='2025-05-08') %}
-      <p>Simplifying and clarifying how policy applies to items vs website pages.</p>
+      <p>Simplifying and clarifying how this policy applies to items vs website pages.</p>
     {% endcall %}
     {% call legal.policy_subsection(title='2020-05-11') %}
       <p>Initial policy.</p>

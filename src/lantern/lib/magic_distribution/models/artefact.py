@@ -261,8 +261,13 @@ class ArtefactSharePointFile(ArtefactFile):
             raise KeyError(msg)
 
     @property
-    def artefact_id(self) -> str:
-        """Artefact identifier."""
+    def artefact_id(self) -> str:  # ty: ignore[invalid-property-type-override]
+        """
+        Artefact identifier.
+
+        As this value is based on a mutable object a typing error is triggered. In practice this value will be static
+        based on the supplied file metadata which should not be modified and so can be treated as a read-only value.
+        """
         return self._list_fields["artefact_id"]
 
     @property
@@ -294,7 +299,7 @@ class ArtefactSharePointFile(ArtefactFile):
         return self._drive_item["name"]
 
     @property
-    def data(self) -> memoryview:
+    def data(self) -> bytes:
         """Artefact content as bytes."""
         raise NotImplementedError() from None
 
@@ -304,17 +309,25 @@ class ArtefactSharePointFile(ArtefactFile):
         return self._drive_item["size"]
 
     @property
-    def quickxor(self) -> str:
-        """Microsoft QuickXorHash."""
+    def quickxor(self) -> str:  # ty: ignore[invalid-property-type-override]
+        """
+        Microsoft QuickXorHash.
+
+        As this value is based on a mutable object a typing error is triggered. In practice this value will be static
+        based on the supplied file metadata which should not be modified and so can be treated as a read-only value.
+        """
         return self._drive_item["file"]["hashes"]["quickXorHash"]
 
     @property
-    def sha256(self) -> str:
+    def sha256(self) -> str:  # ty: ignore[invalid-property-type-override]
         """
         SHA 256 hash.
 
         This value is set at upload, it is not based on the underlying file stored in SharePoint and so cannot be used
         to determine if a file has changed internally (see `quickxor`) but can be used for external comparisons.
+
+        As this value is based on a mutable object a typing error is triggered. In practice this value will be static
+        based on the supplied file metadata which should not be modified and so can be treated as a read-only value.
         """
         return self._list_fields["artefact_sha256"]
 

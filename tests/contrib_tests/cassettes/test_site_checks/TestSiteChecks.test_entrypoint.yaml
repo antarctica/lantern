@@ -1271,7 +1271,7 @@ interactions:
       User-Agent:
       - python-requests/2.34.2
     method: HEAD
-    uri: https://example.com/invalid
+    uri: https://example.com/items/invalid
   response:
     body:
       string: ''

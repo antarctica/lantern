@@ -19,7 +19,7 @@ from lantern.stores.gitlab_cache import GitLabCachedStore
 
 if TYPE_CHECKING:
     import logging
-    from collections.abc import Collection, Iterator
+    from collections.abc import Collection, Generator
 
     from gitlab.v4.objects import Project as GitlabProject
     from gitlab.v4.objects import ProjectIssue as GitlabIssue
@@ -140,7 +140,7 @@ class BasRepository(RepositoryBase):
         )
 
     @contextmanager
-    def snapshot(self, branch: str | None = None) -> Iterator[RecordsProtocol]:
+    def snapshot(self, branch: str | None = None) -> Generator[RecordsProtocol, None, None]:
         """Yield a single refreshed and frozen view of a branch's records for a catalogue operation."""
         store = self._make_gitlab_store(branch=branch, cached=True, frozen=True)
         yield cast("RecordsProtocol", store)

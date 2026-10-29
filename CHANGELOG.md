@@ -75,6 +75,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored ArcGIS web map and web scene distribution options
 * Additional filtering methods for distribution options, identifiers and aggregations in BAS Metadata Library lib
 * PDC contact preset in BAS Metadata Library lib
+* URL used for 404 handler check corrected to use a reverse proxied value
 
 ### Changed
 

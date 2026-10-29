@@ -14,7 +14,7 @@ class ExtraConfig(Config):
         self._extra_prefix = "X_"
         self._none_value = "[**NOT SET**]"
 
-    class ConfigDumpSafe(TypedDict):
+    class ConfigDumpSafe(TypedDict):  # ty: ignore[invalid-attribute-override]
         """Types and keys for `dumps_extra`."""
 
         ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC: str

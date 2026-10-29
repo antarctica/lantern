@@ -24,10 +24,13 @@ class Record(RecordBase):
     Representation of a resource within the BAS Data Catalogue specifically.
 
     Extends the base ISO 19115 Record class, making the `file_identifier` and 'hierarchy_level' properties required.
+
+    WARNING: Due to the `RecordBase` base class allowing `file_identifier` and `hierarchy_level` to be optional, it is
+    not possible to practically or robustly narrow the types for these properties to avoid a None value.
     """
 
-    file_identifier: str
-    hierarchy_level: HierarchyLevelCode
+    file_identifier: str  # ty: ignore[invalid-mutable-override]
+    hierarchy_level: HierarchyLevelCode  # ty: ignore[invalid-mutable-override]
 
     def __post_init__(self) -> None:
         """

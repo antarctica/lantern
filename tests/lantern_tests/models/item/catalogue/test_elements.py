@@ -426,7 +426,7 @@ class TestExtent:
         assert isinstance(extent, Extent)
 
     @pytest.mark.parametrize("has_value", [True, False])
-    def test_start_end(self, has_value: bool):
+    def test_start_end_fmt(self, has_value: bool):
         """Can get formated dates for temporal extent period."""
         date_ = Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))
         expected = FormattedDate.from_rec_date(date_) if has_value else None
@@ -442,8 +442,8 @@ class TestExtent:
 
         extent = Extent(extent=item_extent, embedded_maps_endpoint="x")
 
-        assert extent.start == expected
-        assert extent.end == expected
+        assert extent.start_fmt == expected
+        assert extent.end_fmt == expected
 
     def test_map_iframe(self):
         """Can get iframe fragment for embedded map of extent."""
@@ -513,9 +513,9 @@ class TestItemCatalogueSummary:
             ),
         ],
     )
-    def test_graphic_href(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
+    def test_graphic_href_fmt(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
         """
-        Can get light and dark graphic from item or using default.
+        Can get light and dark graphic from item or using default for use in templates.
 
         If present in a record the same image is returned twice as a light and dark image.
         """
@@ -527,10 +527,10 @@ class TestItemCatalogueSummary:
 
         summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
         if href is not None:
-            assert summary.graphic_href == expected
+            assert summary.graphic_href_fmt == expected
         else:
-            assert summary.graphic_href[0] == expected[0]
-            assert summary.graphic_href[1] == expected[1]
+            assert summary.graphic_href_fmt[0] == expected[0]
+            assert summary.graphic_href_fmt[1] == expected[1]
 
 
 class TestIdentifiers:

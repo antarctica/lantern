@@ -262,6 +262,11 @@ class ItemAlgolia(ItemBase):
         return obj
 
     @property
-    def record(self) -> RecordRevision:
-        """Get underlying RecordRevision."""
+    def record(self) -> RecordRevision:  # ty: ignore[invalid-property-type-override]
+        """
+        Get underlying RecordRevision.
+
+        Return type narrowed as per-init. Technically the internal attribute could be changed to an invalid type but
+        this is not considered likely and so the type error is suppressed.
+        """
         return self._record

@@ -149,6 +149,10 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
     - the additional info tab to show multiple series, scales and other properties
     - graphic overviews to include those from each side
     - item summaries for each side
+
+    Note, the `_extents` and `_additional_info` properties return physical map specific tab classes, narrowing the
+    return types. As cached properties are writable (to support priming/resetting cached values) values could be set
+    of a non-stated type. In practice this is very unlikely (and not supported) but is technically a typing error.
     """
 
     @classmethod
@@ -176,7 +180,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         return [self._select_record(side_identifier.identifier.identifier) for side_identifier in side_identifiers]
 
     @cached_property
-    def _extent(self) -> ExtentTab:
+    def _extent(self) -> ExtentTab:  # ty: ignore[invalid-mutable-override]
         """
         Extent tab.
 
@@ -199,7 +203,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         return ExtentTab(extents=extents)
 
     @cached_property
-    def _additional_info(self) -> AdditionalInfoTab:
+    def _additional_info(self) -> AdditionalInfoTab:  # ty: ignore[invalid-mutable-override]
         """
         Additional info tab.
 

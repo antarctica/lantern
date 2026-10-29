@@ -17,7 +17,7 @@ from requests import Response
 from lantern.lib.arcgis.utils import ArcGISAuthError, ArcGISRequestError, check_arcgis_error, ensure_query_param
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
     from PIL.TiffImagePlugin import TiffImageFile
     from requests.auth import AuthBase
@@ -461,7 +461,7 @@ class ArtefactFormats:
 
     @staticmethod
     @contextmanager
-    def _open_binary(file: Path | IO[bytes]) -> Iterator[IO[bytes]]:
+    def _open_binary(file: Path | IO[bytes]) -> Generator[IO[bytes], None, None]:
         """Normalise opening an input file from a path or IO buffer."""
         if isinstance(file, Path):
             with file.open("rb") as f:

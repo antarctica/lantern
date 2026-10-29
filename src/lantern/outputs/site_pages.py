@@ -119,7 +119,7 @@ class SitePagesOutput(OutputSite):
         checks.append(
             Check(
                 type=CheckType.SITE_404,
-                url=f"{self._meta.base_url}/invalid",
+                url=f"{self._meta.base_url}/items/invalid",
                 http_status=HTTPStatus.NOT_FOUND,
             )
         )

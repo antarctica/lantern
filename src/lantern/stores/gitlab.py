@@ -242,7 +242,7 @@ class GitLabStore(StoreBase):
         return self._client.projects.get(self._source.project)
 
     @property
-    def head_commit(self) -> str:
+    def head_commit(self) -> str | None:
         """ID of the latest commit in the GitLab repository."""
         return self._project.commits.list(ref_name=self._source.ref, get_all=False)[0].id
 

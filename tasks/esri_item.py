@@ -16,8 +16,8 @@ from lxml.html import HTMLParser
 from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
 from tasks._shared import confirm, get_record, init
-from tasks.record_esri import get_agol_item, get_agol_token
 
+from lantern.lib.arcgis.client import ArcGisClient
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
 from lantern.lib.arcgis.gis.enums import SharingLevel
@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     import logging
 
     from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-    from tasks._config import ExtraConfig
 
 
 def _get_cli_args() -> dict:
@@ -287,7 +286,7 @@ def _update_agol_thumbnail(logger: logging.Logger, base_url: str, token: str, it
         raise ValueError(msg)
 
 
-def _update_agol_item(logger: logging.Logger, config: ExtraConfig, item: ArcGisItem, properties: dict) -> None:
+def _update_agol_item(logger: logging.Logger, agol_token: str, item: ArcGisItem, properties: dict) -> None:
     """
     Update properties in an ArcGIS Online item.
 
@@ -295,31 +294,33 @@ def _update_agol_item(logger: logging.Logger, config: ExtraConfig, item: ArcGisI
     Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
     """
     base_url = f"https://www.arcgis.com/sharing/rest/content/users/{item.owner}/items/{item.id}"
-    access_token = get_agol_token(config=config)
 
     metadata = properties.pop("metadata", None)
     if isinstance(metadata, str):
-        _update_agol_metadata(logger=logger, base_url=base_url, token=access_token, item=item, metadata=metadata)
+        _update_agol_metadata(logger=logger, base_url=base_url, token=agol_token, item=item, metadata=metadata)
 
     sharing = properties.pop("sharing_level", None)
     if isinstance(sharing, SharingLevel):
         confirm(logger, f"Update sharing level to {sharing}?")
-        _update_agol_sharing(logger=logger, base_url=base_url, token=access_token, item=item, sharing_level=sharing)
+        _update_agol_sharing(logger=logger, base_url=base_url, token=agol_token, item=item, sharing_level=sharing)
 
     thumbnail = properties.pop("thumbnail_url", None)
     if thumbnail:
-        _update_agol_thumbnail(logger=logger, base_url=base_url, token=access_token, item=item, url=thumbnail)
+        _update_agol_thumbnail(logger=logger, base_url=base_url, token=agol_token, item=item, url=thumbnail)
 
-    _update_agol_properties(logger=logger, base_url=base_url, token=access_token, item=item, properties=properties)
+    _update_agol_properties(logger=logger, base_url=base_url, token=agol_token, item=item, properties=properties)
 
 
 def main() -> None:
     """Entrypoint."""
     logger, config, catalogue = init()
     args = _get_cli_args()
+    arc_client = ArcGisClient(
+        logger=logger, app_client_id=config.AGOL_CLIENT_ID, app_client_secret=config.AGOL_CLIENT_SECRET
+    )
 
     source_record = get_record(logger=logger, cat=catalogue, reference=args["source_id"])
-    target_item = get_agol_item(logger=logger, config=config, item_ref=args["target_id"])
+    target_item = arc_client._get_item(args["target_id"])
     source_item = _create_source_arcgis_item(
         source_record=Record.loads(source_record.dumps(strip_admin=False)),
         admin_keys=config.ADMIN_METADATA_KEYS,
@@ -333,7 +334,7 @@ def main() -> None:
     logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
     logger.info(list(diff.keys()))
     _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=target_item)
-    _update_agol_item(logger=logger, config=config, item=target_item, properties=diff)
+    _update_agol_item(logger=logger, agol_token=arc_client._access_token, item=target_item, properties=diff)
 
     params = f"task esri-item --source {args['source_id']} --target {args['target_id']}"
     logger.info("Re-run as: '%s'", params)

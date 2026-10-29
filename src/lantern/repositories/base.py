@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
     import logging
-    from collections.abc import Collection, Iterator
+    from collections.abc import Collection, Generator
 
     from lantern.models.record.record import Record
     from lantern.models.record.revision import RecordRevision
@@ -88,7 +88,7 @@ class RepositoryBase(ABC):
 
     @abstractmethod
     @contextmanager
-    def snapshot(self) -> Iterator[RecordsProtocol]:
+    def snapshot(self) -> Generator[RecordsProtocol, None, None]:
         """
         Yield available records for Site generation.
 

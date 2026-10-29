@@ -123,11 +123,13 @@ class ItemCatalogueSummary(ItemSummaryBase):
         )
 
     @property
-    def graphic_href(self) -> tuple[str, str]:
+    def graphic_href_fmt(self) -> tuple[str, str]:
         """
         URL to an image representing the item, or a generic default.
 
         Returned as light mode, dark mode tuple.
+
+        Note: This return type is different to the superclass but is specific for use in templates.
         """
         item_graphic = super().graphic_href
         if item_graphic:
@@ -357,12 +359,12 @@ class Extent(ItemExtent):
         self._map_endpoint = embedded_maps_endpoint
 
     @property
-    def start(self) -> FormattedDate | None:
+    def start_fmt(self) -> FormattedDate | None:
         """Temporal period start."""
         return (FormattedDate.from_rec_date(start) if start else None) if (start := super().start) is not None else None
 
     @property
-    def end(self) -> FormattedDate | None:
+    def end_fmt(self) -> FormattedDate | None:
         """Temporal period end."""
         return (FormattedDate.from_rec_date(end) if end else None) if (end := super().end) is not None else None
 

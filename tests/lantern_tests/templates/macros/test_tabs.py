@@ -688,14 +688,14 @@ class TestExtentTab:
         assert html.select_one("#bbox-max").text.strip() == bbox_max
 
         if expected.start:
-            assert html.select_one("#period-start").text.strip() == expected.start.value
-            assert html.select_one("#period-start")["datetime"] == expected.start.datetime
+            assert html.select_one("#period-start").text.strip() == expected.start_fmt.value
+            assert html.select_one("#period-start")["datetime"] == expected.start_fmt.datetime
         else:
             assert html.select_one("#period-start") is None
 
         if expected.end:
-            assert html.select_one("#period-end").text.strip() == expected.end.value
-            assert html.select_one("#period-end")["datetime"] == expected.end.datetime
+            assert html.select_one("#period-end").text.strip() == expected.end_fmt.value
+            assert html.select_one("#period-end")["datetime"] == expected.end_fmt.datetime
         else:
             assert html.select_one("#period-end") is None
 

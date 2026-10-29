@@ -7,7 +7,7 @@
 {% macro info(data) %}
   <section class="space-y-8">{{ bbox(data.bounding_box) }}</section>
   {% if data.start or data.end %}
-    <section class="space-y-8">{{ period(start=data.start, end=data.end) }}</section>
+    <section class="space-y-8">{{ period(start=data.start_fmt, end=data.end_fmt) }}</section>
   {% endif %}
 {% endmacro %}
 

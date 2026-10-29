@@ -22,7 +22,6 @@ def init_sentry() -> None:
     sentry_sdk.init(
         dsn=config.SENTRY_DSN if config.ENABLE_FEATURE_SENTRY else "",
         traces_sample_rate=0.1,
-        profiles_sample_rate=0.1,
         release=version("lantern"),
         environment=config.SENTRY_ENVIRONMENT,
     )

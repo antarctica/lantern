@@ -98,6 +98,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Removed
 
 * 'access' property from catalogue item page summary grid
+* schemathesis OpenAPI tests, which proved too unreliable (and arguably not yet a suitable fit)
 
 ## [0.15.2] - 2026-08-17
 

@@ -38,8 +38,8 @@ content locally.
 The default server has been enhanced to support:
 
 - HTTPS, with a certificate generated using [trustme](https://trustme.readthedocs.io/en/latest/)
-- HTTP basic auth, for protected paths and with relevant error handling for [OpenAPI Tests](#openapi-tests)
-- explicitly blocking unsupported HTTP methods, for [OpenAPI Tests](#openapi-tests)
+- HTTP basic auth, for protected paths and with relevant error handling, for future OpenAPI tests
+- explicitly blocking unsupported HTTP methods, for future OpenAPI tests
 - handling redirects for paths listed in the [Redirects](/docs/outputs.md#redirects-output) Output CSV
 - custom media types for the [Health](/docs/outputs.md#site-health-output) and
   [OpenAPI](/docs/outputs.md#site-api-output) outputs
@@ -937,21 +937,6 @@ server. The site contains all [Test Records](#test-records).
 > [!NOTE]
 > Make sure Playwright tests use the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`) to avoid test failures.
 <!-- pyml enable md028 -->
-
-### OpenAPI tests
-
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-[Schemathesis](https://schemathesis.readthedocs.io/) is used to verify the behaviour of the static site
-[OpenAPI Definition](/docs/site.md#openapi-definition), such as response schemas and authenticated requests.
-Schemathesis tests are part of the slow test suite.
-
-> [!NOTE]
-> OpenAPI testing is experimental and limited the live site only.
-
-Tests are run via Pytest in `tests_slow.openapi.test_openapi`, with additional configuration to account for
-infrastructure configuration we cannot control (e.g. how unsupported HTTP methods are handled within AWS).
 
 ### Search tests
 

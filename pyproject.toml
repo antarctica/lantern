@@ -70,7 +70,6 @@ test = [
     "pytest-recording>=0.13.4",
     "pytest-unordered>=0.7.0",
     "pytest-xdist>=3.8.0",
-    "schemathesis>=4.22.3",
 ]
 
 [tool.uv.exclude-newer-package]

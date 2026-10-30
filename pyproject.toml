@@ -143,6 +143,7 @@ esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distr
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
 preview-records = { cmd = "python -m tasks.records_preview", help = "Preview records as HTML items" }
+append-collections = { cmd = "python -m tasks.append_collections", help = "Append records to any parent collections" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
 check-records = { cmd = "python -m tasks.records_check", help = "Check static site and records contents" }

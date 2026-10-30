@@ -47,13 +47,12 @@ since each touches multiple files that must stay in sync:
 
 - Target Python 3.12 (`.python-version`, `requires-python` in `pyproject.toml`); avoid syntax introduced in later
   versions. Use `from __future__ import annotations` and `if TYPE_CHECKING` for type-only imports where appropriate.
-- Deployable code belongs under `lantern`; `uv run task types` checks `src/` only, while `[tool.ty.src]` includes
-  `src/` and `tasks/` and excludes `tests/` and `tests_slow/` when running `ty` without an explicit path.
+- Deployable code belongs under `lantern`; development scripts belong under `tasks/`.
 - Use `Path.resolve()` when logging/displaying paths; log via `logger = logging.getLogger('lantern')`.
 - Ruff enforces `ban-relative-imports = "all"` — always use absolute imports (`from lantern.foo import Bar`).
 - 100% test coverage is required (`fail_under = 100` in `[tool.coverage.report]`); use `# pragma: no cover` /
   `# pragma: no branch` for justified exceptions, and `@pytest.mark.cov()` for coverage-only tests.
-- `ruff` (lint+format+bandit) and `ty` (type checking) are the code checks; `pymarkdown` lints docs.
+- `ruff check` (lint+bandit) and `ty` (type checking) are the code checks; `pymarkdown` lints docs.
 - The Jinja environment (`lantern.utils.get_jinja_env()`) is `lru_cache`d — do not construct a new `Environment` per
   Output/record, this previously caused an 80%+ slowdown by recompiling all templates on every access.
 - Prefer `functools.cached_property` for derived Output/Item properties that are read more than once per instance
@@ -69,13 +68,15 @@ uv run task test            # pytest -n auto (main suite, tests/)
 uv run task test-slow       # e2e/Playwright/Schemathesis suite (tests_slow/), slow
 uv run task test-cov        # coverage (--cov-report=html -> htmlcov/)
 uv run task lint            # ruff check
-uv run task format          # ruff format
 uv run task types           # ty check src/ (run uv run ty check tasks/ to check scripts)
 uv run task css             # rebuild Tailwind CSS: builds a temp site, extracts used classes, writes main.css
 uv run task build-test-records   # build a static site from tests.resources.records test fixtures
 uv run task serve            # serve a built static site locally (HTTPS via trustme, basic auth)
 ```
 
+- Agents MUST run lint and type checks for code they change and correct any reported issues.
+- Agents MUST NOT run formatters (e.g. `ruff format` or `uv run task format`), check formatting, or make manual
+  formatting-only changes. Formatting is handled by a human after the agent finishes, before committing.
 - Run a single test: `uv run pytest tests/path/to/test_module.py::Class.method`.
 - If tests fail with `NotImplementedError` after renaming/reparametrizing a test, run `uv run task test-reset`
   (clears the `--failed-first` pytest cache — see `docs/dev.md#pytest-fast-fail`).
@@ -88,6 +89,7 @@ uv run task serve            # serve a built static site locally (HTTPS via trus
 
 ## Testing conventions
 
+- Agents MUST NOT generate tests for files within `tasks/`.
 - Fixtures go in `tests/conftest.py`, prefixed `fx_` (e.g. `fx_exporter_static_server`).
 - Tests needing a real static site (Playwright, template checks) use `tests.resources.catalogues.fake_catalogue`
   / `tests.resources.stores.fake_records_store.FakeRecordsStore` and test records under `tests/resources/records/`

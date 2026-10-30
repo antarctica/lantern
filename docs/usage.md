@@ -118,6 +118,9 @@ To update existing records:
   - run the [`esri-record`](/docs/supplemental/proto-cli-reference.md#esri-record) command
 - to set access permissions:
   - run the [`restrict-records`](/docs/supplemental/proto-cli-reference.md#restrict-record) command
+- to add records to collections
+  - select child records and include aggregations to parent collections
+  - run the [`append-collections`](/docs/supplemental/proto-cli-reference.md#append-collections) command
 
 Then follow a [Publishing Workflow](#publishing-workflows).
 

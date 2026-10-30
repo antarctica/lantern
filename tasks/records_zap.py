@@ -115,8 +115,8 @@ def _revise_records(logger: logging.Logger, records: list[Record], catalogue: Ba
             continue
 
 
-def _update_collection_aggregations(logger: logging.Logger, record: Record, collection: Record) -> None:
-    """Add aggregation back-refs if missing to a collections a record is part of."""
+def update_collection_aggregations(logger: logging.Logger, record: Record, collection: Record) -> bool:
+    """Add a collection-member aggregation if missing; return whether one was added."""
     if record.file_identifier is None:
         msg = "Record must have a file identifier to create back-refs."
         logger.error(msg)
@@ -128,14 +128,18 @@ def _update_collection_aggregations(logger: logging.Logger, record: Record, coll
         logger.debug(
             "Record '%s' already in collection '%s', skipping", record.file_identifier, collection.file_identifier
         )
-        return
+        return False
     collection.identification.aggregations.append(make_bas_cat_collection_member(record.file_identifier))
     logger.info("Added record '%s' to collection '%s'", record.file_identifier, collection.file_identifier)
+    return True
 
 
-def _update_collection_extent(logger: logging.Logger, record: Record, collection: Record) -> None:
-    record_extent = record.identification.extents.filter(identifier="bounding")[0].geographic.bounding_box
-    collection_extent = collection.identification.extents.filter(identifier="bounding")[0].geographic.bounding_box
+def update_collection_extent(logger: logging.Logger, record: Record, collection: Record) -> None:
+    """Expand a collection's bounding geographic and temporal extent to include a record."""
+    record_bounding = record.identification.extents.filter(identifier="bounding")[0]
+    collection_bounding = collection.identification.extents.filter(identifier="bounding")[0]
+    record_extent = record_bounding.geographic.bounding_box
+    collection_extent = collection_bounding.geographic.bounding_box
 
     record_bbox = [
         record_extent.west_longitude,
@@ -165,11 +169,43 @@ def _update_collection_extent(logger: logging.Logger, record: Record, collection
     if collection_bbox_updated != collection_bbox:
         bbox = ", ".join([str(c) for c in collection_bbox])
         bbox_updated = ", ".join([str(c) for c in collection_bbox_updated])
-        logger.debug("Collection extent '%s' updated", collection.file_identifier)
-        logger.debug("From: %s to: %s", bbox, bbox_updated)
+        logger.info("Collection geographic extent '%s' updated", collection.file_identifier)
+        logger.debug("Geographic extent from: %s to: %s", bbox, bbox_updated)
     else:
-        logger.debug("Collection extent '%s' unchanged, skipping update", collection.file_identifier)
+        logger.debug("Collection geographic extent '%s' unchanged", collection.file_identifier)
+
+    record_period = record_bounding.temporal.period if record_bounding.temporal else None
+    if record_period is None:
         return
+    original_temporal = deepcopy(collection_bounding.temporal)
+    if collection_bounding.temporal is None:
+        collection_bounding.temporal = deepcopy(record_bounding.temporal)
+    else:
+        collection_period = collection_bounding.temporal.period
+        if collection_period is None:
+            collection_bounding.temporal.period = deepcopy(record_period)
+        else:
+            # Date and datetime values may coexist; compare as UTC instants while retaining original precision.
+            def as_datetime(value: Date) -> datetime:
+                if isinstance(value.date, datetime):
+                    return value.date
+                return datetime.combine(value.date, datetime.min.time(), tzinfo=UTC)
+
+            if record_period.start and (
+                collection_period.start is None
+                or as_datetime(record_period.start) < as_datetime(collection_period.start)
+            ):
+                collection_period.start = deepcopy(record_period.start)
+            if record_period.end and (
+                collection_period.end is None or as_datetime(record_period.end) > as_datetime(collection_period.end)
+            ):
+                collection_period.end = deepcopy(record_period.end)
+
+    if original_temporal != collection_bounding.temporal:
+        logger.info("Collection temporal extent '%s' updated", collection.file_identifier)
+        logger.debug("Temporal extent from: %s to: %s", original_temporal, collection_bounding.temporal)
+    else:
+        logger.debug("Collection temporal extent '%s' unchanged", collection.file_identifier)
 
 
 def _update_record_collections(logger: logging.Logger, record: Record, collections: dict[str, RecordRevision]) -> None:
@@ -196,8 +232,8 @@ def _update_record_collections(logger: logging.Logger, record: Record, collectio
 
     for collection_id in filtered_record_collection_ids:
         collection = collections[collection_id]
-        _update_collection_aggregations(logger=logger, record=record, collection=collection)
-        _update_collection_extent(logger=logger, record=record, collection=collection)
+        if update_collection_aggregations(logger=logger, record=record, collection=collection):
+            update_collection_extent(logger=logger, record=record, collection=collection)
 
 
 def _process_magic_collections(

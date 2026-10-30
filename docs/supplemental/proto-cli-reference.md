@@ -40,6 +40,7 @@ preview-records          Preview records as HTML items
 import-records           Import records from directory
 build-records            Build records as a catalogue site
 check-records            Check static site and records contents
+append-collections       Append records to any parent collections
 
 # record utility commands
 upgrade-records          Upgrade records
@@ -448,6 +449,14 @@ Upgrade records.
 
 ```shell
 % task upgrade-records --help
+```
+
+### `append-collections`
+
+Appends records to collections they are stated members of and update collection bounding temporal and geographic extents.
+
+```shell
+% task append-collections --help
 ```
 
 ### `bootstrap-records`

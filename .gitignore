@@ -17,7 +17,6 @@ wheels/
 
 # Pytest generated files
 .pytest_cache/
-/.schemathesis
 htmlcov/
 .coverage
 

@@ -432,6 +432,8 @@ class TestArtefactArcGisService:
         expected_host = "maps.arcgis.com" if sharing_level == SharingLevel.EVERYONE else "bas.maps.arcgis.com"
         expected_title = "ArcGIS Online"
 
+        assert len(fx_lib_arcgis_service_artefact.distribution_options) >= 1
+
         assert isinstance(fx_lib_arcgis_service_artefact.distribution_option, Distribution)
         assert isinstance(fx_lib_arcgis_service_artefact.distributor, Contact)
         assert isinstance(fx_lib_arcgis_service_artefact.distribution_format, Format)
@@ -444,6 +446,8 @@ class TestArtefactArcGisService:
         assert _online_resource.function == OnlineResourceFunctionCode.INFORMATION
 
         if service_label:
+            assert len(fx_lib_arcgis_service_artefact.distribution_options) == 2  # noqa: PLR2004
+
             assert isinstance(fx_lib_arcgis_service_artefact.distribution_option_service, Distribution)
             assert isinstance(fx_lib_arcgis_service_artefact.distribution_format_service, Format)
             assert isinstance(fx_lib_arcgis_service_artefact.distribution_transfer_opt_service, TransferOption)

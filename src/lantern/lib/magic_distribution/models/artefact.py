@@ -19,7 +19,13 @@ from lantern.lib.magic_distribution.formats import (
 )
 from lantern.lib.magic_distribution.types import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.common import Contact, OnlineResource
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
+from lantern.lib.metadata_library.models.record.elements.distribution import (
+    Distribution,
+    Distributions,
+    Format,
+    Size,
+    TransferOption,
+)
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR, MICROSOFT_DISTRIBUTOR
 
@@ -584,6 +590,14 @@ class ArtefactArcGisService(ArtefactService):
             distributor=self.distributor,
             transfer_option=self.distribution_transfer_opt_service,
         )
+
+    @property
+    def distribution_options(self) -> Distributions:
+        """Combination of artefact ISO distribution options for item and underlying service if applicable."""
+        _service_opt = self.distribution_option_service
+        if not _service_opt:
+            return Distributions([self.distribution_option])
+        return Distributions([self.distribution_option, _service_opt])
 
     def validate_format(self) -> None:
         """

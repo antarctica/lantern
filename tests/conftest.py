@@ -1349,7 +1349,7 @@ def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> A
         id="x",
         owner="x",
         org_id="x",
-        url="x",
+        url="https://example.com",
         properties=fx_lib_arcgis_item_properties,
         sharing_level=ArcGisSharingLevel.PRIVATE,
     )

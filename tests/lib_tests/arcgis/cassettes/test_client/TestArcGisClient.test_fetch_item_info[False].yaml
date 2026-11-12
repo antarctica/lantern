@@ -14,7 +14,7 @@ interactions:
     uri: https://www.arcgis.com/sharing/rest/content/items/x?f=json&token=x
   response:
     body:
-      string: "{\"id\":\"x\"}"
+      string: '{"id":"x"}'
     headers:
       Cache-Control:
       - no-cache

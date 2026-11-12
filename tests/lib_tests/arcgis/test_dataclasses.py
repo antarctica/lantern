@@ -256,7 +256,7 @@ class TestItem:
         assert fx_lib_arcgis_item != "x"
 
     @pytest.mark.parametrize(
-        ("data", "metadata"),
+        ("info", "metadata"),
         [
             (
                 {
@@ -351,7 +351,7 @@ class TestItem:
             ),
         ],
     )
-    def test_from_item_json(self, data: dict, metadata: str):
+    def test_from_item_json(self, info: dict, metadata: str):
         """
         Can create an item instance for supported properties from ArcGIS item JSON, metadata and optional thumbnail.
 
@@ -366,20 +366,22 @@ class TestItem:
             properties=ItemProperties(
                 title="x",
                 item_type=self.test_type,
-                snippet="x" if "snippet" in data else None,
-                description="x" if "description" in data else None,
-                access_information="x" if "accessInformation" in data else None,
-                license_info="x" if "licenseInfo" in data else None,
+                snippet="x" if "snippet" in info else None,
+                description="x" if "description" in info else None,
+                access_information="x" if "accessInformation" in info else None,
+                license_info="x" if "licenseInfo" in info else None,
+                extent=[[-180, -89.99], [180, -50]] if "extent" in info else None,
                 metadata=metadata,
             ),
         )
 
-        item = Item.from_item_json(data=data, metadata=metadata, thumbnail=None)
+        item = Item.from_item_json(info=info, metadata=metadata, thumbnail=None)
 
         assert isinstance(item, Item)
-        assert item == expected
-        assert item.raw_item == data
         assert item.properties.metadata == metadata
+
+        assert item == expected
+        assert item.raw_item == info
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
@@ -389,7 +391,7 @@ class TestItem:
     def test_from_item_json_public_access(self, fx_lib_arcgis_item: Item, access: str, sharing_level: SharingLevel):
         """Can map access property to SharingLevel enum (inc. 'public' to SharingLevel.EVERYONE)."""
         fx_lib_arcgis_item.sharing_level = sharing_level
-        data = {
+        info = {
             "id": "x",
             "owner": "x",
             "orgId": "x",
@@ -399,7 +401,7 @@ class TestItem:
             "access": access,
         }
 
-        item = Item.from_item_json(data=data, metadata="x", thumbnail=None)
+        item = Item.from_item_json(info=info, metadata="x", thumbnail=None)
         assert item.sharing_level == sharing_level
 
     @pytest.mark.cov()
@@ -407,7 +409,7 @@ class TestItem:
         """Cannot use non SharingLevel value."""
         with pytest.raises(KeyError):
             Item.from_item_json(
-                data={
+                info={
                     "id": "x",
                     "owner": "x",
                     "orgId": "x",
@@ -425,7 +427,7 @@ class TestItem:
         """Can use thumbnail values."""
         expected = ("/x.png", "https://example.com/x.png?sha1=x")
         item = Item.from_item_json(
-            data={
+            info={
                 "id": "x",
                 "owner": "x",
                 "orgId": "x",

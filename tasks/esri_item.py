@@ -320,7 +320,7 @@ def main() -> None:
     )
 
     source_record = get_record(logger=logger, cat=catalogue, reference=args["source_id"])
-    target_item = arc_client._get_item(args["target_id"])
+    target_item = arc_client.get_item(args["target_id"])
     source_item = _create_source_arcgis_item(
         source_record=Record.loads(source_record.dumps(strip_admin=False)),
         admin_keys=config.ADMIN_METADATA_KEYS,

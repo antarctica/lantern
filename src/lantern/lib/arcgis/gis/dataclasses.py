@@ -213,7 +213,7 @@ class Item:  # noqa: PLW1641
         return self_attrs == other_attrs
 
     @classmethod
-    def from_item_json(cls, data: dict, metadata: str, thumbnail: tuple[str, str] | None) -> Item:
+    def from_item_json(cls, info: dict, metadata: str, thumbnail: tuple[str, str] | None) -> Item:
         """
         Create instance from JSON data returned by `.../content/items/{item_id}` API endpoints.
 
@@ -222,30 +222,31 @@ class Item:  # noqa: PLW1641
         - thumbnail[1] MUST be the full URL to this file, with a query parameter for its `sha1` hash
         """
         try:
-            sharing_level = SharingLevel[data["access"].upper()]
+            sharing_level = SharingLevel[info["access"].upper()]
         except KeyError as e:
-            if data["access"] != "public":
+            if info["access"] != "public":
                 raise e from e
             sharing_level = SharingLevel.EVERYONE
 
         item_props = ItemProperties(
-            title=data["title"],
-            item_type=ItemType(data["type"]),
+            title=info["title"],
+            item_type=ItemType(info["type"]),
             metadata=metadata,
-            snippet=data.get("snippet"),
-            description=data.get("description"),
-            access_information=data.get("accessInformation"),
-            license_info=data.get("licenseInfo"),
+            snippet=info.get("snippet"),
+            description=info.get("description"),
+            access_information=info.get("accessInformation"),
+            license_info=info.get("licenseInfo"),
+            extent=info.get("extent"),
         )
         if thumbnail:
             item_props.thumbnail = thumbnail[0]
             item_props.thumbnail_url = thumbnail[1]
         return Item(
-            id=data["id"],
-            owner=data["owner"],
-            org_id=data["orgId"],
-            url=data["url"],
+            id=info["id"],
+            owner=info["owner"],
+            org_id=info["orgId"],
+            url=info["url"],
             properties=item_props,
             sharing_level=sharing_level,
-            raw_item=data,
+            raw_item=info,
         )

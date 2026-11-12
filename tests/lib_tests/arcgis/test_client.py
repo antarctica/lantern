@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs
@@ -8,8 +9,9 @@ import pytest
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
-from lantern.lib.arcgis.client import ArcGisClient
+from lantern.lib.arcgis.client import ArcGisClient, SpatialExtent
 from lantern.lib.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
 from lantern.lib.magic_distribution.models.artefact import ArtefactArcGisService
 
 if TYPE_CHECKING:
@@ -78,10 +80,35 @@ class TestArcGisClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_get_item_id_for_service(self, fx_lib_arcgis_client: ArcGisClient):
-        """Can get Portal item ID for a Server service."""
+    def test_fetch_fs_info(self, fx_lib_arcgis_client: ArcGisClient):
+        """Can fetch information about a Server feature service."""
+        result = fx_lib_arcgis_client._fetch_fs_info(
+            service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
+        )
+        assert isinstance(result, dict)
+        assert result["serviceItemId"] == "123"
+        assert isinstance(result["layers"], list)
+        assert len(result["layers"]) > 0
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_fetch_fs_layer_info(self, fx_lib_arcgis_client: ArcGisClient):
+        """Can fetch information about a layer within a Server feature service."""
+        expected = 0
+        result = fx_lib_arcgis_client._fetch_fs_layer_info(
+            service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer",
+            layer_id=expected,
+        )
+        assert isinstance(result, dict)
+        assert result["id"] == expected
+        assert result["serviceItemId"] == "123"
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_fetch_item_id_for_service(self, fx_lib_arcgis_client: ArcGisClient):
+        """Can fetch Portal item ID for a Server service."""
         assert (
-            fx_lib_arcgis_client._get_item_id_for_service(
+            fx_lib_arcgis_client._fetch_item_id_for_service(
                 service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
             )
             == "x"
@@ -89,33 +116,75 @@ class TestArcGisClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_get_item_info(self, fx_lib_arcgis_client: ArcGisClient):
-        """Can get info for a Portal item."""
-        result = fx_lib_arcgis_client._get_item_info(item_id="x")
-        assert isinstance(result, dict)
+    def test_get_fs_layer_last_data_update(self, fx_lib_arcgis_client: ArcGisClient):
+        """Can get the last time features were updated in a layer within a Server feature service."""
+        result = fx_lib_arcgis_client.get_fs_layer_last_data_update(
+            service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
+        )
+        assert result == datetime(2024, 7, 30, 8, 37, 3, 961000, tzinfo=UTC)
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_get_item_metadata(self, fx_lib_arcgis_client: ArcGisClient):
+    def test_fetch_fs_layer_features_geojson(self, fx_lib_arcgis_client: ArcGisClient):
+        """Can get features in a layer within a Server feature service as a GeoJSON feature collection."""
+        result = fx_lib_arcgis_client.fetch_fs_layer_features_geojson(
+            service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
+        )
+        assert isinstance(result, dict)
+        assert isinstance(result["features"], list)
+        assert len(result["features"]) > 0
+
+    @pytest.mark.cov()
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("variant", ["missing_key", "invalid_feature"])
+    def test_fetch_fs_layer_features_geojson_invalid(self, fx_lib_arcgis_client: ArcGisClient, variant: str):
         """
-        Can get additional metadata for a Portal item.
+        Cannot get features in a layer where GeoJSON feature collection is invalid.
+
+        See VCR cassettes for invalid data variants.
+        """
+        with pytest.raises(ValueError, match=r"GeoJSON parse error"):
+            fx_lib_arcgis_client.fetch_fs_layer_features_geojson(
+                service_endpoint="https://x.arcgis.com/x/arcgis/rest/services/x/FeatureServer"
+            )
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("with_org_id", [False, True])
+    def test_fetch_item_info(self, fx_lib_arcgis_client: ArcGisClient, with_org_id: bool):
+        """
+        Can fetch info for a Portal item.
+
+        Includes coverage check for missing `orgId` property.
+        """
+        expected = "x"
+        result = fx_lib_arcgis_client._fetch_item_info(item_id=expected)
+        assert isinstance(result, dict)
+        assert result["id"] == expected
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_fetch_item_metadata(self, fx_lib_arcgis_client: ArcGisClient):
+        """
+        Can fetch additional metadata for a Portal item.
 
         I.e. external information stored as a related file for the item in one of Arc's supported metadata standards.
         """
-        result = fx_lib_arcgis_client._get_item_metadata(item_id="x")
+        result = fx_lib_arcgis_client._fetch_item_metadata(item_id="x")
         assert "<metadata>" in result
 
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.parametrize("with_custom", [False, True])
     @pytest.mark.parametrize("with_info", [False, True])
-    def test_get_item_thumbnail(self, fx_lib_arcgis_client: ArcGisClient, with_custom: bool, with_info: bool):
-        """Can get thumbnail for a Portal item if set, with or without pre-fetched item info."""
+    def test_fetch_item_thumbnail(self, fx_lib_arcgis_client: ArcGisClient, with_custom: bool, with_info: bool):
+        """Can fetch thumbnail for a Portal item if set, with or without pre-fetched item info."""
         thumbnail = "thumbnail/thumbnail123.png" if with_custom else "thumbnail/ago_downloaded.gif"
         info = {"id": "x", "thumbnail": thumbnail} if with_info else None
         item_id = "x" if with_custom else "y"  # 7 (with custom thumbnail) = x
 
-        result = fx_lib_arcgis_client._get_item_thumbnail(item_id=item_id, item_info=info)
+        result = fx_lib_arcgis_client._fetch_item_thumbnail(item_id=item_id, item_info=info)
         assert len(result) == 2  # noqa: PLR2004
         assert result[0] == thumbnail
 
@@ -124,7 +193,7 @@ class TestArcGisClient:
     def test_get_item(self, fx_lib_arcgis_client: ArcGisClient):
         """Can get a Portal item with info, metadata and thumbnail as an ArcGIS item dataclass."""
         item_id = "x"
-        result = fx_lib_arcgis_client._get_item(item_id=item_id)
+        result = fx_lib_arcgis_client.get_item(item_id=item_id)
         assert isinstance(result, Item)
         assert result.id == item_id
 
@@ -141,6 +210,55 @@ class TestArcGisClient:
         result = fx_lib_arcgis_client._get_item_file_identifier(fx_lib_arcgis_item)
         assert result == expected
 
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("is_service", [False, True])
+    def test_fetch_service_endpoint_for_item(
+        self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item, is_service: bool
+    ):
+        """Can get Server service endpoint from Portal item if applicable (i.e. not a web map)."""
+        expected = "x" if is_service else None
+        fx_lib_arcgis_item.url = "x" if is_service else ""
+
+        result = fx_lib_arcgis_client.get_service_endpoint_for_item(fx_lib_arcgis_item)
+        assert result == expected
+
+    @pytest.mark.parametrize("with_extent", [False, True])
+    def test_get_item_geo_extent(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item, with_extent: bool):
+        """
+        Can get bounding box spatial extent from Portal item if set.
+
+        In theory this should always be set for the item types we support (i.e. not PowerPoint documents, etc.).
+        """
+        raw_extent = [[1.0, 2.0], [3.0, 4.0]]
+        fx_lib_arcgis_item.properties.extent = raw_extent if with_extent else []
+        expected = SpatialExtent(1.0, 3.0, 2.0, 4.0) if with_extent else None
+
+        result = fx_lib_arcgis_client.get_item_geo_extent(fx_lib_arcgis_item)
+        assert result == expected
+
+    @pytest.mark.cov()
+    def test_get_item_geo_extent_invalid(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Cannot get bounding box spatial extent from Portal item if set to an invalid value."""
+        fx_lib_arcgis_item.properties.extent = "x"
+
+        with pytest.raises(TypeError, match=r"Invalid item bounding geographic extent."):
+            fx_lib_arcgis_client.get_item_geo_extent(fx_lib_arcgis_item)
+
+    @pytest.mark.parametrize("endpoint", [None, "https://example.com"])
+    def test_get_service_artefact_format(
+        self, mocker: MockerFixture, fx_lib_arcgis_client: ArcGisClient, endpoint: str | None
+    ):
+        """Can optionally determine ArcGIS service format."""
+        expected = ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE
+        service_format = ArtefactFormats.get_by_label(ArtefactFormatLabel.ARCGIS_FEATURE_SERVICE)
+        mocker.patch.object(ArtefactFormats, "get_service_format", return_value=service_format)
+
+        result = fx_lib_arcgis_client._get_service_artefact_format(endpoint)
+        if endpoint:
+            assert result == expected
+        else:
+            assert result is None
+
     @pytest.mark.parametrize("item_ref", [None, "x", "https://example.com?id=x"])
     @pytest.mark.parametrize("resource_id", [None, "x"])
     @pytest.mark.parametrize("with_metadata_id", [False, True])
@@ -153,13 +271,18 @@ class TestArcGisClient:
         resource_id: bool,
         with_metadata_id: bool,
     ):
-        """Can create an ArcGIS service artefact from an ArcGIS Item."""
+        """
+        Can create an ArcGIS service artefact from an ArcGIS Item.
+
+        Implicitly tests `_get_item_artefact_format`.
+        """
         metadata = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><metadata><mdFileID>x</mdFileID></metadata>'
         fx_lib_arcgis_item.properties.metadata = metadata if with_metadata_id else None
-        mocker.patch.object(fx_lib_arcgis_client, "_get_item", return_value=fx_lib_arcgis_item)
+        mocker.patch.object(fx_lib_arcgis_client, "get_item", return_value=fx_lib_arcgis_item)
+        mocker.patch.object(fx_lib_arcgis_client, "_get_service_artefact_format", return_value=None)
 
         if not item_ref:
-            with pytest.raises(ValueError, match=r"Either ArcGIS item ID or item URL required."):
+            with pytest.raises(ValueError, match=r"Either ArcGIS Portal item ID or item URL required."):
                 fx_lib_arcgis_client.get_artefact(item_ref=item_ref, resource_id=resource_id)
             return
 

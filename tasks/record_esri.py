@@ -14,8 +14,6 @@ from lantern.lib.arcgis.client import ArcGisClient
 if TYPE_CHECKING:
     import logging
 
-    from lantern.lib.magic_distribution.models.artefact import ArtefactArcGisService
-    from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
     from lantern.lib.metadata_library.models.record.record import Record
 
 
@@ -92,19 +90,6 @@ def _get_args(
     return import_path, record, item, params
 
 
-def _make_esri_distributions(artefact: ArtefactArcGisService) -> list[Distribution]:
-    """
-    Generate distribution options for an ArcGIS artefact.
-
-    Assumes artefact represents an ArcGIS Portal item, and will generate an Item and Service distribution option (if applicable).
-    """
-    distributions = [artefact.distribution_option]
-    service_dist_opt = artefact.distribution_option_service
-    if service_dist_opt:
-        distributions.append(service_dist_opt)
-    return distributions
-
-
 def main() -> None:
     """Entrypoint."""
     logger, config, _catalogue = init()
@@ -116,8 +101,7 @@ def main() -> None:
     import_path, record, item_url, params = _get_args(logger=logger, cli_args=cli_args)
 
     artefact = arc_client.get_artefact(resource_id=record.file_identifier, item_ref=item_url)
-    distribution_options = _make_esri_distributions(artefact)
-    for option in distribution_options:
+    for option in artefact.distribution_options:
         record.distribution.ensure(option)
     dump_records(logger=logger, records=[record], output_path=import_path)
 

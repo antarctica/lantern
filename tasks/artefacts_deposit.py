@@ -13,14 +13,13 @@ from tasks._shared import dump_records, init, parse_records, pick_local_record
 from lantern.lib.magic_distribution.client import DuplicateArtefactError, MagicResourceDistributionClient
 from lantern.lib.magic_distribution.formats import ArtefactFormatNotSupportedError, ArtefactFormatUnknownError
 from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.magic_distribution.utils import get_sharepoint_permissions
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 
 if TYPE_CHECKING:
     import logging
 
-    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
     from tasks._config import ExtraConfig
 
 
@@ -129,35 +128,6 @@ def _get_args(
     return cli_force, artefacts_path, records_path, record, clean_deposited, params
 
 
-def get_permissions(
-    admin_keys: AdministrationKeys, record: Record, groups_mapping: dict[str, list[str]]
-) -> tuple[set[str], bool]:
-    """
-    Convert resource permissions into sharing groups or whether unrestricted access is allowed.
-
-    Open access permissions MUST be exclusive based on well-known permission.
-
-    The directory of any other permissions MUST match the tenancy of the deposit SharePoint site (i.e. NERC).
-
-    Permissions targeting other directories are ignored. Permission expiry date times are also ignored.
-
-    Permission referencing well-known group aliases (e.g. `~bas-staff`) need to be resolved to real Entra groups using
-    the provided mapping (where aliases CAN resolve to multiple Entra groups, e.g. `{'x': ['123', '234']}`).
-    """
-    admin_meta = get_admin(keys=admin_keys, record=record)
-    if not admin_meta:
-        return set(), False
-    if admin_meta.resource_permissions == [OPEN_ACCESS]:
-        return set(), True
-
-    # filter out permissions for other directories
-    groups = {p.group for p in admin_meta.resource_permissions if p.directory == "~nerc"}
-    # resolve any group mappings
-    groups = {mapped_group for group in groups for mapped_group in groups_mapping.get(group, [group])}
-
-    return groups, False
-
-
 def _get_artefacts(logger: logging.Logger, artefacts_path: Path, resource_id: str) -> list[ArtefactLocalFile]:
     """Generate artefacts for supported file types."""
     logger.info("Searching for artefacts without recursion in: %s", artefacts_path.resolve())
@@ -250,9 +220,8 @@ def _run(
         logger=logger, cli_args=cli_args
     )
 
-    access_groups, unrestricted = get_permissions(
-        admin_keys=config.ADMIN_METADATA_KEYS, record=record, groups_mapping=groups_mapping
-    )
+    admin_meta = get_admin(keys=config.ADMIN_METADATA_KEYS, record=record)
+    access_groups, unrestricted = get_sharepoint_permissions(admin_meta=admin_meta, groups_mapping=groups_mapping)
     artefacts = _get_artefacts(
         logger=logger,
         artefacts_path=artefacts_path,

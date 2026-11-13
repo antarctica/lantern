@@ -22,7 +22,6 @@ from rich.console import Console
 from rich.progress_bar import ProgressBar
 from rich.table import Table
 from tasks._shared import dump_records, init, init_s3
-from tasks.artefacts_deposit import get_permissions
 from tasks.record_supersede import process_predecessor, process_successor
 from tasks.records_zap import revise_collection
 
@@ -38,6 +37,7 @@ from lantern.lib.magic_distribution.models.artefact import (
     ArtefactLocalFile,
     ArtefactSharePointFile,
 )
+from lantern.lib.magic_distribution.utils import get_sharepoint_permissions
 from lantern.lib.metadata_library.models.record.elements.common import Constraints, Date, Dates
 from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -67,6 +67,7 @@ from lantern.lib.metadata_library.models.record.presets.constraints import BAS_S
 from lantern.lib.metadata_library.models.record.presets.contacts import make_bas_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 
 if TYPE_CHECKING:
     import logging
@@ -849,8 +850,9 @@ def _deposit_files(
 
     deposit_events = []
     for event in events:
-        access_groups, unrestricted = get_permissions(
-            admin_keys=admin_keys, record=event.record, groups_mapping=access_groups_mapping
+        admin_meta = get_admin(keys=admin_keys, record=event.record)
+        access_groups, unrestricted = get_sharepoint_permissions(
+            admin_meta=admin_meta, groups_mapping=access_groups_mapping
         )
 
         event_artefacts = []  # expected order: source artefact, converted artefact

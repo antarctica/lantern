@@ -1376,4 +1376,5 @@ def fx_lib_arcgis_client(mocker: MockerFixture, fx_logger: logging.Logger) -> Ar
         app_client_secret="x",  # noqa: S106
     )
     mocker.patch.object(type(client), "_access_token", new_callable=PropertyMock, return_value="x")
+
     return client

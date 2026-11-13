@@ -54,10 +54,12 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `search-configure` development task
 * Dedicated search test suite to consistently check expected functionality and index settings
 * MAGIC Team well known access permissions preset
-* `ensure()` and `without()` utility methods for resource and metadata constraints
+* `ensure()` and `without()` utility methods for resource and metadata constraints in metadata library lib
 * Initial support for ArcGIS service as artefacts
 * `retire-record` development task to mark a record as retired and unavailable
 * `append-collections` development task to include records in parent collects and update extents
+* `get()` utility method for extents and identifiers in metadata library lib
+* `set()` utility method for extents in metadata library lib
 
 ### Fixed
 

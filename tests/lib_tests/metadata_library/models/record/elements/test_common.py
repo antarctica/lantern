@@ -863,40 +863,6 @@ class TestIdentifiers:
         assert len(identifiers) == 1
         assert identifiers[0] == expected
 
-    def test_filter_namespace(self):
-        """Can filter identifiers by a namespace."""
-        identifier = Identifier(identifier="x", href="x", namespace="a")
-        identifiers = Identifiers([identifier, Identifier(identifier="x", href="x", namespace="b")])
-        expected = Identifiers([identifier])
-
-        result = identifiers.filter(identifier.namespace)
-        assert result == expected
-
-    def test_without_namespace(self):
-        """Can filter identifiers to exclude a namespace."""
-        identifier = Identifier(identifier="x", href="x", namespace="a")
-        identifiers = Identifiers([identifier, Identifier(identifier="x", href="x", namespace="b")])
-        expected = Identifiers([Identifier(identifier="x", href="x", namespace="b")])
-
-        result = identifiers.without(identifier.namespace)
-        assert result == expected
-
-    test_ensure_id = Identifier(identifier="x", href="x", namespace="x")
-
-    @pytest.mark.parametrize(
-        ("before", "after"),
-        [
-            (Identifiers([]), Identifiers([test_ensure_id])),
-            (Identifiers([test_ensure_id]), Identifiers([test_ensure_id])),
-        ],
-    )
-    def test_ensure(self, before: Identifiers, after: Identifiers):
-        """Can append an identifier as needed."""
-        value = self.test_ensure_id
-
-        before.ensure(value)
-        assert before == after
-
     def test_structure(self):
         """Can create an Identifiers container by converting a list of plain types."""
         expected = Identifiers([Identifier(identifier="x", href="x", namespace="x")])
@@ -924,6 +890,47 @@ class TestIdentifiers:
         result = clean_list(converter.unstructure(value))
 
         assert result == expected
+
+    def test_filter_namespace(self):
+        """Can filter identifiers by a namespace."""
+        identifier = Identifier(identifier="x", href="x", namespace="a")
+        identifiers = Identifiers([identifier, Identifier(identifier="x", href="x", namespace="b")])
+        expected = Identifiers([identifier])
+
+        result = identifiers.filter(identifier.namespace)
+        assert result == expected
+
+    def test_without_namespace(self):
+        """Can filter identifiers to exclude a namespace."""
+        identifier = Identifier(identifier="x", href="x", namespace="a")
+        identifiers = Identifiers([identifier, Identifier(identifier="x", href="x", namespace="b")])
+        expected = Identifiers([Identifier(identifier="x", href="x", namespace="b")])
+
+        result = identifiers.without(identifier.namespace)
+        assert result == expected
+
+    def test_get_identifier(self):
+        """Can get an identifier by a namespace."""
+        expected = Identifier(identifier="x", href="x", namespace="x")
+        identifiers = Identifiers([expected])
+        assert identifiers.get(namespace=expected.namespace) == expected
+        assert identifiers.get(namespace="unknown") is None
+
+    test_ensure_id = Identifier(identifier="x", href="x", namespace="x")
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Identifiers([]), Identifiers([test_ensure_id])),
+            (Identifiers([test_ensure_id]), Identifiers([test_ensure_id])),
+        ],
+    )
+    def test_ensure(self, before: Identifiers, after: Identifiers):
+        """Can append an identifier as needed."""
+        value = self.test_ensure_id
+
+        before.ensure(value)
+        assert before == after
 
 
 class TestOnlineResource:

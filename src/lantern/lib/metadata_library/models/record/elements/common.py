@@ -450,6 +450,18 @@ class Identifiers(list[Identifier]):
         """Filter identifiers by namespace, returning non-matching identifiers."""
         return Identifiers([identifier for identifier in self if identifier.namespace != namespace])
 
+    def get(self, namespace: str) -> Identifier | None:
+        """
+        Get the first available identifier by namespace if present.
+
+        Identifier namespaces are not guaranteed to be unique. This method returns a first matching identifier.
+        Use `filter()` to select all identifiers for a namespace.
+        """
+        for identifier in self:
+            if identifier.namespace == namespace:
+                return identifier
+        return None
+
     def ensure(self, identifier: Identifier) -> None:
         """Add identifier without creating duplicates."""
         if identifier in self:

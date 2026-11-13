@@ -154,10 +154,7 @@ class ItemBase(ItemCore):
     @property
     def bounding_extent(self) -> Extent | None:
         """Bounding extent."""
-        try:
-            return self.extents.filter(identifier="bounding")[0]
-        except IndexError:
-            return None
+        return self.extents.get(identifier="bounding")
 
     @property
     def citation_raw(self) -> str | None:

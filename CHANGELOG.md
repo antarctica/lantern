@@ -96,6 +96,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating copyright policy to reflect item metadata licences
 * Improving `zap-records` to stage artefacts for deposit where using legacy hosting
 * Improving `supersede-record` to optionally move aliases from old to new record
+* Refactoring SharePoint permission logic into SharePoint lib
 
 ### Removed
 

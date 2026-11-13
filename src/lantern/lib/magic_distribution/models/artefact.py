@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from base64 import b64encode, urlsafe_b64encode
 from functools import cached_property
 from typing import TYPE_CHECKING, Final, get_type_hints
-from urllib.parse import urlencode, urlparse, urlunparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from quickxorhash import quickxorhash  # ty: ignore[unresolved-import]
 
@@ -212,7 +212,7 @@ class ArtefactSharePointFile(ArtefactFile):
 
     Uses metadata recorded about a file to state its format, size, name, etc. Does not allow access to file content.
 
-    Provides an access URL to access the artefact file for use in distribution options within resource records.
+    Provides an access URL to access the artefact file and distribution option for use within resource records.
 
     Metadata
     --------
@@ -353,9 +353,19 @@ class ArtefactSharePointFile(ArtefactFile):
         """
         Direct access URL, unless an access proxy is configured and the artefact is unrestricted.
 
-        File checksum values are appended to the direct URL for checking the integrity of downloaded files.
+        URLs use the `webUrl` property which has variable behaviour based on file format as defined by SharePoint:
+        - formats supported for editing open in a relevant app (e.g. Excel online for a CSV file)
+        - PDF files specifically open in a (SharePoint) PDF viewer
+        - all other files download directly
+
+        Files that support editing use URLs in the form:
+        `https://example.com/.../_layouts/15/Doc.aspx?sourcedoc=...&file=file.csv
+
+        File checksum values are appended to the URL for checking the integrity of downloaded files.
 
         E.g. A direct URL `https://example.com/file.ext` becomes: `https://example.com/file.ext?sha256=x&quickxor=y`.
+
+        Note: Any existing query parameters in the direct URL are preserved when checksum values are appended.
 
         Where an access proxy is used:
         - a base 64 encoded direct URL is appended to the `proxy_base` parameter as a `url` query parameter
@@ -371,7 +381,11 @@ class ArtefactSharePointFile(ArtefactFile):
         base = self._proxy_base if proxy else direct
         if proxy:
             params.update({"url": urlsafe_b64encode(direct.encode()).decode(), "name": self.name})
-        return urlunparse(urlparse(base)._replace(query=urlencode(params)))
+
+        parsed = urlparse(base)
+        query = [(key, value) for key, value in parse_qsl(parsed.query, keep_blank_values=True) if key not in params]
+        query.extend(params.items())
+        return urlunparse(parsed._replace(query=urlencode(query)))
 
     @property
     def distributor(self) -> Contact:
@@ -573,7 +587,7 @@ class ArtefactArcGisService(ArtefactService):
 
     @property
     def distribution_option(self) -> Distribution:
-        """Artefact ISO transfer option for item."""
+        """Artefact ISO distribution option for item."""
         return Distribution(
             format=self.distribution_format,
             distributor=self.distributor,

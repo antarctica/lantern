@@ -633,26 +633,6 @@ class TestExtents:
         assert len(extents) == 1
         assert extents[0] == expected
 
-    def test_filter_identifier(self):
-        """Can filter extents by an identifier."""
-        extent = Extent(
-            identifier="x",
-            geographic=ExtentGeographic(
-                bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
-            ),
-        )
-        other = Extent(
-            identifier="y",
-            geographic=ExtentGeographic(
-                bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
-            ),
-        )
-        extents = Extents([extent, other])
-        expected = Extents([extent])
-
-        result = extents.filter(extent.identifier)
-        assert result == expected
-
     def test_structure(self):
         """Can create an Extents container by converting a list of plain types."""
         expected_date = date(2014, 6, 30)
@@ -781,6 +761,62 @@ class TestExtents:
         result = clean_list(converter.unstructure(value))
 
         assert result == expected
+
+    def test_filter_identifier(self):
+        """Can filter extents by an identifier."""
+        extent = Extent(
+            identifier="x",
+            geographic=ExtentGeographic(
+                bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
+            ),
+        )
+        other = Extent(
+            identifier="y",
+            geographic=ExtentGeographic(
+                bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
+            ),
+        )
+        extents = Extents([extent, other])
+        expected = Extents([extent])
+
+        result = extents.filter(extent.identifier)
+        assert result == expected
+
+    def test_get_identifier(self):
+        """Can get an extent by an identifier."""
+        expected = Extent(
+            identifier="x",
+            geographic=ExtentGeographic(
+                bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
+            ),
+        )
+        extents = Extents([expected])
+        assert extents.get(identifier=expected.identifier) == expected
+        assert extents.get(identifier="unknown") is None
+
+    _extent = ExtentGeographic(
+        bounding_box=BoundingBox(west_longitude=1.0, east_longitude=2.0, south_latitude=3.0, north_latitude=4.0)
+    )
+
+    @pytest.mark.parametrize(
+        ("initial", "value", "expected"),
+        [
+            (
+                Extents([Extent(identifier="x", geographic=_extent)]),
+                Extent(identifier="x", geographic=_extent),
+                Extents([Extent(identifier="x", geographic=_extent)]),
+            ),
+            (
+                Extents([Extent(identifier="x", geographic=_extent)]),
+                Extent(identifier="y", geographic=_extent),
+                Extents([Extent(identifier="x", geographic=_extent), Extent(identifier="y", geographic=_extent)]),
+            ),
+        ],
+    )
+    def test_set_identifier(self, initial: Extents, value: Extent, expected: Extents):
+        """Can add or update extents by an identifier."""
+        initial.set(value)
+        assert initial == expected
 
 
 class TestGraphicOverview:

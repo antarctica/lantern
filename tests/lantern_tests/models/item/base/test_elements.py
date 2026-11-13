@@ -196,6 +196,7 @@ class TestExtents:
         assert item_extents[0] == item_extent
         # verify methods from parent class are accessible
         assert len(item_extents.filter(identifier=identifier)) > 0
+        assert item_extents.get(identifier=identifier) is not None
 
 
 class TestLink:

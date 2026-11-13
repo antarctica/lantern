@@ -347,6 +347,26 @@ class Extents(list[Extent]):
         """
         return Extents([extent for extent in self if extent.identifier == identifier])
 
+    def get(self, identifier: str) -> Extent | None:
+        """
+        Get the first available extent by identifier if present.
+
+        Extent identifiers are not guaranteed to be unique but usually will be. This method returns a first matching
+        extent where there are duplicates.
+        """
+        for extent in self:
+            if extent.identifier == identifier:
+                return extent
+        return None
+
+    def set(self, extent: Extent) -> None:
+        """Add or update a specific extent by identifier."""
+        for i, e in enumerate(self):
+            if e.identifier == extent.identifier:
+                self[i] = extent
+                return
+        self.append(extent)
+
 
 @dataclass(kw_only=True)
 class GraphicOverview:

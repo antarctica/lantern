@@ -127,6 +127,10 @@ class Extents(RecordExtents):
         """Get items as overloaded type."""
         return cast("Extents", super().filter(identifier))
 
+    def get(self, identifier: str) -> Extent | None:
+        """Get items as overloaded type."""
+        return cast("Extent", super().get(identifier))
+
 
 @dataclass
 class Link:

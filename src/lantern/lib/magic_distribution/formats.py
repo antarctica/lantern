@@ -193,7 +193,7 @@ class ArtefactFormats:
             "Download information as a Shapefile compressed as a Zip archive.",
             [".shp.zip"],
             [],
-            "https://metadata-resources.data.bas.ac.uk/media-types/application/shapefile+zip",
+            "https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip",
         ),
         ArtefactFormat(
             ArtefactFormatLabel.GEOTIFF,

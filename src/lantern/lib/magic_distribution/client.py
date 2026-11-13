@@ -72,19 +72,20 @@ class MagicResourceDistributionClient:
     """
     Lightweight client to deposit and manage artefacts in the MAGIC Resource Distribution SharePoint Online site.
 
+    Uses the MS Graph API directly to avoid the complexity and overhead of a full MS Graph SDK.
+
+    List metadata is specific to MAGIC Resource Distribution libraries (as per the MagicDistributionMetadata typed dict).
+
+    Requires an Entra app registration with the `Sites.Selected` permission configured for the relevant SharePoint site.
+
     Supports:
+    ---------
     - creating directories
     - uploading files (via an upload session if needed)
     - setting required list metadata and permissions
     - fetching file information and contents
 
     Does not support updating existing artefacts (see `docs/libraries.md` for other limitations).
-
-    Uses the MS Graph API directly to avoid the complexity and overhead of a full MS Graph SDK.
-
-    List metadata is specific to MAGIC Resource Distribution libraries (as per the MagicDistributionMetadata typed dict).
-
-    Requires an Entra app registration with the `Sites.Selected` permission configured for the relevant SharePoint site.
     """
 
     def __init__(

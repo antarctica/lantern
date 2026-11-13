@@ -281,12 +281,12 @@ class TestArtefactSharePointFile:
     @pytest.mark.parametrize("unrestricted", [False, True])
     def test_url(self, proxy_base: str, unrestricted: bool):
         """Can use access proxy for URL if the resource is unrestricted."""
-        raw_url = "https://example.com/file.txt"
+        raw_url = "https://example.com/file.txt?x=x"  # query string included to check values are preserved
         common_query = "sha256=y&quickxor=x"
         expected_url = (
-            f"{proxy_base}?{common_query}&url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dA%3D%3D&name=x"
+            f"{proxy_base}?{common_query}&url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dD94PXg%3D&name=x"
             if proxy_base and unrestricted
-            else f"{raw_url}?{common_query}"
+            else f"{raw_url}&{common_query}"
         )
 
         artefact = ArtefactSharePointFile(

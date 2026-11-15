@@ -249,17 +249,18 @@ To add support for a new ISO element within Records:
 1. add a preset in `lantern.lib.metadata_library.models.record.presets.constraints` (for discovery metadata)
 1. update `lantern.lib.metadata_library.models.record.utils.admin.parse_framework_permissions` and associated tests
 
-## MAGIC Resource Distribution
+## SharePoint
 
 `lantern.lib.magic_distribution`
 
-Includes classes for [Artefacts](/docs/models.md#artefacts), associated metadata and a Microsoft Graph upload client
-for SharePoint Online.
+Includes metadata data structures, [Artefacts](#sharepoint-file-artefacts) and a Microsoft Graph upload client for
+interacting with resources hosted in Microsoft SharePoint Online.
 
 > [!NOTE]
-> These classes are specific to the SharePoint implementation of the
-> [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) (mainly in terms
-> of list metadata and folder structure).
+> This package is specific to the SharePoint implementation of the
+> [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) and functionality
+> required by the `deposit-artefacts` [Development Tasks](/docs/dev.md#development-tasks), plus some experimental
+> workflows for the BAS Operations GIS platform.
 
 ### SharePoint client
 
@@ -272,151 +273,66 @@ Microsoft Graph API.
 > This client requires an Entra app registration with permissions to either read, or manage files within the relevant
 > SharePoint site (depending on whether file deposit is needed).
 
-### SharePoint client limitations
+#### SharePoint client limitations
 
-In addition to [Limitations 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution#limitations) from the MAGIC
-Resource Distribution service:
+Known unsupported features (not-exhaustive) and addition to
+[Limitations 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution#limitations) from the MAGIC Resource
+Distribution service:
 
 - permissions on existing files cannot be updated
 
 > [!TIP]
 > Where needed, permissions for existing files can be updated by (manually) removing files then re-depositing them.
 
-### Artefacts
-
-`lantern.lib.magic_distribution.models.artefact.ArtefactBase`.
-
-Artefacts represent a description of the contents of a resource in Python. They generally describe files, services or
-other representations containing all or part of the resource in a specific (typically output focused) format or
-protocol. Artefacts are related to a [Record](#records) using distribution options or (if supported in future) resource
-representations.
-
-For example:
-
-- a map product MAY be distributed with PDF and JPEG [File Artefacts](#file-artefacts)
-  - the underlying GIS project for this map COULD also be an artefact as a resource representation, if supported
-- a vector dataset MAY be distributed as a GeoPackage file, and as an OGC Features API
-  [Service Artefact](#service-artefacts)
-
-The `ArtefactBase` abstract class defines common logic and properties and methods artefact subclasses must implement.
-
-### Artefact metadata
-
-`lantern.lib.magic_distribution.models.metadata.ArtefactMetadata`
-
-Artefacts MUST include metadata to record:
-
-- the identifier of the associated resource
-- whether this resource has unrestricted (open) access
-- a unique artefact identifier (generated via a hash of a relevant value)
-- a controlled and supported [Format](#artefact-formats)
-
-### Artefact formats
-
-`lantern.lib.magic_distribution.models.artefact.ArtefactFormat`
-
-Artefacts MUST select a supported format, identified by the
-`lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enum. Either by examining the entity the Artefact
-represents (e.g. a file's extension and contents or service conformance info), or by direct assignment.
-
-### File artefacts
-
-`lantern.lib.magic_distribution.models.artefact.ArtefactFile`
-
-Represents information held in a stored or virtual file of a particular type in Python, with a name which includes a
-file extension.
-
-File artefacts MAY be local (using `lantern.lib.magic_distribution.models.artefact.ArtefactLocalFile`), where the file
-contents is available and the [Format](#artefact-formats) can be reliably determined (as file extensions are not
-definitive in some cases).
-
 ### SharePoint file artefacts
 
 `lantern.lib.magic_distribution.models.artefact.ArtefactSharePointFile`
 
-Represents a remote file stored in a SharePoint document library in Python and accessed via the Microsoft Graph as a
-[Drive Item](https://learn.microsoft.com/en-us/graph/api/resources/driveitem).
+[File Artefacts](#file-artefacts) representing a remote file hosted in a SharePoint document library, accessed via the
+Microsoft Graph as a [Drive Item](https://learn.microsoft.com/en-us/graph/api/resources/driveitem).
 
-Intended for artefacts deposited in the [MAGIC Resource Distribution](/docs/libraries.md#magic-resource-distribution),
-including associated SharePoint list values for artefact [Metadata](#artefact-metadata) and a
-[Format](#artefact-formats), also accessed via the Microsoft Graph as a
+Includes [Metadata](#sharepoint-file-metadata) and an [Artefact Format](#artefact-formats) from associated SharePoint
+list values accessed via the Microsoft Graph as a
 [Field Value Set](https://learn.microsoft.com/en-us/graph/api/resources/fieldvalueset).
 
 > [!Note]
 > SharePoint artefacts do not include direct access to file content. An access URL intended for end-users is available.
 
-### Service artefacts
+#### SharePoint file metadata
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
+In addition to required [Artefact Metadata](#artefact-metadata), SharePoint file artefacts include properties for:
 
-`lantern.lib.magic_distribution.models.artefact.ArtefactServicePlaceholder`
-
-Represents information accessible via a particular protocol in Python, available at a given endpoint URL.
-
-### Supported file formats
-
-- CSV
-- FPL (Garmin flight plan - for Garmin aviation GPS units)
-- GPX (nominally for handheld GPS units)
-- GeoPackage (optionally zipped for compression)
-- JPEG images
-- GeoJSON (non-geo JSON files are not supported)
-- MapBox vector tiles
-- PDF (including georeferenced PDF)
-- PNG
-- Shapefile (specifically where zipped with required files `.shp`, `.shx`, `.dbf`)
-- GeoTiff (non-geo TIFF images are not supported)
-
-### Supported service formats
-
-> [!NOTE]
-> Format in this context relates to the service protocol, rather than the formats a service may offer as output.
-
-- ArcGIS feature service (and associated layer)
-- OGC API features (as implemented by ArcGIS, and including associated layer)
-- ArcGIS raster tile service (and associated layer)
-- ArcGIS vector tile service (and associated layer)
-- ArcGIS scene service (and associated layer)
-- ArcGIS web map
-
-### Adding file artefact formats
-
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-To enable additional file formats to be deposited as [File Artefacts](#file-artefacts).
-
-- add a new member to the `lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enumeration
-- add a new list item to `lantern.lib.magic_distribution.models.artefact.ArtefactFormats.file_formats`
-  (or `.service_formats`)
-- update tests (typically `lib_tests.magic_distribution.models.test_artefacts.TestArtefactsFormats.test_get_file_format`)
-- update supported [File](#supported-file-formats) or [Service](#supported-service-formats) documentation
-
-> [!NOTE]
-> Typically, new artefact formats are also added as supported
-> [Distribution Formats](/docs/dev.md#adding-distribution-formats) for display within catalogue items.
+- whether a resource has unrestricted (open) access, for use with a SharePoint access proxy
 
 ## ArcGIS
 
 `lantern.lib.arcgis`
 
-### ArcGIS API for Python
+Includes data structures, [Artefacts](#arcgis-service-artefacts) and a ArcGIS client for interacting with resources
+hosted in Esri ArcGIS Online and Enterprise.
 
-The Esri [ArcGIS API for Python](https://developers.arcgis.com/python) package is not used in this project due to the
-number of dependencies it relies on (see https://github.com/Esri/arcgis-python-api/issues/1692).
-
-Instead, direct HTTP requests are made the relevant operations in the ArcGIS REST API.
+> [!NOTE]
+> This package is limited to functionality required by the `esri-record` and `esri-item`
+> [Development Tasks](/docs/dev.md#development-tasks), plus some experimental workflows for the BAS Operations GIS
+> platform.
 
 ### ArcGIS vendored classes
 
-A vendored subset of data classes and enums for representing content items are maintained in this package.
+`lantern.lib.arcgis.gis`
+
+A vendored subset of data classes and enums for representing ArcGIS Portal items are maintained in this package.
 
 > [!WARNING]
 > These classes have been modified from their original versions in some cases to remove unneeded functionality and to
 > adjust types to comply with linting rules in this project.
 
-### ArcGIS item JSON properties
+### ArcGIS item properties
+
+`lantern.lib.arcgis.gis.dataclasses.ItemProperties`
+
+> [!WARNING]
+> The behaviour and/or use of some item properties has been expanded or changed from their original implementation in
+> the ArcGIS Python SDK to suit the requirements of this project.
 
 Supported item JSON properties:
 
@@ -426,7 +342,7 @@ Supported item JSON properties:
 - url (service endpoint)
 - access (sharing level)
 - title
-- type [enum]
+- type (`enum`)
 - snippet
 - description
 - accessInformation (attribution)
@@ -474,12 +390,6 @@ Unsupported item JSON properties:
 - apiToken2ExpirationDate
 - lastViewed
 
-### ArcGIS specially handled features
-
-> [!WARNING]
-> The behaviour and/or use of some item properties has been expanded or changed from their original implementation in
-> the ArcGIS Python SDK to suit the requirements of this project.
-
 #### ArcGIS thumbnails
 
 In ArcGIS Portal items, thumbnails are stored as a related resource, similar to metadata. The relative path to this
@@ -508,15 +418,10 @@ otherwise unused.
 > Due to this system, only the `sha1Agol` value is used to compare item thumbnails. If the underlying image is changed,
 > and the SHA1 values are not, the sync process will not determine the thumbnail needs to be replaced.
 
-### ArcGIS limitations
+### ArcGIS item property limitations
 
-<!-- pyml disable md028 -->
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
-
-> [!NOTE]
-> Overall, this package is limited to functionality required by the `esri-record` and `esri-item` dev tasks only.
-<!-- pyml enable md028 -->
 
 Partially supported features (not-exhaustive):
 
@@ -524,7 +429,177 @@ Partially supported features (not-exhaustive):
   - not exposed as a property via these classes
   - used only in the `_update_agol_item()` method of the `esri-item` dev task (force set)
 
+---
+
+### ArcGIS client
+
+`lantern.lib.arcgis.client.ArcGisClient`
+
+Used to lookup and download [Service Artefacts](#service-artefacts) in a ArcGIS Online organisation using ArcGIS APIs.
+
+Targeted to the needs and conventions within BAS/MAGIC. This client is not intended as a general replacement for
+`arcpy` or the ArcGIS API for Python.
+
+<!-- pyml disable md028 -->
+> [!NOTE]
+> The Esri [ArcGIS API for Python](https://developers.arcgis.com/python) package is not used due to the number of
+> dependencies it relies on (see https://github.com/Esri/arcgis-python-api/issues/1692).
+
+> [!NOTE]
+> This client requires an ArcGIS OAuth client registration with permissions to either read, or manage content within
+> an ArcGIS Online organisation.
+<!-- pyml enable md028 -->
+
+#### ArcGIS client limitations
+
 Known unsupported features (not-exhaustive):
 
 - group sharing (see also [ArcGIS Item Limitations](/docs/models.md#arcgis-items-limitations))
-- [Unsupported Item JSON Properties](#arcgis-item-json-properties)
+- [Item and Service Types](#supported-arcgis-types) not listed as supported (e.g. non-raster tile map services)
+- [Unsupported Item Properties](#arcgis-item-properties)
+- provisioning services via a collaborated ArcGIS Enterprise instance
+- content administration and organisation
+- user administration
+
+### Supported ArcGIS types
+
+Supported ArcGIS service types:
+
+- Feature Services
+- ArcGIS OGC API Features
+- Map Services (for raster tiles only)
+- Vector Tile Services
+
+Supported ArcGIS item types:
+
+- Feature Layers
+- OGC API Feature Layers
+- Raster Tile Layers
+- Vector Tile Layers
+- Web Scenes
+- Web Maps
+
+Items vs Services:
+
+- services are hosted within ArcGIS Server and are used to access and query data (such as features, tiles, etc.)
+- items describe services and other objects such as maps within ArcGIS Portal
+- all services have a corresponding item; not all items are backed by an underlying service (e.g. web maps)
+- for this reason item metadata are usually used over service for e.g. a bounding extent
+- exceptions to this include `ArcGisClient._get_fs_layer_last_data_update` to get a more specific value
+
+### ArcGIS service artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactArcGisService`
+
+[Service Artefacts](#service-artefacts) representing content hosted in an ArcGIS Online organisation accessed as a
+ArcGIS Portal item.
+
+Items vs Artefacts:
+
+- items are ArcGIS specific metadata about resources held within ArcGIS Portal, using an ArcGIS information model
+- artefacts are an internal concept representing how resources can be accessed in a generic way (e.g. as files)
+- items are used internally with this client for compatibility with ArcGIS APIs
+- items may be used directly outside of this client where this makes (e.g. in ArcGIS specific workflows)
+- artefacts can be constructed by this client based on an item (as `ArtefactArcGisService` instances) for use in a
+  more generic way within other tools and workflows (e.g. a resource may include both service and file artefacts
+  hosted across a range of providers)
+
+> [!Note]
+> ArcGIS artefacts do not include direct access to data within underlying services. The [ArcGIS Client](#arcgis-client)
+> provides methods to access data from some service types.
+
+## Artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactBase`.
+
+Artefacts represent a description of the contents of a resource in Python. They generally describe files, services or
+other representations containing all or part of the resource in a specific (typically output focused) format or
+protocol. Artefacts are related to a [Record](#records) using distribution options or (if supported in future) resource
+representations.
+
+For example:
+
+- a map product MAY be distributed with PDF and JPEG [File Artefacts](#file-artefacts)
+  - the underlying GIS project for this map COULD also be an artefact as a resource representation, if supported
+- a vector dataset MAY be distributed as a GeoPackage file, and/or as an OGC Features API
+  [Service Artefact](#service-artefacts)
+
+The `ArtefactBase` abstract class defines common logic and properties and methods artefact subclasses MUST implement.
+
+### Artefact metadata
+
+`lantern.lib.magic_distribution.models.metadata.ArtefactMetadata`
+
+Artefacts MUST include metadata for:
+
+- the identifier of the associated resource
+- a unique artefact identifier (generated via a hash of a relevant value)
+- a controlled and supported [Format](#artefact-formats)
+
+### Artefact formats
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactFormat`
+
+Artefacts MUST select a supported format, identified by the
+`lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enum. Either by examining the entity the Artefact
+represents (e.g. a file's extension and contents or service conformance info), or by direct assignment.
+
+### File artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactFile`
+
+Represents information held in a stored or virtual file of a particular type in Python, with a name which includes a
+file extension.
+
+File artefacts MAY be local (using `lantern.lib.magic_distribution.models.artefact.ArtefactLocalFile`), where the file
+contents is available and the [Format](#artefact-formats) can be reliably determined (as file extensions are not
+definitive in some cases).
+
+### Service artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactService`
+
+Represents information accessible via a particular protocol in Python, available at a given endpoint URL.
+
+### Supported file formats
+
+- CSV
+- FPL (Garmin flight plan - for Garmin aviation GPS units)
+- GPX (nominally for handheld GPS units)
+- GeoPackage (optionally zipped for compression)
+- JPEG images
+- GeoJSON (non-geo JSON files are not supported)
+- MapBox vector tiles
+- PDF (including georeferenced PDF)
+- PNG
+- Shapefile (specifically where zipped with required files `.shp`, `.shx`, `.dbf`)
+- GeoTiff (non-geo TIFF images are not supported)
+
+### Supported service formats
+
+> [!NOTE]
+> Format in this context relates to the service protocol, rather than the formats a service may offer as output.
+
+- ArcGIS feature service (and associated layer)
+- OGC API features (as implemented by ArcGIS, and including associated layer)
+- ArcGIS raster tile service (and associated layer)
+- ArcGIS vector tile service (and associated layer)
+- ArcGIS scene service (and associated layer)
+- ArcGIS web map
+
+### Adding file artefact formats
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+To enable additional file formats to be deposited as [File Artefacts](#file-artefacts).
+
+- add a new member to the `lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enumeration
+- add a new list item to `lantern.lib.magic_distribution.models.artefact.ArtefactFormats.file_formats`
+  (or `.service_formats`)
+- update tests (typically `lib_tests.magic_distribution.models.test_artefacts.TestArtefactsFormats.test_get_file_format`)
+- update supported [File](#supported-file-formats) or [Service](#supported-service-formats) documentation
+
+> [!NOTE]
+> Typically, new artefact formats are also added as supported
+> [Distribution Formats](/docs/dev.md#adding-distribution-formats) for display within catalogue items.

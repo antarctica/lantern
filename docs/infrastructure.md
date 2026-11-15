@@ -218,11 +218,11 @@ where possible/pragmatic in the
 
 To manually rotate tokens managed by IaC that expire, and update deployed instances:
 
-- run IaC [1], which will write rotated values to 1Password items
-- update Ansible Vaults [2]
-- run the [Ansible Deployment Playbook](/docs/deployment.md#ansible-playbook) [3]
+- run IaC {1}, which will write rotated values to 1Password items
+- update Ansible Vaults {2}
+- run the [Ansible Deployment Playbook](/docs/deployment.md#ansible-playbook) {3}
 
-[1]
+{1}
 
 ```shell
 % cd resources/infra
@@ -230,13 +230,13 @@ To manually rotate tokens managed by IaC that expire, and update deployed instan
 % tofu apply
 ```
 
-[2]
+{2}
 
 Follow the
 [General Instructions 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-bas-ansible.md#edit-vault-file)
 to template out secrets from 1Password and re-encrypt vault files, which will use current/updated values.
 
-[3]
+{3}
 
 Follow the
 [General Instructions 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-bas-ansible.md#run-a-playbook)

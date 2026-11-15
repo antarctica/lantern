@@ -297,7 +297,7 @@ Completed challenges populate a hidden form field which MUST be validated by the
 
 <!-- pyml disable md028 -->
 > [!WARNING]
-> Turnstile triggers browser warnings and errors, even when working correctly [1] and are expected (if unwanted).
+> Turnstile triggers browser warnings and errors, even when working correctly {1} and are expected (if unwanted).
 
 > [!NOTE]
 > An error handler is configured to supress these errors from [Sentry](/docs/monitoring.md#sentry), as they indicate an
@@ -308,7 +308,7 @@ Completed challenges populate a hidden form field which MUST be validated by the
 > - `110200` and `110600` (timeout)
 <!-- pyml enable md028 -->
 
-[1] These include:
+{1} These include:
 
 - cross-origin errors between the challenge iframe and main page, such as:
   'Blocked a frame with origin "https://challenges.cloudflare.com" from accessing a frame with origin

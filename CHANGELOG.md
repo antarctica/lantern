@@ -15,7 +15,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 > Existing Lantern releases (from 0.1.0 to 0.6.1) have been re-allocated starting from 0.8.0, in this change log, git
 > tags and Python packages.
 
+<!--suppress MarkdownUnresolvedLinkLabel -->
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
+
 ## [Unreleased]
 
 ### Changed [BREAKING!]
@@ -80,6 +82,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * PDC contact preset in BAS Metadata Library lib
 * URL used for 404 handler check corrected to use a reverse proxied value
 * Return type for `Record.loads` preventing subclassing
+* Replaced inline references in docs to avoid interpretation as link references (`[1]` -> `{1}`)
 
 ### Changed
 

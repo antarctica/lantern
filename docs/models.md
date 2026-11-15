@@ -41,7 +41,7 @@ profiles, the Data Catalogue requires all records:
 - MUST use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
   - to ensure resource identifiers and aliases are distinct and can't be ambiguous
-- MUST include an `identification.identifier`, as per [1]:
+- MUST include an `identification.identifier`, as per {1}:
   - to determine if a record is part of the Catalogue
 - MUST NOT use the `database.bas.ac.uk` namespace in any `identification.identifier` elements:
   - as this value is ambiguous across systems, use a more specific value (e.g. `foo.data.bas.ac.uk`)
@@ -50,7 +50,7 @@ profiles, the Data Catalogue requires all records:
 - MUST use unique identifiers for extents
 - MUST structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`
-  - MUST use an allowed prefix for each hierarchy level, as per [2]
+  - MUST use an allowed prefix for each hierarchy level, as per {2}
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
   - MUST set the `href` property to `https://lantern.data.bas.ac.uk/{alias}`
     (e.g. `https://lantern.data.bas.ac.uk/collections/foo`)
@@ -68,13 +68,13 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 > The catalogue does not enforce metadata access constraints if set.
 <!-- pyml enable md028 -->
 
-[1]
+{1}
 
 - identifier: `{file_identifier}`
 - href: `https://lantern.data.bas.ac.uk/items/{file_identifier}`
 - namespace: `lantern.data.bas.ac.uk`
 
-[2]
+{2}
 
 | Hierarchy level           | Allowed Prefixes |
 |---------------------------|------------------|
@@ -320,12 +320,12 @@ Supported distribution option formats:
 
 ### Catalogue item live updates
 
-Where the record includes a resource update frequency of 'continuous' [1], Catalogue Items will include a 'live updates'
+Where the record includes a resource update frequency of 'continuous' {1}, Catalogue Items will include a 'live updates'
 indicator in the item page and item summaries (including search results).
 
 This is intended for items that updated in (near) real-time, such as asset position information.
 
-[1] `identification.maintenance.maintenance_frequency=MaintenanceFrequencyCode.CONTINUAL`
+{1} `identification.maintenance.maintenance_frequency=MaintenanceFrequencyCode.CONTINUAL`
 
 ## Special catalogue items
 
@@ -342,13 +342,13 @@ determine which Catalogue Item class or subclass to use.
 `lantern.models.item.catalogue.special.physical_map.ItemCataloguePhysicalMap`.
 
 Physical maps are represented by a trio of Records, one per side plus a third Record for the overall map itself.
-Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association [1]
-and local 'paperMap' aggregation initiative [2].
+Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association {1}
+and local 'paperMap' aggregation initiative {2}.
 
 Records for each side are typical Catalogue Items. The overall Record is special Physical Map subclass, which is used
 automatically when a Record:
 
-- uses the local 'paperMapProduct' hierarchy level [3]
+- uses the local 'paperMapProduct' hierarchy level {3}
 - includes at least one aggregation for a map side ('isComposedOf' association, 'paperMap' initiative)
 
 This subclass overloads some properties in Catalogue Item tabs to show a common, aggregated, value, or separate values
@@ -357,11 +357,11 @@ per side:
 - if the values in each side are the same, they are ignored and the value from the overall Record is shown
 - if different, values for each side are shown - the value from the overall Record is ignored
 
-[1] `lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`
+{1} `lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`
 
-[2] `lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`
+{2} `lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`
 
-[3] `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`
+{3} `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`
 
 ## Algolia search items
 

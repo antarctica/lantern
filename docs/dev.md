@@ -13,11 +13,11 @@ Requirements:
 Setup:
 
 1. install tools (`brew install git uv prek 1password-cli opentofu`)
-1. clone and setup project [1]
+1. clone and setup project {1}
 1. [Generate](/docs/config.md#generate-an-environment-config-file) an `.env` file
 1. initialise [Prek](#prek) pre-commit hook (`prek install`)
 
-[1]
+{1}
 
 ```shell
 % git clone https://gitlab.data.bas.ac.uk/MAGIC/lantern.git
@@ -61,11 +61,11 @@ To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
 3. for [Trusted Publishing](/docs/architecture.md#trusted-publishing):
    - ensure you can access the catalogue directory within the Ops Data Store web root
    - if needed, create an SSH key and add the public key to the relevant remote authorised keys file
-   - if needed, configure SSH to access the relevant server with the relevant credentials automatically [1]
+   - if needed, configure SSH to access the relevant server with the relevant credentials automatically {1}
    - if needed, set the umask for this user to `0002` to allow group write permissions on POSIX filesystems
 4. set the relevant [Config](/docs/config.md) options in your local `.env` file
 
-[1] E.g. in `~/.ssh/config`:
+{1} E.g. in `~/.ssh/config`:
 
 ```text
 Host lantern-trusted-content
@@ -96,7 +96,7 @@ Start:
 
 - start stack using the `stack-start` [Development Task](#development-tasks)
 - Run [GitLab](#local-stack-gitlab) manual pre-configuration
-- Run local Infrastructure as Code using OpenTofu [1]
+- Run local Infrastructure as Code using OpenTofu {1}
 - Run [GitLab](#local-stack-gitlab) manual post-configuration
 - Configure [Algolia](#local-stack-algolia) for local development
 - Configure [S3](#local-development-s3) for local development
@@ -119,7 +119,7 @@ To manipulate the local containers via OrbStack (which acts as a `docker compose
 % docker compose -f ./resources/dev/docker-compose.yml ...
 ```
 
-[1]
+{1}
 
 ```text
 % cd ./resources/dev
@@ -186,7 +186,7 @@ Part of [Local Development Stack](#development-stack).
 
 Manual pre-configuration:
 
-- once [Local Stack](#development-stack) is up, login to [GitLab](https://gitlab.dev.orb.local) as 'root' [1]
+- once [Local Stack](#development-stack) is up, login to [GitLab](https://gitlab.dev.orb.local) as 'root' {1}
 - create a new [Admin User](https://gitlab.dev.orb.local/admin/users/new) for yourself
   - you can use any email address as all messages will be caught in the local email server
 - open [Local Email Server](https://mail.dev.orb.local) and follow the link in signup email to set a password
@@ -195,7 +195,7 @@ Manual pre-configuration:
   - scopes: `api`, `sudo`
 
 > [!TIP]
-> Use this token to run the Terraform configuration for the local stack, as per [1] in
+> Use this token to run the Terraform configuration for the local stack, as per {1} in
 > [Local development stack](#development-stack).
 
 Manual post-configuration:
@@ -211,7 +211,7 @@ Manual post-configuration:
 > The [`truststore`](https://pypi.org/project/truststore/) dev dependency is used to trust the OrbStack local CA in
 > the GitLab Store.
 
-[1] Root password:
+{1} Root password:
 
 ```shell
 % docker compose -f ./resources/dev/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
@@ -269,17 +269,17 @@ config options used by development tasks.
 
 <!-- pyml disable md013 -->
 | Option                                 | Type         | Required | Sensitive | Since Version | Summary                                                                   | Example                                      |
-|----------------------------------------|--------------|----------|-----------|---------------|---------------------------------------------------------------------------|----------------------------------------------|
-| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes      | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata                   | '{"kid": "magic_metadata_signing_key", ...}' |
-| `X_AGOL_CLIENT_ID`                     | String       | Yes      | No        | v0.6.x        | Client ID for AGOL OAuth application for accessing and updating items     | 'xxx'                                        |
-| `X_AGOL_CLIENT_SECRET`                 | String       | Yes      | Yes       | v0.6.x        | Client secret for AGOL OAuth application for accessing and updating items | 'xxx'                                        |
-| `X_DEPOSIT_CLIENT_ID`                  | String       | Yes      | No        | v0.16.x       | Client ID for Entra app registration for depositing file artefacts        | 'xxx'                                        |
-| `X_DEPOSIT_CLIENT_SECRET`              | String       | Yes      | Yes       | v0.16.x       | Client secret for Entra app registration for depositing file artefacts    | 'xxx'                                        |
-| `X_DEPOSIT_GROUPS_MAPPING`             | Dict         | Yes      | No        | v0.16.x       | JSON encoded `dict[str, list[str]`, may be empty                          | '{"x": ["123"]}'                             |
-| `X_DEPOSIT_LIBRARY_NAME`               | String       | Yes      | No        | v0.16.x       | Library name within SharePoint site used for depositing file artefacts    | 'xxx'                                        |
-| `X_DEPOSIT_PROXY_URL`                  | String       | No       | No        | v0.16.x       | Base URL for access proxy to access unrestricted file artefacts           | 'https://example.com'                        |
-| `X_DEPOSIT_SITE_ID`                    | String       | Yes      | No        | v0.16.x       | ID for SharePoint site used for depositing file artefacts                 | 'xxx'                                        |
-| `X_DEPOSIT_TENANT_ID`                  | String       | Yes      | No        | v0.16.x       | Tenancy ID for Entra app registration for depositing file artefacts       | 'xxx'                                        |
+|----------------------------------------|--------------|----------|-----------|---------------|---------------------------------------------------------------------------|------------------------------------------------|
+| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes      | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata                   | `'{"kid": "magic_metadata_signing_key", ...}'` |
+| `X_AGOL_CLIENT_ID`                     | String       | Yes      | No        | v0.6.x        | Client ID for AGOL OAuth application for accessing and updating items     | `'xxx'`                                        |
+| `X_AGOL_CLIENT_SECRET`                 | String       | Yes      | Yes       | v0.6.x        | Client secret for AGOL OAuth application for accessing and updating items | `'xxx'`                                        |
+| `X_DEPOSIT_CLIENT_ID`                  | String       | Yes      | No        | v0.16.x       | Client ID for Entra app registration for depositing file artefacts        | `'xxx'`                                        |
+| `X_DEPOSIT_CLIENT_SECRET`              | String       | Yes      | Yes       | v0.16.x       | Client secret for Entra app registration for depositing file artefacts    | `'xxx'`                                        |
+| `X_DEPOSIT_GROUPS_MAPPING`             | Dict         | Yes      | No        | v0.16.x       | JSON encoded `dict[str, list[str]`, may be empty                          | `{"x": ["123"]}`                             |
+| `X_DEPOSIT_LIBRARY_NAME`               | String       | Yes      | No        | v0.16.x       | Library name within SharePoint site used for depositing file artefacts    | `'xxx'`                                        |
+| `X_DEPOSIT_PROXY_URL`                  | String       | No       | No        | v0.16.x       | Base URL for access proxy to access unrestricted file artefacts           | `'https://example.com'`                        |
+| `X_DEPOSIT_SITE_ID`                    | String       | Yes      | No        | v0.16.x       | ID for SharePoint site used for depositing file artefacts                 | `'xxx'`                                        |
+| `X_DEPOSIT_TENANT_ID`                  | String       | Yes      | No        | v0.16.x       | Tenancy ID for Entra app registration for depositing file artefacts       | `'xxx'`                                        |
 <!-- pyml enable md013 -->
 
 > [!WARNING]
@@ -601,7 +601,7 @@ The minimum Python version is 3.12 for compatibility with BAS IT servers.
 
 The [`uv audit`](https://docs.astral.sh/uv/reference/cli/#uv-audit) command checks for known vulnerabilities in
 packages using a range of sources, including GitHub and the
-[Python Packaging Advisory Database](https://github.com/pypa/advisory-database.
+[Python Packaging Advisory Database](https://github.com/pypa/advisory-database).
 
 > [!WARNING]
 > As with all security tools, `uv audit` is a tool for detecting well-known vulnerabilities, not a guarantee of

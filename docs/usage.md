@@ -188,7 +188,7 @@ To import, build and check sets of [Manually Authored](#creating-records) record
 
 To publish records in the testing catalogue:
 
-- ensure a suitable GitLab issue exists to track publishing the records [1]
+- ensure a suitable GitLab issue exists to track publishing the records {1}
 - ensure `*.json` record configs exist in the `import/` directory (by default/convention)
   - see [Create Records](#creating-records) if needed
 - run the [`workflow-testing`](/docs/supplemental/proto-cli-reference.md#workflow-testing) command
@@ -200,7 +200,7 @@ To publish records in the testing catalogue:
 > GitLab issue. Project memberships SHOULD be defined using
 > [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
 
-[1]
+{1}
 
 For example, a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
 its metadata record to provide context. When ready for publishing, a separate Mapping Coordination issue may be created.

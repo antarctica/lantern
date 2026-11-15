@@ -88,14 +88,14 @@ The [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-
 
 Manually:
 
-- create and secure an area in the Operations Data Store web root [1]
-- configure this area [2]
+- create and secure an area in the Operations Data Store web root {1}
+- configure this area {2}
 - configure [Reverse Proxying](#reverse-proxying)
 - set the relevant [Config](/docs/config.md) options for enabling checks of trusted content in:
   - the `/resources/dev/.env.tpl` template
   - the relevant Ansible Vault template
 
-[1] As the Ops Data Store control user from a server with ACLs enabled:
+{1} As the Ops Data Store control user from a server with ACLs enabled:
 
 ```text
 $ mkdir -p $DOCUMENT_ROOT/content/cat
@@ -113,7 +113,7 @@ This:
   - grants the web server user read access
   - revokes all access to others/world
 
-[2] As a user in the `magic` group:
+{2} As a user in the `magic` group:
 
 ```text
 $ umask 002
@@ -137,9 +137,9 @@ This requires a request to BAS IT asking for:
     - the relevant AWS CloudFront Distribution
     - or the relevant Operations Data Store endpoint
   - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint) (for static hosting)
-  - URL rewriting as needed (for secure hosting) [1]
+  - URL rewriting as needed (for secure hosting) {1}
 
-[1]
+{1}
 
 For secure hosting, URL rewrites are required to change `/-` to `/cat/testing` or `/cat/live` in the internal HAProxy,
 to ensure requests map to the Operations Data Store web root. E.g.:
@@ -291,10 +291,10 @@ Manually:
     - referrer URLs: *NONE* (not applicable)
   - item details:
     - title: `BAS Data Catalogue (Lantern)`
-    - summary: [1]
+    - summary: {1}
 - set the relevant [Extra Config](/docs/dev.md#development-tasks-config) options in the `.env` template
 
-[1]
+{1}
 
 > Application representing the Lantern data catalogue to allow:
 >

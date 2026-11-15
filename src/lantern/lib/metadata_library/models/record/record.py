@@ -6,7 +6,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import cattrs
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
@@ -289,7 +289,7 @@ class Record:
     @classmethod
     def loads(
         cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
-    ) -> Record:
+    ) -> Self:
         """
         Create a Record from a JSON schema instance.
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, date, timedelta
+from datetime import UTC, date, datetime
 from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
 from typing import TYPE_CHECKING, TypedDict, TypeVar
@@ -45,18 +45,26 @@ class FormattedDate:
     datetime: str
 
     @classmethod
-    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> FormattedDate:
+    def from_rec_date(
+        cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None, live: bool = False
+    ) -> FormattedDate:
         """
         Create a formatted date (time) from a Python value.
 
-        Time elements consist of human-readable value and a machine-readable 'datetime' attribute.
+        Time elements consist of human-readable 'value' and a machine-readable 'datetime' attribute.
 
-        For time values:
-        - a 'DD MMM YYYY' (e.g. 01 Oct 2023) representation is used where precision allows
-        - where a value is within 24 hours of a reference point (defaults to now) the date and time is used
+        For values:
+        - '(DD) (M+) YYYY' is used as precision allows (e.g. '01 October 2023', 'October 2023' or '2023')
+        - where the time is within the same day as a reference point (defaults to now), *only* the time is shown
+        - where `live` is true, a fixed ' today' suffix is used without a date, regardless of the reference point
 
-        For time 'datetime' attributes:
+        For 'datetime':
         - the relevant ISO 8601 representation is used (e.g. 2023-10-01T12:00:00+00:00)
+
+        `live` values are handled differently as it's expected the publication date (used as the reference date) will
+        be fixed in the past (beyond the revision date) but revised multiple times within a day. By default, only this
+        would mean all revisions within a day are indistinguishable. The revision date is assumed to be now and
+        replaced with a ' today' suffix to clarify it is not the same day as the (fixed) reference date.
         """
         if not isinstance(value, Date):
             msg = "Value must be a record Date object."
@@ -66,9 +74,14 @@ class FormattedDate:
         val = value.date.strftime("%d %B %Y")
         relative_to = relative_to or DateTime.now(tz=UTC)
 
-        if isinstance(value.date, DateTime) and not relative_to - value.date > timedelta(hours=24):
-            val = value.date.strftime("%d %B %Y %H:%M:%S %Z")
-            dt = value.date.isoformat()
+        if isinstance(value.date, DateTime):
+            _value_date = value.date
+            if _value_date.date() == relative_to.date():
+                val = value.date.strftime("%H:%M:%S %Z")
+                dt = value.date.isoformat()
+            elif live:
+                val = value.date.strftime("%H:%M:%S %Z today")
+                dt = value.date.isoformat()
         if isinstance(value.date, date) and value.precision is DatePrecisionCode.YEAR:
             val = value.date.strftime("%Y")
             dt = str(value.date.year)
@@ -300,21 +313,21 @@ class Dates(RecordDates):
             return None
         return FormattedDate.from_rec_date(val)
 
-    @property
-    def revision_relative(self) -> FormattedDate | None:
-        """
-        Revision date relative to now.
-
-        Returns a formatted date with a time only value where the revision date is within the current day.
-        """
-        val = super().__getattribute__("revision")
-        if val is None:
+    def revision_relative(self, live: bool = False) -> FormattedDate | None:
+        """Revision date relative to now, if live; or to the publication date, if set."""
+        _rev: Date | None = super().__getattribute__("revision")
+        if _rev is None:
             return None
+        revision_fmt = FormattedDate.from_rec_date(value=_rev, live=live)
 
-        fmt_val = FormattedDate.from_rec_date(val)
-        if isinstance(val.date, DateTime) and val.date.date() == DateTime.now(tz=UTC).date():
-            fmt_val.value = val.date.strftime("%H:%M:%S %Z")
-        return fmt_val
+        _pub: Date | None = super().__getattribute__("publication")
+        if _pub is not None and _pub.date is not None:
+            _pub_dt = datetime.fromisoformat(_pub.date.isoformat())
+            if not _pub_dt.tzinfo:
+                _pub_dt = _pub_dt.astimezone(UTC)
+            revision_fmt = FormattedDate.from_rec_date(value=_rev, relative_to=_pub_dt, live=live)
+
+        return revision_fmt
 
     def as_dict_enum_formatted(self) -> dict[DateTypeCode, FormattedDate]:
         """
@@ -546,11 +559,11 @@ class PageSummary:
     @property
     def published(self) -> FormattedDate | None:
         """
-        Formatted published date.
+        Formatted published date if set.
 
-        With revision date if set and different to publication.
+        With revision date relative to publication date, if set and different to publication.
         """
-        if self._published_date is None:
+        if not self._published_date:
             return None
         if self._published_date != self._revision_date and self._revision_date is not None:
             return FormattedDate(

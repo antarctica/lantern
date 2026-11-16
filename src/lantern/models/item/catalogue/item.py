@@ -297,7 +297,7 @@ class ItemCatalogue(ItemBase):
             item_super_type=self._super_type,
             edition=self.edition,
             published_date=cast("FormattedDate | None", self._dates.publication),
-            revision_date=self._dates.revision_relative,
+            revision_date=self._dates.revision_relative(live=self.live),
             aggregations=self._aggregations,
             live=self.live,
             citation=self.citation_html,

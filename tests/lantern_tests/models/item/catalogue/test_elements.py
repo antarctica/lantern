@@ -70,23 +70,42 @@ class TestFormattedDate:
         assert fd.value == "x"
 
     @pytest.mark.parametrize(
-        ("value", "exp_value", "exp_dt"),
+        ("value", "live", "exp_value", "exp_dt"),
         [
-            (Date(date=date(2014, 1, 1), precision=DatePrecisionCode.YEAR), "2014", "2014"),
-            (Date(date=date(2014, 6, 1), precision=DatePrecisionCode.MONTH), "June 2014", "2014-06"),
-            (Date(date=date(2014, 6, 30)), "30 June 2014", "2014-06-30"),
+            (Date(date=date(2014, 1, 1), precision=DatePrecisionCode.YEAR), False, "2014", "2014"),
+            (Date(date=date(2014, 6, 1), precision=DatePrecisionCode.MONTH), False, "June 2014", "2014-06"),
+            (Date(date=date(2014, 6, 30)), False, "30 June 2014", "2014-06-30"),
             (
                 Date(date=datetime(2014, 6, 30, 13, tzinfo=UTC)),
-                "30 June 2014 13:00:00 UTC",
+                False,
+                "13:00:00 UTC",
                 "2014-06-30T13:00:00+00:00",
             ),
-            (Date(date=datetime(2014, 6, 29, 1, tzinfo=UTC)), "29 June 2014", "2014-06-29"),
+            (
+                Date(date=datetime(2014, 6, 29, 23, tzinfo=UTC)),
+                False,
+                "29 June 2014",
+                "2014-06-29",
+            ),
+            (
+                Date(date=datetime(2014, 7, 1, 1, tzinfo=UTC)),
+                False,
+                "01 July 2014",
+                "2014-07-01",
+            ),
+            (
+                Date(date=datetime(2014, 7, 1, 1, tzinfo=UTC)),
+                True,
+                "01:00:00 UTC today",
+                "2014-07-01T01:00:00+00:00",
+            ),
+            (Date(date=datetime(2014, 6, 29, 1, tzinfo=UTC)), False, "29 June 2014", "2014-06-29"),
         ],
     )
-    def test_from_record_date(self, value: Date, exp_value: str, exp_dt: str):
+    def test_from_record_date(self, value: Date, live: bool, exp_value: str, exp_dt: str):
         """Can create a FormattedDate from a Record Date."""
         now = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)
-        result = FormattedDate.from_rec_date(value, relative_to=now)
+        result = FormattedDate.from_rec_date(value, relative_to=now, live=live)
 
         assert result.value == exp_value
         assert result.datetime == exp_dt
@@ -356,17 +375,43 @@ class TestDates:
         assert dates.creation == expected
 
     @pytest.mark.parametrize(
-        ("revision", "expected"),
+        # 'now' = 2014-06-30
+        ("revision", "publication", "live", "expected"),
         [
-            (None, None),
-            (Date(date=date(2014, 6, 30)), FormattedDate(value="30 June 2014", datetime="2014-06-30")),
+            (None, None, False, None),
+            # no publication, compare with 'now'
+            (Date(date=date(2014, 6, 30)), None, False, FormattedDate(value="30 June 2014", datetime="2014-06-30")),
             (
                 Date(date=datetime(2015, 6, 30, 14, 30, second=45, tzinfo=UTC)),
-                FormattedDate(value="30 June 2015 14:30:45 UTC", datetime="2015-06-30T14:30:45+00:00"),
+                None,
+                False,
+                FormattedDate(value="30 June 2015", datetime="2015-06-30"),
             ),
             (
-                Date(date=datetime(2014, 6, 30, 15, 30, second=45, tzinfo=UTC)),
-                FormattedDate(value="15:30:45 UTC", datetime="2014-06-30T15:30:45+00:00"),
+                Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+                None,
+                False,
+                FormattedDate(value="14:30:45 UTC", datetime="2014-06-30T14:30:45+00:00"),
+            ),
+            # compare with publication
+            (
+                Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+                Date(date=date(2012, 6, 30)),
+                False,
+                FormattedDate(value="30 June 2014", datetime="2014-06-30"),
+            ),
+            (
+                Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+                Date(date=datetime(2014, 6, 30, 12, 00, second=00, tzinfo=UTC)),
+                False,
+                FormattedDate(value="14:30:45 UTC", datetime="2014-06-30T14:30:45+00:00"),
+            ),
+            # live
+            (
+                Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+                Date(date=date(2012, 6, 30)),
+                True,
+                FormattedDate(value="14:30:45 UTC today", datetime="2014-06-30T14:30:45+00:00"),
             ),
         ],
     )
@@ -375,6 +420,8 @@ class TestDates:
         freezer: FrozenDateTimeFactory,
         fx_freezer_time: datetime,
         revision: Date | None,
+        publication: Date | None,
+        live: bool,
         expected: FormattedDate | None,
     ):
         """Can format a revision date relative to the current date."""
@@ -382,11 +429,12 @@ class TestDates:
         record_dates = RecordDates(
             # Creation needed to ensure at least one date
             creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+            publication=publication,
             revision=revision,
         )
 
         dates = Dates(dates=record_dates)
-        assert dates.revision_relative == expected
+        assert dates.revision_relative(live) == expected
 
     def test_as_dict_enum(self):
         """Can get dates as a DateTypeCode indexed dict."""
@@ -883,6 +931,70 @@ class TestPageSummary:
             published_date=published,
             revision_date=revision,
             live=False,
+            aggregations=Aggregations(
+                admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), select_record=_select_record
+            ),
+            citation=None,
+            description="x",
+        )
+
+        assert summary.published == expected
+
+    @pytest.mark.parametrize(
+        ("publication", "revision", "live", "expected"),
+        [
+            (
+                FormattedDate(datetime="2014-06-30", value="30 June 2014"),
+                Date(date=date(2015, 6, 30)),
+                False,
+                FormattedDate(datetime="2014-06-30", value="30 June 2014 (last updated: 30 June 2015)"),
+            ),
+            (
+                FormattedDate(datetime="2014-06-30T14:30:45+00:00", value="30 June 2014 14:30:45 UTC"),
+                Date(date=datetime(2014, 6, 30, 16, 20, 0, tzinfo=UTC)),
+                False,
+                FormattedDate(
+                    value="30 June 2014 14:30:45 UTC (last updated: 16:20:00 UTC)",
+                    datetime="2014-06-30T14:30:45+00:00",
+                ),
+            ),
+            (
+                FormattedDate(datetime="2012-07-06", value="06 July 2012"),
+                Date(date=datetime(2014, 6, 30, 16, 20, 0, tzinfo=UTC)),
+                True,
+                FormattedDate(datetime="2012-07-06", value="06 July 2012 (last updated: 16:20:00 UTC today)"),
+            ),
+        ],
+    )
+    def test_published_revision_relative(
+        self,
+        freezer: FrozenDateTimeFactory,
+        fx_freezer_time: datetime,
+        fx_admin_meta_keys: AdministrationKeys,
+        publication: FormattedDate,
+        revision: FormattedDate,
+        live: bool,
+        expected: str,
+    ):
+        """
+        Can show revision date within formatted publication date relative to publication, not today.
+
+        To avoid '06 July 2026 (last updated: 20:50:31 UTC)' showing where the revision date was 2026-11-12.
+        """
+        freezer.move_to(fx_freezer_time)
+        dates = Dates(
+            RecordDates(
+                publication=Date(date=date.fromisoformat(publication.datetime)) if live else None,  # for live test-case
+                revision=revision,
+            )
+        )
+
+        summary = PageSummary(
+            item_super_type=ItemSuperType.RESOURCE,
+            edition=None,
+            published_date=publication,
+            revision_date=dates.revision_relative(live),
+            live=live,
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), select_record=_select_record
             ),

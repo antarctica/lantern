@@ -83,6 +83,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * URL used for 404 handler check corrected to use a reverse proxied value
 * Return type for `Record.loads` preventing subclassing
 * Replaced inline references in docs to avoid interpretation as link references (`[1]` -> `{1}`)
+* Formatted publication date including revision date(time) where available in item page summaries
 
 ### Changed
 

@@ -9,10 +9,10 @@ import pytest
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
-from lantern.lib.arcgis.client import ArcGisClient, SpatialExtent
-from lantern.lib.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.arcgis.client import ArcGisClient, SpatialExtent
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.arcgis.models.artefact import ArtefactArcGisService
 from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
-from lantern.lib.magic_distribution.models.artefact import ArtefactArcGisService
 
 if TYPE_CHECKING:
     import logging

@@ -33,19 +33,19 @@ from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
-from lantern.lib.arcgis.client import ArcGisClient
-from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
-from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
-from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
-from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
-from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.arcgis.client import ArcGisClient
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType as ArcGisItemType
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
+from lantern.lib.magic_distribution.arcgis.models.artefact import ArtefactArcGisService
 from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
 from lantern.lib.magic_distribution.models.artefact import (
-    ArtefactArcGisService,
     ArtefactLocalFile,
-    ArtefactSharePointFile,
 )
-from lantern.lib.magic_distribution.types import ArtefactMetadata
+from lantern.lib.magic_distribution.sharepoint.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.sharepoint.models.artefact import ArtefactSharePointFile
+from lantern.lib.magic_distribution.sharepoint.models.types import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
@@ -588,7 +588,6 @@ def _select_records(file_identifiers: set[str]) -> list[RecordRevision]:
     return [_select_record(fid) for fid in file_identifiers]
 
 
-# noinspection PyUnusedLocal
 def _select_records_fixed(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
     """
     Minimal records fetch method returning a fixed set of records.

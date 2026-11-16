@@ -1,4 +1,6 @@
-from typing import TypedDict
+from __future__ import annotations
+
+from typing import NamedTuple, TypedDict
 
 
 class ResourceMetadata(TypedDict):
@@ -15,4 +17,11 @@ class ArtefactMetadata(TypedDict):
     artefact_id: str
     artefact_fmt: str
     artefact_sha256: str
+    unrestricted: bool
+
+
+class SharePointPermissions(NamedTuple):
+    """Return type for `get_sharepoint_permissions`."""
+
+    group_ids: set[str]
     unrestricted: bool

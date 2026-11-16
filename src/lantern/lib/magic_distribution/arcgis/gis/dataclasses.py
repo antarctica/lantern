@@ -7,7 +7,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, urlparse
 
-from lantern.lib.arcgis.gis.enums import ItemType, MetadataFormat, SharingLevel
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType, MetadataFormat, SharingLevel
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

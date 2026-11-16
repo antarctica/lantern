@@ -7,7 +7,7 @@ import requests
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
-from lantern.lib.arcgis.utils import (
+from lantern.lib.magic_distribution.arcgis.utils import (
     ArcGISAuthError,
     ArcGISRequestError,
     HTTPArcGISTokenAuth,

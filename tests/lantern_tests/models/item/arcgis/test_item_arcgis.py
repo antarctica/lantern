@@ -7,9 +7,9 @@ import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bs4 import BeautifulSoup
 
-from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
-from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
-from lantern.lib.arcgis.gis.enums import SharingLevel
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType as ArcGisItemType
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews

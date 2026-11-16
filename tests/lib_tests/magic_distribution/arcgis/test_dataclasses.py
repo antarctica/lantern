@@ -3,8 +3,8 @@ from typing import Final
 
 import pytest
 
-from lantern.lib.arcgis.gis.dataclasses import Item, ItemProperties
-from lantern.lib.arcgis.gis.enums import ItemType, MetadataFormat, SharingLevel
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item, ItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType, MetadataFormat, SharingLevel
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 

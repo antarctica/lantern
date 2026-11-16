@@ -10,7 +10,7 @@ A data discovery tool used to find, evaluate and access resources produced, mana
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
-> This project supersedes and will replace the
+> This project supersedes and replaces the
 > [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox) as the future BAS Data Catalogue.
 
 > [!NOTE]

@@ -7,10 +7,10 @@ from lxml import html as lxml_html
 from lxml.etree import Element, SubElement
 from lxml.etree import tostring as etree_tostring
 
-from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
-from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
-from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
-from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType as ArcGisItemType
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.const import CATALOGUE_NAMESPACE

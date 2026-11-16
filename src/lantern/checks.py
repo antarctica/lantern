@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 from requests import Response
 from requests.auth import AuthBase, HTTPBasicAuth
 
-from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.sharepoint.client import MagicResourceDistributionClient
 from lantern.log import init as init_logging
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.outputs.checks import ChecksOutput

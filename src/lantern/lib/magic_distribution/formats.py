@@ -14,7 +14,12 @@ import requests
 from PIL import Image, UnidentifiedImageError
 from requests import Response
 
-from lantern.lib.arcgis.utils import ArcGISAuthError, ArcGISRequestError, check_arcgis_error, ensure_query_param
+from lantern.lib.magic_distribution.arcgis.utils import (
+    ArcGISAuthError,
+    ArcGISRequestError,
+    check_arcgis_error,
+    ensure_query_param,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator

@@ -10,7 +10,7 @@ from pytest_httpserver import HTTPServer
 from pytest_mock import MockerFixture
 from werkzeug import Response
 
-from lantern.lib.arcgis.utils import ArcGISAuthError, ArcGISRequestError, HTTPArcGISTokenAuth
+from lantern.lib.magic_distribution.arcgis.utils import ArcGISAuthError, ArcGISRequestError, HTTPArcGISTokenAuth
 from lantern.lib.magic_distribution.formats import (
     ArtefactFormat,
     ArtefactFormatLabel,

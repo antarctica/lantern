@@ -13,10 +13,10 @@ from authlib.oauth2.rfc7523 import ClientSecretJWT
 from geojson import FeatureCollection
 from lxml import etree
 
-from lantern.lib.arcgis.gis.dataclasses import Item
-from lantern.lib.arcgis.utils import HTTPArcGISTokenAuth, check_arcgis_error, ensure_query_param
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.arcgis.models.artefact import ArtefactArcGisService
+from lantern.lib.magic_distribution.arcgis.utils import HTTPArcGISTokenAuth, check_arcgis_error, ensure_query_param
 from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
-from lantern.lib.magic_distribution.models.artefact import ArtefactArcGisService
 
 if TYPE_CHECKING:
     import logging

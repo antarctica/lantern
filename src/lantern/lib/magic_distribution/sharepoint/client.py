@@ -13,10 +13,10 @@ from requests.exceptions import HTTPError
 from lantern.lib.magic_distribution.models.artefact import (
     ArtefactFile,
     ArtefactLocalFile,
-    ArtefactSharePointFile,
 )
-from lantern.lib.magic_distribution.types import ArtefactMetadata, ResourceMetadata
-from lantern.lib.magic_distribution.utils import HTTPBearerTokenAuth
+from lantern.lib.magic_distribution.sharepoint.models.artefact import ArtefactSharePointFile
+from lantern.lib.magic_distribution.sharepoint.models.types import ArtefactMetadata, ResourceMetadata
+from lantern.lib.magic_distribution.sharepoint.utils import HTTPBearerTokenAuth
 
 if TYPE_CHECKING:
     import logging

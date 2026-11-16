@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from lantern.config import Config
-    from lantern.lib.magic_distribution.models.artefact import ArtefactSharePointFile
+    from lantern.lib.magic_distribution.sharepoint.models.artefact import ArtefactSharePointFile
 
 
 class TestCheckRunner:

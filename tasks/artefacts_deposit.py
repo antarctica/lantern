@@ -10,10 +10,10 @@ import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
-from lantern.lib.magic_distribution.client import DuplicateArtefactError, MagicResourceDistributionClient
 from lantern.lib.magic_distribution.formats import ArtefactFormatNotSupportedError, ArtefactFormatUnknownError
-from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
-from lantern.lib.magic_distribution.utils import get_sharepoint_permissions
+from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile
+from lantern.lib.magic_distribution.sharepoint.client import DuplicateArtefactError, MagicResourceDistributionClient
+from lantern.lib.magic_distribution.sharepoint.utils import get_sharepoint_permissions
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     import logging
 
     from tasks._config import ExtraConfig
+
+    from lantern.lib.magic_distribution.sharepoint.models.artefact import ArtefactSharePointFile
 
 
 def _get_cli_args() -> tuple[bool, Path, Path, Path | None, bool]:

@@ -17,10 +17,10 @@ from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
 from tasks._shared import confirm, get_record, init
 
-from lantern.lib.arcgis.client import ArcGisClient
-from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
-from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
-from lantern.lib.arcgis.gis.enums import SharingLevel
+from lantern.lib.magic_distribution.arcgis.client import ArcGisClient
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.record.record import Record
 

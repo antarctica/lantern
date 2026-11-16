@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import inquirer
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
-from lantern.lib.arcgis.client import ArcGisClient
+from lantern.lib.magic_distribution.arcgis.client import ArcGisClient
 
 if TYPE_CHECKING:
     import logging

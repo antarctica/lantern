@@ -11,7 +11,11 @@ from pytest_httpserver import HTTPServer, RequestMatcher
 from requests.exceptions import HTTPError
 from werkzeug import Response
 
-from lantern.lib.magic_distribution.client import (
+from lantern.lib.magic_distribution.formats import ArtefactFormatLabel
+from lantern.lib.magic_distribution.models.artefact import (
+    ArtefactLocalFile,
+)
+from lantern.lib.magic_distribution.sharepoint.client import (
     ArtefactHashMismatchError,
     ArtefactPermissionsNotSupportedError,
     DriveItemNotFoundError,
@@ -20,12 +24,8 @@ from lantern.lib.magic_distribution.client import (
     MagicResourceDistributionClient,
     SiteNotFoundError,
 )
-from lantern.lib.magic_distribution.formats import ArtefactFormatLabel
-from lantern.lib.magic_distribution.models.artefact import (
-    ArtefactLocalFile,
-    ArtefactSharePointFile,
-)
-from lantern.lib.magic_distribution.types import ArtefactMetadata
+from lantern.lib.magic_distribution.sharepoint.models.artefact import ArtefactSharePointFile
+from lantern.lib.magic_distribution.sharepoint.models.types import ArtefactMetadata
 
 if TYPE_CHECKING:
     import logging

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 
 from requests.auth import AuthBase
 
+from lantern.lib.magic_distribution.sharepoint.models.types import SharePointPermissions
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 
 if TYPE_CHECKING:
@@ -24,13 +25,6 @@ class HTTPBearerTokenAuth(AuthBase):
     def __call__(self, r: PreparedRequest) -> PreparedRequest:  # noqa: D102
         r.headers["Authorization"] = f"Bearer {self._token}"
         return r
-
-
-class SharePointPermissions(NamedTuple):
-    """Return type for `get_sharepoint_permissions`."""
-
-    group_ids: set[str]
-    unrestricted: bool
 
 
 def get_sharepoint_permissions(

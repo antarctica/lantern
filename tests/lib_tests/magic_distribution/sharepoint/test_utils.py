@@ -8,7 +8,8 @@ from bas_metadata_library.standards.magic_administration.v1 import Administratio
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
-from lantern.lib.magic_distribution.utils import HTTPBearerTokenAuth, SharePointPermissions, get_sharepoint_permissions
+from lantern.lib.magic_distribution.sharepoint.models.types import SharePointPermissions
+from lantern.lib.magic_distribution.sharepoint.utils import HTTPBearerTokenAuth, get_sharepoint_permissions
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 
 

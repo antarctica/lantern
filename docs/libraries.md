@@ -249,24 +249,30 @@ To add support for a new ISO element within Records:
 1. add a preset in `lantern.lib.metadata_library.models.record.presets.constraints` (for discovery metadata)
 1. update `lantern.lib.metadata_library.models.record.utils.admin.parse_framework_permissions` and associated tests
 
-## SharePoint
+## MAGIC Distribution
 
 `lantern.lib.magic_distribution`
 
-Includes metadata data structures, [Artefacts](#sharepoint-file-artefacts) and a Microsoft Graph upload client for
-interacting with resources hosted in Microsoft SharePoint Online.
+Includes clients, [Artefact](#artefacts) models and clients for managing file artefacts within [SharePoint](#sharepoint)
+and service artefacts within [ArcGIS](#arcgis).
+
+### SharePoint
+
+`lantern.lib.magic_distribution.sharepoint`
+
+Includes metadata data structures, [Artefact](#sharepoint-file-artefacts) and a Microsoft Graph upload client for
+managing file artefacts within Microsoft SharePoint Online.
 
 > [!NOTE]
 > This package is specific to the SharePoint implementation of the
-> [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) and functionality
-> required by the `deposit-artefacts` [Development Tasks](/docs/dev.md#development-tasks), plus some experimental
-> workflows for the BAS Operations GIS platform.
+> [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution).
 
-### SharePoint client
+#### SharePoint client
 
-`lantern.lib.magic_distribution.client.MagicResourceDistributionClient`
+`lantern.lib.magic_distribution.sharepoint.client.MagicResourceDistributionClient`
 
-Used to deposit, lookup and download [File Artefacts](#file-artefacts) in a SharePoint Online site library using the
+Used to deposit [File Artefacts](#file-artefacts) and lookup/download hosted
+[SharePoint File Artefacts](#sharepoint-file-artefacts) in a SharePoint Online site document library using the
 Microsoft Graph API.
 
 > [!NOTE]
@@ -275,18 +281,17 @@ Microsoft Graph API.
 
 #### SharePoint client limitations
 
-Known unsupported features (not-exhaustive) and addition to
-[Limitations 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution#limitations) from the MAGIC Resource
-Distribution service:
+In addition to [Limitations 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution#limitations) from the
+underlying MAGIC Resource Distribution service, known limitations include:
 
 - permissions on existing files cannot be updated
 
 > [!TIP]
-> Where needed, permissions for existing files can be updated by (manually) removing files then re-depositing them.
+> Where needed, permissions on existing files can be updated by (manually) removing files then re-depositing them.
 
-### SharePoint file artefacts
+#### SharePoint file artefacts
 
-`lantern.lib.magic_distribution.models.artefact.ArtefactSharePointFile`
+`lantern.lib.magic_distribution.sharepoint.models.artefact.ArtefactSharePointFile`
 
 [File Artefacts](#file-artefacts) representing a remote file hosted in a SharePoint document library, accessed via the
 Microsoft Graph as a [Drive Item](https://learn.microsoft.com/en-us/graph/api/resources/driveitem).
@@ -295,44 +300,50 @@ Includes [Metadata](#sharepoint-file-metadata) and an [Artefact Format](#artefac
 list values accessed via the Microsoft Graph as a
 [Field Value Set](https://learn.microsoft.com/en-us/graph/api/resources/fieldvalueset).
 
+<!-- pyml disable md028 -->
 > [!Note]
 > SharePoint artefacts do not include direct access to file content. An access URL intended for end-users is available.
+
+> [!WARNING]
+> This URL MAY NOT resolve to a raw file (for example CSV and PDF files MAY open in an online viewer.
+<!-- pyml enable md028 -->
 
 #### SharePoint file metadata
 
 In addition to required [Artefact Metadata](#artefact-metadata), SharePoint file artefacts include properties for:
 
-- whether a resource has unrestricted (open) access, for use with a SharePoint access proxy
+- whether a resource has unrestricted (open) access, for use with an
+  [Anonymous Access Proxy 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution/-/blob/main/docs/implementation.md#anonymous-access-proxy)
 
 ## ArcGIS
 
-`lantern.lib.arcgis`
+`lantern.lib.magic_distribution.arcgis`
 
-Includes data structures, [Artefacts](#arcgis-service-artefacts) and a ArcGIS client for interacting with resources
-hosted in Esri ArcGIS Online and Enterprise.
+Includes metadata data structures, [Artefact](#arcgis-service-artefacts) and an ArcGIS API client for managing and
+accessing artefacts within ArcGIS Online and Enterprise.
 
 > [!NOTE]
-> This package is limited to functionality required by the `esri-record` and `esri-item`
-> [Development Tasks](/docs/dev.md#development-tasks), plus some experimental workflows for the BAS Operations GIS
-> platform.
+> This package is focused on and limited to needs within the Mapping and Geographic Information Centre (MAGIC).
+>
+> It is not a suitable replacement for the ArcGIS API for Python and/or `arcpy` packages maintained by Esri.
 
 ### ArcGIS vendored classes
 
-`lantern.lib.arcgis.gis`
+`lantern.lib.magic_distribution.arcgis.gis`
 
-A vendored subset of data classes and enums for representing ArcGIS Portal items are maintained in this package.
+A vendored subset of data classes and enums representing ArcGIS Portal items.
 
-> [!WARNING]
-> These classes have been modified from their original versions in some cases to remove unneeded functionality and to
-> adjust types to comply with linting rules in this project.
+> [!NOTE]
+> These classes are based on originals from the ArcGIS API for Python. These local classes remove unneeded
+> functionality and/or adjust types to comply with linting rules in this project.
 
 ### ArcGIS item properties
 
-`lantern.lib.arcgis.gis.dataclasses.ItemProperties`
+`lantern.lib.magic_distribution.arcgis.gis.dataclasses.ItemProperties`
 
 > [!WARNING]
 > The behaviour and/or use of some item properties has been expanded or changed from their original implementation in
-> the ArcGIS Python SDK to suit the requirements of this project.
+> the ArcGIS API for Python to suit the requirements of this project.
 
 Supported item JSON properties:
 
@@ -420,27 +431,25 @@ otherwise unused.
 
 ### ArcGIS item property limitations
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
 Partially supported features (not-exhaustive):
 
 - the `metadataEditable` property
   - not exposed as a property via these classes
   - used only in the `_update_agol_item()` method of the `esri-item` dev task (force set)
 
----
-
 ### ArcGIS client
 
-`lantern.lib.arcgis.client.ArcGisClient`
+`lantern.lib.magic_distribution.arcgis.client.ArcGisClient`
 
-Used to lookup and download [Service Artefacts](#service-artefacts) in a ArcGIS Online organisation using ArcGIS APIs.
-
-Targeted to the needs and conventions within BAS/MAGIC. This client is not intended as a general replacement for
-`arcpy` or the ArcGIS API for Python.
+Used for managing and accessing [ArcGIS Service Artefacts](#arcgis-service-artefacts) in a ArcGIS Online organisation
+using ArcGIS APIs.
 
 <!-- pyml disable md028 -->
+> [!NOTE]
+> This client is focused on and limited to needs within the Mapping and Geographic Information Centre (MAGIC).
+>
+> It is not a suitable replacement for the ArcGIS API for Python and/or `arcpy` packages maintained by Esri.
+
 > [!NOTE]
 > The Esri [ArcGIS API for Python](https://developers.arcgis.com/python) package is not used due to the number of
 > dependencies it relies on (see https://github.com/Esri/arcgis-python-api/issues/1692).
@@ -489,7 +498,7 @@ Items vs Services:
 
 ### ArcGIS service artefacts
 
-`lantern.lib.magic_distribution.models.artefact.ArtefactArcGisService`
+`lantern.lib.magic_distribution.arcgis.models.artefact.ArtefactArcGisService`
 
 [Service Artefacts](#service-artefacts) representing content hosted in an ArcGIS Online organisation accessed as a
 ArcGIS Portal item.
@@ -512,10 +521,9 @@ Items vs Artefacts:
 
 `lantern.lib.magic_distribution.models.artefact.ArtefactBase`.
 
-Artefacts represent a description of the contents of a resource in Python. They generally describe files, services or
-other representations containing all or part of the resource in a specific (typically output focused) format or
-protocol. Artefacts are related to a [Record](#records) using distribution options or (if supported in future) resource
-representations.
+Artefacts represent a description of the contents of a resource in Python. They describe files, services or other
+representations containing all or part of the resource in a specific format or protocol. Artefacts are related to
+resources via distribution options within metadata.
 
 For example:
 
@@ -540,9 +548,9 @@ Artefacts MUST include metadata for:
 
 `lantern.lib.magic_distribution.models.artefact.ArtefactFormat`
 
-Artefacts MUST select a supported format, identified by the
-`lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enum. Either by examining the entity the Artefact
-represents (e.g. a file's extension and contents or service conformance info), or by direct assignment.
+Artefacts MUST select a supported format, identified by the `lantern.lib.magic_distribution.formats.ArtefactFormatLabel`
+enum. Either by examining the entity the Artefact represents (e.g. a file's extension and contents or service
+conformance info), or by direct assignment.
 
 ### File artefacts
 

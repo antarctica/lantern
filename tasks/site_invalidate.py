@@ -33,7 +33,7 @@ def main() -> None:
     _logger, _config, catalogue = init()
 
     keys = _get_cli_args()
-    catalogue._envs["live"]._untrusted._invalidator.invalidate(keys)  # ty:ignore[unresolved-attribute]
+    catalogue._envs["live"]._untrusted._invalidator.invalidate(keys)  # ty: ignore[missing-union-attribute]
 
 
 if __name__ == "__main__":

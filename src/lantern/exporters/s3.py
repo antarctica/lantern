@@ -37,7 +37,7 @@ class S3Exporter(ExporterBase):
         """Create per-thread S3 client."""
         if not hasattr(self._thread_local, "s3"):
             # Hack to copy access key from existing client
-            _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[unresolved-attribute]
+            _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[missing-attribute]
 
             self._thread_local.s3 = BotoClient(
                 "s3",

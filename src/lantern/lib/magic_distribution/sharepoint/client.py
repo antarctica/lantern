@@ -297,7 +297,7 @@ class MagicResourceDistributionClient:
             if message == "One or more fields with unique constraints already has the provided value.":
                 # Artefact ID is the only unique constraint, so metadata is assumed to be ArtefactMetadata.
                 self._logger.warning("Duplicate artefact ID: %s", metadata.get("artefact_id"))
-                raise DuplicateArtefactError(artefact_id=metadata["artefact_id"]) from e  # ty: ignore[invalid-key]
+                raise DuplicateArtefactError(artefact_id=metadata["artefact_id"]) from e  # ty: ignore[invalid-typed-dict-key]
             raise
 
     def _get_permissions(self, item_id: str) -> list:

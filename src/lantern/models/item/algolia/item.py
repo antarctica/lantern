@@ -262,7 +262,7 @@ class ItemAlgolia(ItemBase):
         return obj
 
     @property
-    def record(self) -> RecordRevision:  # ty: ignore[invalid-property-type-override]
+    def record(self) -> RecordRevision:  # ty: ignore[incompatible-property-override]
         """
         Get underlying RecordRevision.
 

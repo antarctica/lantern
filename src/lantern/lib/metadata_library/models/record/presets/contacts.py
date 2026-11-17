@@ -54,7 +54,7 @@ def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
         team_url_title="Mapping and Geographic Information Centre (MAGIC)",
     )
     # Fix inconsistency with online resource description, the format of which is required by external profiles.
-    contact.online_resource.description = contact.online_resource.description.replace(  # ty: ignore[invalid-assignment, unresolved-attribute]
+    contact.online_resource.description = contact.online_resource.description.replace(  # ty: ignore[invalid-assignment, missing-union-attribute]
         "Mapping and Geographic Information Centre (MAGIC)", "BAS Mapping and Geographic Information Centre (MAGIC)"
     )
     return contact

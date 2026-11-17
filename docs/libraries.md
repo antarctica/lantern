@@ -315,7 +315,7 @@ In addition to required [Artefact Metadata](#artefact-metadata), SharePoint file
 - whether a resource has unrestricted (open) access, for use with an
   [Anonymous Access Proxy 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution/-/blob/main/docs/implementation.md#anonymous-access-proxy)
 
-## ArcGIS
+### ArcGIS
 
 `lantern.lib.magic_distribution.arcgis`
 
@@ -327,7 +327,7 @@ accessing artefacts within ArcGIS Online and Enterprise.
 >
 > It is not a suitable replacement for the ArcGIS API for Python and/or `arcpy` packages maintained by Esri.
 
-### ArcGIS vendored classes
+#### ArcGIS vendored classes
 
 `lantern.lib.magic_distribution.arcgis.gis`
 
@@ -337,7 +337,7 @@ A vendored subset of data classes and enums representing ArcGIS Portal items.
 > These classes are based on originals from the ArcGIS API for Python. These local classes remove unneeded
 > functionality and/or adjust types to comply with linting rules in this project.
 
-### ArcGIS item properties
+#### ArcGIS item properties
 
 `lantern.lib.magic_distribution.arcgis.gis.dataclasses.ItemProperties`
 
@@ -429,7 +429,7 @@ otherwise unused.
 > Due to this system, only the `sha1Agol` value is used to compare item thumbnails. If the underlying image is changed,
 > and the SHA1 values are not, the sync process will not determine the thumbnail needs to be replaced.
 
-### ArcGIS item property limitations
+#### ArcGIS item property limitations
 
 Partially supported features (not-exhaustive):
 
@@ -437,7 +437,7 @@ Partially supported features (not-exhaustive):
   - not exposed as a property via these classes
   - used only in the `_update_agol_item()` method of the `esri-item` dev task (force set)
 
-### ArcGIS client
+#### ArcGIS client
 
 `lantern.lib.magic_distribution.arcgis.client.ArcGisClient`
 
@@ -470,7 +470,7 @@ Known unsupported features (not-exhaustive):
 - content administration and organisation
 - user administration
 
-### Supported ArcGIS types
+#### Supported ArcGIS types
 
 Supported ArcGIS service types:
 
@@ -496,7 +496,7 @@ Items vs Services:
 - for this reason item metadata are usually used over service for e.g. a bounding extent
 - exceptions to this include `ArcGisClient._get_fs_layer_last_data_update` to get a more specific value
 
-### ArcGIS service artefacts
+#### ArcGIS service artefacts
 
 `lantern.lib.magic_distribution.arcgis.models.artefact.ArtefactArcGisService`
 

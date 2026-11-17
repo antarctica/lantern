@@ -19,38 +19,35 @@
   {{ com.experimental_page() }}
 
   {% call section(slug='recently-released', title='Recently released') %}
+    {% call subsection(title='Clearer access restrictions') %}
+      <p>We've clarified who can access some restricted item downloads, such as those restricted to BAS Staff.</p>
+    {% endcall %}
     {% call subsection(title='Deprecated items') %}
       <p>We've added a warning to items that are old and should no longer be used, such as the
-        <a class="{{ com.link_classes() }}" href="/items/4df5a9d9-b4de-4d90-812a-abbbe90cb96a">Rothera Masterplan Map</a>.</p>
+        <a class="{{ com.link_classes() }}" href="/items/4df5a9d9-b4de-4d90-812a-abbbe90cb96a">Rothera Masterplan</a> map.</p>
     {% endcall %}
-    {% call subsection(title='Frequently updated items') %}
-      <p>We've added an indicator for items that are updated in near real time, such as
-        <a class="{{ com.link_classes() }}" href="/items/260298c6-8b63-4def-b0c3-964986a8bd24">Asset tracking data</a>.</p>
-    {% endcall %}
-    {% call subsection(title='Performance improvements') %}
-      <p>We've significantly improved the efficiency of the code used to build this website, reducing its carbon emissions.</p>
+    {% call subsection(title='Retired items') %}
+      <p>We've added a caution to items that may no longer be used, such as the outdated
+        <a class="{{ com.link_classes() }}" href="/items/b40090f3-a13d-4918-ab05-7625a0b839d8">Antarctic Hillshade and Bathymetry</a> layer.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
-      <p>This section only includes recent, high level, changes intended for a general audience.</p>
+      <p>This section only includes recent high level changes relevant to a general audience.</p>
       <p>The project {{ com.ext_link_a(href='https://github.com/antarctica/lantern/blob/main/CHANGELOG.md', value='CHANGELOG') }}
-        contains a full history at a lower technical level aimed at developers.</p>
+        contains a full history aimed at developers.</p>
     {% endcall %}
   {% endcall %}
 
   {% call section(slug='working-on', title='What we\'re doing now') %}
-    {% call subsection(title='Improving restricted items') %}
-      <p>We're clarifying who can access some restricted item downloads, such as those restricted to BAS Staff.</p>
-    {% endcall %}
-    {% call subsection(title='Site checks for restricted items') %}
-      <p>We're expanding the automatic broken download checks we run to include restricted downloads hosted in SharePoint.</p>
+    {% call subsection(title='Support for multiple thumbnails') %}
+      <p>To show both the covers and an overview of a published map for example.</p>
     {% endcall %}
     {% call subsection(title='File download checksums') %}
       <p>We're including checksums for verifying file downloads are complete to some download links, initially for
         automated checks.</p>
     {% endcall %}
-    {% call subsection(title='Automated publishing') %}
-      <p>To reduce manual effort and improve consistency, we're prototyping a workflow to process, deposit and
-        catalogue initially one time series of products automatically.</p>
+    {% call subsection(title='Automated publishing improvements') %}
+      <p>To reduce manual effort and improve consistency, we're prototyping improvements to how regularly updated
+        products and datasets can be catalogued automatically.</p>
     {% endcall %}
   {% endcall %}
 
@@ -59,12 +56,15 @@
       <p>To include filters for things such as download types, publication date and access restrictions.</p>
       <p>We are also exploring how searching for items based on their location might work.</p>
     {% endcall %}
+    {% call subsection(title='STAC support') %}
+      <p>We're exploring how the catalogue could be linked to SpatioTemporal Assets Catalogues (STAC) for larger image series.</p>
+    {% endcall %}
     {% call subsection(title='Improving multiple product editions') %}
       <p>For maps that are created each year/season, we're exploring how to improve navigating between previous and
         future editions as part of a historical series.</p>
     {% endcall %}
     {% call subsection(title='Migrate to UKRI AWS') %}
-      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
+      <p>We will move the hosting for this website to our parent body, for better support and oversight.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
       <p>

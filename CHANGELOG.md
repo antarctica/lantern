@@ -51,7 +51,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `upload-thumbnail` development task to downsample and upload thumbnails to the BAS CDN
 * `deprecate-record` to mark a record as deprecated without a replacement
 * Initial, internal, support for file checksums within distribution options
-* Updated Python dependencies
+* Updated Python dependencies x3
 * Updated Algolia, Scalar and Sentry vendored JS dependencies
 * `search-configure` development task
 * Dedicated search test suite to consistently check expected functionality and index settings

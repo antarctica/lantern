@@ -394,7 +394,7 @@ class GitLabLocalCache:
             table="record",
             values={
                 "record_pickled": record.pickled,
-                "record_jsonb": SQL.funcs.jsonb(json.dumps(record.config)),  # ty:ignore[unresolved-attribute]
+                "record_jsonb": SQL.funcs.jsonb(json.dumps(record.config)),  # ty:ignore[missing-attribute]
                 "sha1": record.record.sha1,
             },
         )

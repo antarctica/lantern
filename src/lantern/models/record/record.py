@@ -29,8 +29,8 @@ class Record(RecordBase):
     not possible to practically or robustly narrow the types for these properties to avoid a None value.
     """
 
-    file_identifier: str  # ty: ignore[invalid-mutable-override]
-    hierarchy_level: HierarchyLevelCode  # ty: ignore[invalid-mutable-override]
+    file_identifier: str  # ty: ignore[incompatible-mutable-override]
+    hierarchy_level: HierarchyLevelCode  # ty: ignore[incompatible-mutable-override]
 
     def __post_init__(self) -> None:
         """

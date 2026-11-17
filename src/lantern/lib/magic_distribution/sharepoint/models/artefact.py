@@ -81,7 +81,7 @@ class ArtefactSharePointFile(ArtefactFile):
             raise KeyError(msg)
 
     @property
-    def artefact_id(self) -> str:  # ty: ignore[invalid-property-type-override]
+    def artefact_id(self) -> str:  # ty: ignore[incompatible-property-override]
         """
         Artefact identifier.
 
@@ -129,7 +129,7 @@ class ArtefactSharePointFile(ArtefactFile):
         return self._drive_item["size"]
 
     @property
-    def quickxor(self) -> str:  # ty: ignore[invalid-property-type-override]
+    def quickxor(self) -> str:  # ty: ignore[incompatible-property-override]
         """
         Microsoft QuickXorHash.
 
@@ -139,7 +139,7 @@ class ArtefactSharePointFile(ArtefactFile):
         return self._drive_item["file"]["hashes"]["quickXorHash"]
 
     @property
-    def sha256(self) -> str:  # ty: ignore[invalid-property-type-override]
+    def sha256(self) -> str:  # ty: ignore[incompatible-property-override]
         """
         SHA 256 hash.
 

@@ -250,7 +250,7 @@ class RecordsReport:
         return {
             c.record.file_identifier or "": {
                 "id": c.record.file_identifier,
-                "type": c.record.hierarchy_level.name,  # ty: ignore[unresolved-attribute]
+                "type": c.record.hierarchy_level.name,  # ty: ignore[missing-union-attribute]
                 "title": c.record.identification.title,
                 "edition": c.record.identification.edition,
                 "changes": c.changes,
@@ -385,7 +385,7 @@ class RecordsIO:
                 self.logger.info(
                     "* %s [%s] '%s' (%s)",
                     r.file_identifier,
-                    r.hierarchy_level.name,  # ty: ignore[unresolved-attribute]
+                    r.hierarchy_level.name,  # ty: ignore[missing-union-attribute]
                     r.identification.title,
                     r.identification.edition,
                 )

@@ -180,7 +180,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         return [self._select_record(side_identifier.identifier.identifier) for side_identifier in side_identifiers]
 
     @cached_property
-    def _extent(self) -> ExtentTab:  # ty: ignore[invalid-mutable-override]
+    def _extent(self) -> ExtentTab:  # ty: ignore[incompatible-mutable-override]
         """
         Extent tab.
 
@@ -203,7 +203,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         return ExtentTab(extents=extents)
 
     @cached_property
-    def _additional_info(self) -> AdditionalInfoTab:  # ty: ignore[invalid-mutable-override]
+    def _additional_info(self) -> AdditionalInfoTab:  # ty: ignore[incompatible-mutable-override]
         """
         Additional info tab.
 

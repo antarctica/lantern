@@ -7,7 +7,7 @@ from base64 import b64encode, urlsafe_b64encode
 from functools import cached_property
 from typing import TYPE_CHECKING, Final
 
-from quickxorhash import quickxorhash  # ty: ignore[unresolved-import]
+from quickxorhash import quickxorhash  # ty: ignore[import-not-found]
 
 from lantern.lib.magic_distribution.formats import (
     ArtefactFormat,

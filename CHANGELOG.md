@@ -105,6 +105,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving `supersede-record` to optionally move aliases from old to new record
 * Refactoring SharePoint permission logic into SharePoint lib
 * Refactoring MAGIC SharePoint and ArcGIS libraries into a MAGIC Distribution library
+* Using Pixi to create a Python 3.6 environment for Ansible deployments in CI/CD
 
 ### Removed
 

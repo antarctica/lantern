@@ -17,6 +17,9 @@ variables:
   UV_VERSION: "0.13.8"
   UV_PYTHON_PREFERENCE: "only-managed"
 
+  # Pixi
+  PIXI_VERSION: "0.84.2"
+
   # App
   STATIC_SITE_PATH: "$CI_PROJECT_DIR/_site"
 
@@ -29,14 +32,17 @@ variables:
   # Deployment
   DEPLOY_ANSIBLE_REPO: "gitlab.data.bas.ac.uk/station-data-management/ansible.git"
   DEPLOY_ANSIBLE_BRANCH: "master"
-  DEPLOY_ANSIBLE_VENV: "/tmp/.venv/ansible"
   DEPLOY_ANSIBLE_ROOT_PATH: "/tmp/ansible"
+  DEPLOY_PIXI_PATH: "${DEPLOY_ANSIBLE_ROOT_PATH}"
+  DEPLOY_PYTHON_PATH: "${DEPLOY_ANSIBLE_ROOT_PATH}/.pixi/envs/default/bin/python"
+  DEPLOY_ANSIBLE_VENV: "${DEPLOY_ANSIBLE_ROOT_PATH}/.venv"
+  DEPLOY_ANSIBLE_PYTHON: "${DEPLOY_ANSIBLE_VENV}/bin/python"
   DEPLOY_ANSIBLE_VAULT_PATH: ".vault_magic.password"
-  ANSIBLE_HOST_KEY_CHECKING: "False"
   DEPLOY_GROUP: "magic"
   DEPLOY_SSH_PRIVATE_KEY: "id_ed25519.pem"
   DEPLOY_INVENTORY_GROUP: "lantern"
   DEPLOY_PLAYBOOK: "lantern.yml"
+  ANSIBLE_HOST_KEY_CHECKING: "False"
 
   # Secrets (set in GitLab CI/CD settings)
   # - PROJECT_ACCESS_TOKEN
@@ -86,12 +92,22 @@ image: mcr.microsoft.com/playwright/python:v1.65.1-noble
   - curl -sSfo op.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.32.0/op_linux_amd64_v2.32.0.zip
   - unzip -od /usr/local/bin/ op.zip
 
+  # setup Pixi
+  - curl -LsSfo pixi.tar.gz https://github.com/prefix-dev/pixi/releases/download/v$PIXI_VERSION/pixi-x86_64-unknown-linux-musl.tar.gz
+  - tar -xzf pixi.tar.gz
+  - mv pixi /usr/local/bin
+  - pixi --version
+
   # setup Ansible
-  - apt-get install -y git ssh build-essential
+  - apt-get install -y git openssh-client build-essential
   - git clone --branch $DEPLOY_ANSIBLE_BRANCH https://gitlab-ci-token:$CI_JOB_TOKEN@$DEPLOY_ANSIBLE_REPO $DEPLOY_ANSIBLE_ROOT_PATH
-  - python -m venv $DEPLOY_ANSIBLE_VENV
-  - $DEPLOY_ANSIBLE_VENV/bin/python -m pip install --upgrade pip
-  - $DEPLOY_ANSIBLE_VENV/bin/python -m pip install -r $DEPLOY_ANSIBLE_ROOT_PATH/requirements.txt
+
+  - pixi init --channel conda-forge $DEPLOY_PIXI_PATH
+  - cd $DEPLOY_PIXI_PATH
+  - pixi add python=3.6
+  - $DEPLOY_PYTHON_PATH -m venv $DEPLOY_ANSIBLE_VENV
+  - $DEPLOY_ANSIBLE_PYTHON -m pip install --upgrade pip
+  - $DEPLOY_ANSIBLE_PYTHON -m pip install -r $DEPLOY_ANSIBLE_ROOT_PATH/requirements.txt
   - export PATH=$DEPLOY_ANSIBLE_VENV/bin:$PATH
 
   # setup Ansible vault
@@ -268,7 +284,6 @@ deploy_stage:
   needs:
     - job: prerelease
       artifacts: true
-  image: python:3.6-slim
   variables:
     DEPLOY_ENV: "staging"
   before_script:
@@ -289,7 +304,6 @@ deploy_prod:
   stage: 🚀 deploy
   needs:
     - job: publish
-  image: python:3.6-slim
   variables:
     DEPLOY_ENV: "production"
   before_script:

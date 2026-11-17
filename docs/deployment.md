@@ -84,6 +84,9 @@ within the BAS IT [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-m
 Tagged commits created for [Releases](/README.md#releases) will trigger a continuous deployment workflow for the
 release to the production environment using GitLab's CI/CD configured in [`.gitlab-ci.yml`](/.gitlab-ci.yml).
 
+> [!NOTE]
+> CD will create a conda environment via Pixi to install Python 3.6, required for the Ansible version used.
+
 Pre-releases can optionally be deployed to the staging environment by triggering the relevant CI job manually.
 
 ## Rotating access tokens

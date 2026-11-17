@@ -325,6 +325,8 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 - all deployable code SHOULD be contained in the `lantern` package
 - `Path.resolve()` SHOULD be used to display or log file/directory paths
 - logging SHOULD be used to record how actions progress, using the app logger (`logger = logging.getLogger('lantern')`)
+- `lantern.utils.get_jinja_env()` SHOULD be used to get a Jinja2 environment to avoid recompiling macros
+- `@cached_property` SHOULD be used for expensive properties that don't change during the lifetime of a class
 - `from __future__ import annotations` and `if TYPE_CHECKING` SHOULD be used for future proofing later Python versions
 - extensions to third party dependencies SHOULD be:
   - created in `lantern.lib`

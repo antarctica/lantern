@@ -20,6 +20,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+### Fixed
+
+* logger name inconsistencies within contrib modules
+* logger level falling back to 0 (debug) within site workers where app logger level was not explicitly set
+
 ## [0.16.0] - 2026-11-17
 
 ### Changed [BREAKING!]

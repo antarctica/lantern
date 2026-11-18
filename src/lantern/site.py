@@ -188,7 +188,8 @@ class Site:
         records = self._records.prep_parallel()
         start = time.monotonic()
         nested_outputs: list[list[SiteContent | Check | list[str]]] = Parallel(n_jobs=self._workers)(
-            delayed(_run_job)(self._logger.level, self._meta, records, job, self._worker_key) for job in jobs
+            delayed(_run_job)(self._logger.getEffectiveLevel(), self._meta, records, job, self._worker_key)
+            for job in jobs
         )
         outputs: list[SiteContent | Check | list[str]] = [
             output for output_outputs in nested_outputs for output in output_outputs

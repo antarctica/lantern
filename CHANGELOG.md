@@ -20,6 +20,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-11-18
+
 ### Fixed
 
 * logger name inconsistencies within contrib modules

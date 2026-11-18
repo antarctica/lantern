@@ -257,7 +257,7 @@ def entrypoint(args: Args) -> None:
     init_sentry()
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.info("Initialising Lantern non-interactive publishing workflow.")
 
     _run(logger=logger, config=config, args=args)

@@ -53,7 +53,7 @@ def entrypoint(env: SiteEnvironment) -> None:
     """Entrypoint."""
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.info("Initialising Lantern deployment site updates.")
 
     _run(logger=logger, config=config, env=env)

@@ -24,7 +24,7 @@ def entrypoint() -> None:
     init_sentry()
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.info("Initialising Lantern catalogue checks.")
 
     _run(logger=logger, config=config)

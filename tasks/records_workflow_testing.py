@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 import sys
+from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 from textwrap import dedent
@@ -42,7 +43,7 @@ if TYPE_CHECKING:
 
     from lantern.catalogues.bas import BasCatalogue
     from lantern.config import Config
-    from lantern.lib.metadata_library.models.record.record import Record
+    from lantern.models.record.record import Record as CatRecord
     from lantern.models.record.revision import RecordRevision
     from lantern.models.repository import GitUpsertResults
     from lantern.outputs.base import OutputBase
@@ -285,8 +286,38 @@ def _zap(logger: logging.Logger, cat: BasCatalogue, admin_keys: AdministrationKe
     zap_clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
 
 
+@time_task(label="load")
+def _load(
+    logger: logging.Logger, cat: BasCatalogue, admin_keys: AdministrationKeys, import_path: Path
+) -> dict[Path, CatRecord]:
+    """Load records, fixing any Zap ⚡️ authored records."""
+    # load records, pre-processing any Zap ⚡️ authored records
+    _zap(logger=logger, cat=cat, admin_keys=admin_keys, import_path=import_path)
+
+    pr = import_load(logger=logger, import_path=import_path)
+    if len(pr) < 1:
+        logger.info("No valid records to commit, exiting.")
+        sys.exit(0)
+    return pr
+
+
+@time_task(label="revise")
+def _revise(logger: logging.Logger, record_paths: dict[Path, CatRecord]) -> None:
+    """Check metadata date stamps use today's date."""
+    today = datetime.now(tz=UTC).date()
+    for path, record in record_paths.items():
+        if record.metadata.date_stamp == today:
+            continue
+        logger.warning(
+            "Metadata date stamp in '%s' is '%s' not today.", record.file_identifier, record.metadata.date_stamp
+        )
+        if not inquirer.confirm(message="Update date_stamp?", default=True):
+            continue
+        record_paths[path].metadata.date_stamp = today
+
+
 @time_task(label="Changeset")
-def _changeset(logger: logging.Logger, keys: AdministrationKeys, records: dict[Path, Record]) -> tuple[str, str]:
+def _changeset(logger: logging.Logger, keys: AdministrationKeys, records: dict[Path, CatRecord]) -> tuple[str, str]:
     """
     Get branch for a new or existing changeset.
 
@@ -313,15 +344,13 @@ def _changeset(logger: logging.Logger, keys: AdministrationKeys, records: dict[P
 
 
 @time_task(label="Import")
-def _import(logger: logging.Logger, cat: BasCatalogue, import_path: Path, branch: str) -> GitUpsertResults | None:
-    """Load and commit records."""
-    records = import_load(logger=logger, import_path=import_path)
-    if len(records) == 0:
-        return None
-
+def _import(
+    logger: logging.Logger, cat: BasCatalogue, branch: str, record_paths: dict[Path, CatRecord]
+) -> GitUpsertResults | None:
+    """Commit records."""
     commit_context = get_git_commit_context(logger=logger, cat=cat, branch=branch)
-    results = import_push(logger=logger, cat=cat, records=list(records.values()), commit_context=commit_context)
-    import_clean(logger=logger, records=records, results=results)
+    results = import_push(logger=logger, cat=cat, records=list(record_paths.values()), commit_context=commit_context)
+    import_clean(logger=logger, records=record_paths, results=results)
     return results
 
 
@@ -393,9 +422,20 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: s
 
 
 @time_task(label="Check")
-def _check(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path) -> Path:
-    """Check items for committed records."""
-    check(cat=cat, env=env, target="local", branch=branch, identifiers=identifiers, local_path=checks_base_path)
+def _check(
+    cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path
+) -> Path | None:
+    """
+    Check items for committed records.
+
+    Any unhandled errors (rather than handled failures) are ignored to prevent the workflow failing.
+    """
+    with suppress(BaseException):
+        check(cat=cat, env=env, target="local", branch=branch, identifiers=identifiers, local_path=checks_base_path)
+    expected_path = checks_base_path.joinpath("-/checks/data.json")
+    if not expected_path.exists():
+        return None
+
     # clean up checks output
     with checks_base_path.joinpath("-/checks/data.json").open() as f:
         data = json.load(f)
@@ -410,7 +450,6 @@ def _check(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: se
 
 @time_task(label="Output")
 def _output(
-    logger: logging.Logger,
     config: Config,
     cat: BasCatalogue,
     env: SiteEnvironment,
@@ -420,7 +459,7 @@ def _output(
     merge_url: str,
     merge_new: bool,
 ) -> None:
-    """Add comments to GitLab merge request and, if MR is new, issue."""
+    """Optionally add comments to GitLab merge request and, if MR is new, issue."""
     mr_comment = OutputCommentMergeRequest(
         config=config, cat=cat, env=env, branch=branch, commit=commit, merge_url=merge_url
     )
@@ -433,7 +472,8 @@ def _output(
         return
     issue_comment = OutputCommentIssue(cat=cat, merge_url=merge_url, issue_url=issue_url)
     print(issue_comment.render())
-    confirm(logger, f"Post comment above to '{issue_url}'?")
+    if not inquirer.confirm(message=f"Post comment above to '{issue_url}'?", default=True):
+        return
     issue_comment.post()
 
 
@@ -460,18 +500,15 @@ def main() -> None:
     print("TIP! See the 'records-select' and/or 'records-clone' tasks if useful.")
     confirm(logger, "Are records staged in import directory?")
 
-    # load records, pre-processing any Zap ⚡️ authored records
-    _zap(logger=logger, cat=catalogue, admin_keys=admin_keys, import_path=import_path)
-    records = import_load(logger=logger, import_path=import_path)
-    if len(records) < 1:
-        logger.info("No valid records to commit, exiting.")
-        sys.exit(0)
+    # load records
+    record_paths = _load(logger=logger, cat=catalogue, admin_keys=admin_keys, import_path=import_path)
+    _revise(logger=logger, record_paths=record_paths)
 
     # open or reuse changeset
-    issue_url, branch = _changeset(logger=logger, keys=admin_keys, records=records)
+    issue_url, branch = _changeset(logger=logger, keys=admin_keys, records=record_paths)
 
     # commit records
-    commit = _import(logger=logger, cat=catalogue, import_path=import_path, branch=branch)
+    commit = _import(logger=logger, cat=catalogue, branch=branch, record_paths=record_paths)
     if commit is None:
         logger.warning("No records were loaded, exiting.")
         sys.exit(0)
@@ -487,13 +524,12 @@ def main() -> None:
 
     # build and check records
     _export(cat=catalogue, env=env, branch=branch, identifiers=identifiers)
-    checks_path = _check(
+    checks_path: Path | None = _check(
         cat=catalogue, env=env, branch=branch, identifiers=identifiers, checks_base_path=checks_base_path
     )
 
     # generate output comments
     _output(
-        logger=logger,
         config=config,
         cat=catalogue,
         env=env,
@@ -504,8 +540,11 @@ def main() -> None:
         merge_new=merge_new,
     )
 
-    logger.info("Testing records workflow exited normally.")
-    logger.info("Checks data: %s", checks_path.resolve())
+    if checks_path:
+        logger.info("Testing records workflow exited normally.")
+        logger.info("Checks data: %s", checks_path.resolve())
+    else:
+        logger.error("Unhandled error in checks during testing records workflow.")
 
 
 if __name__ == "__main__":

@@ -155,7 +155,7 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str]) -> N
 
 
 @time_task(label="Check")
-def _check(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str], checks_base_path: Path) -> Path:
+def _check(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str], checks_base_path: Path) -> Path | None:
     """Check items for committed records."""
     return check(
         cat=cat,
@@ -233,7 +233,9 @@ def main() -> None:
 
     # build and check records
     _export(cat=catalogue, env=env, identifiers=identifiers)
-    checks_path = _check(cat=catalogue, env=env, identifiers=identifiers, checks_base_path=checks_base_path)
+    checks_path: Path | None = _check(
+        cat=catalogue, env=env, identifiers=identifiers, checks_base_path=checks_base_path
+    )
 
     # clean up changeset related files
     _clean(logger=logger, config=config, branch=branch)
@@ -249,8 +251,11 @@ def main() -> None:
         identifiers=identifiers,
     )
 
-    logger.info("Testing records workflow exited normally.")
-    logger.info("Checks data: %s", checks_path.resolve())
+    if checks_path:
+        logger.info("Live records workflow exited normally.")
+        logger.info("Checks data: %s", checks_path.resolve())
+    else:
+        logger.error("Unhandled error in checks during live records workflow.")
 
 
 if __name__ == "__main__":

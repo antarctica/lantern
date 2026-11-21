@@ -189,6 +189,70 @@ class TestItemProperties:
         result = clean_dict(value.to_dict(), strip_empty_str=True)
         assert result == expected
 
+    def test_from_dict(self):
+        """Can create item properties from required ArcGIS item JSON fields only."""
+        expected_title = "x"
+        expected_type = ItemType.FEATURE_COLLECTION
+        expected_metadata = "x"
+
+        result = ItemProperties.from_dict(info={"title": expected_title, "type": expected_type.value, "metadata": "x"})
+        assert result.title == expected_title
+        assert result.item_type == expected_type
+        assert result.metadata == expected_metadata
+
+    @pytest.mark.parametrize("thumbnail", [None, ("thumbnail/x.png", "https://example.com/x.png?sha1=x")])
+    def test_from_dict_optional_properties(self, thumbnail: tuple[str, str] | None):
+        """Can create item properties with typically used optional values, including a thumbnail."""
+        info = {
+            "title": "x",
+            "type": "Feature Service",
+            "snippet": "summary",
+            "description": "description",
+            "accessInformation": "attribution",
+            "licenseInfo": "licence",
+            "extent": [[0, 0], [0, 0]],
+        }
+        expected = ItemProperties(
+            title="x",
+            item_type=ItemType.FEATURE_SERVICE,
+            metadata="metadata",
+            snippet="summary",
+            description="description",
+            access_information="attribution",
+            license_info="licence",
+            extent=[[0, 0], [0, 0]],
+        )
+        if thumbnail:
+            expected.thumbnail = thumbnail[0]
+            expected.thumbnail_url = thumbnail[1]
+
+        result = ItemProperties.from_dict(info=info, metadata="metadata", thumbnail=thumbnail)
+        assert result == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("info_metadata", "metadata", "expected"),
+        [
+            ({}, "y", "y"),
+            ({"metadata": "x"}, None, "x"),
+            ({"metadata": "x"}, "y", "y"),
+            ({"metadata": "x"}, "", "x"),
+            ({"metadata": ""}, None, ""),
+        ],
+    )
+    def test_from_dict_metadata(self, info_metadata: dict, metadata: str | None, expected: str):
+        """Can handle metadata values from standalone values or information dict."""
+        info = {"title": "x", "type": "Feature Service", **info_metadata}
+        result = ItemProperties.from_dict(info=info, metadata=metadata)
+        assert result.metadata == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("metadata", [None, ""])
+    def test_from_dict_no_metadata(self, metadata: str | None):
+        """Cannot create properties without metadata in either source."""
+        with pytest.raises(KeyError, match="metadata"):
+            ItemProperties.from_dict(info={"title": "x", "type": "Feature Service"}, metadata=metadata)
+
 
 class TestItem:
     """Test ArcGIS content items."""

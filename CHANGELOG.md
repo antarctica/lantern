@@ -22,6 +22,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [0.16.1] - 2026-11-18
 
+### Added
+
+* ArcGIS item comparison, sync and ownership transfer methods to MAGIC Distribution library ArcGIS client
+
 ### Fixed
 
 * logger name inconsistencies within contrib modules

@@ -406,19 +406,21 @@ Unsupported item JSON properties:
 In ArcGIS Portal items, thumbnails are stored as a related resource, similar to metadata. The relative path to this
 file, if set, is stored in the `thumbnail` item property.
 
-To enable thumbnail syncing (and other properties) between catalogue records and ArcGIS items, a target Arc item is
-compared against a simulated item from a catalogue record (via the [`ItemArcGIS`](/docs/models.md#arcgis-items) model).
-Catalogue records store complete URLs to thumbnails, and file references stored in a Arc item cannot be reliably
-guaranteed. This means filename based comparisons cannot be used to determine if the item thumbnail needs to be
-replaced, based on a source record.
+To enable thumbnail syncing between catalogue records and ArcGIS items, a target Arc item is compared against a
+simulated item from a catalogue record (using the [`ItemArcGIS`](/docs/models.md#arcgis-items) model). Catalogue
+records store complete URLs to thumbnails, and file references stored in a Arc item cannot be reliably guaranteed.
 
-Instead, SHA1 hashes are used to compare the source and target thumbnails. For target items, the SHA1 is calculated from
-the thumbnail if set. For source records, the SHA1 is appended as a `sha1` query parameter in the relevant graphic
-overview href.
+This means filename based comparisons cannot be used to determine if the item thumbnail needs to be replaced, based
+on a source record. Instead, SHA1 hashes are used to compare the source and target thumbnails. For targets items, the
+SHA1 is calculated from the thumbnail if set (by hashing a temporary download). For source records, the SHA1 is taken
+from the relevant graphic overview href.
 
-However, as original thumbnails are post-processed by ArcGIS Portal/Online when uploaded, the original SHA1 value will
-never match the target item. To work around this, an additional `sha1Agol` query parameter is used to record a known
-accurate value.
+However, as original thumbnails are post-processed by ArcGIS Portal/Online when uploaded, its original SHA1 value
+(calculated outside of Arc), will never match the target item (even where the target represents the same resource).
+To work around this, an additional `sha1Agol` query parameter is used to record a known accurate value.
+
+> [!TIP]
+>
 
 The `thumbnailurl` ArcGIS Python SDK class property is used to hold the computed (for target items) or pre-determined
 (for source records) image URLs containing sha1 values. Normally this property is only set when creating a thumbnail
@@ -467,7 +469,7 @@ Known unsupported features (not-exhaustive):
 - [Item and Service Types](#supported-arcgis-types) not listed as supported (e.g. non-raster tile map services)
 - [Unsupported Item Properties](#arcgis-item-properties)
 - provisioning services via a collaborated ArcGIS Enterprise instance
-- content administration and organisation
+- content administration and organisation (except item reassignment)
 - user administration
 
 #### Supported ArcGIS types

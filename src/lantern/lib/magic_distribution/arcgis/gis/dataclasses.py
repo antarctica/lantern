@@ -39,6 +39,7 @@ class ItemProperties:
     - None removed as a type for 'metadata'
     - None removed as a type for 'thumbnail_url' and default value set
     - post_init modified to validate 'thumbnail_url' has required parameters
+    - `from_dict()` method added
 
     For `thumbnail` and 'thumbnail_url':
 
@@ -176,6 +177,34 @@ class ItemProperties:
 
         return data
 
+    @classmethod
+    def from_dict(
+        cls, info: dict, metadata: str | None = None, thumbnail: tuple[str, str] | None = None
+    ) -> ItemProperties:
+        """
+        Create properties from ArcGIS item JSON and separately fetched metadata and thumbnail.
+
+        Metadata MUST be set within either an info dict (where already known) or as a standalone value (where fetched).
+
+        Where a thumbnail is set:
+        - thumbnail[0] MUST be the file path within the item
+        - thumbnail[1] MUST be the full URL to this file, with a query parameter for its `sha1` hash
+        """
+        properties = cls(
+            title=info["title"],
+            item_type=ItemType(info["type"]),
+            metadata=metadata or info["metadata"],
+            snippet=info.get("snippet"),
+            description=info.get("description"),
+            access_information=info.get("accessInformation"),
+            license_info=info.get("licenseInfo"),
+            extent=info.get("extent"),
+        )
+        if thumbnail:
+            properties.thumbnail = thumbnail[0]
+            properties.thumbnail_url = thumbnail[1]
+        return properties
+
 
 @dataclass
 class Item:  # noqa: PLW1641
@@ -228,25 +257,12 @@ class Item:  # noqa: PLW1641
                 raise e from e
             sharing_level = SharingLevel.EVERYONE
 
-        item_props = ItemProperties(
-            title=info["title"],
-            item_type=ItemType(info["type"]),
-            metadata=metadata,
-            snippet=info.get("snippet"),
-            description=info.get("description"),
-            access_information=info.get("accessInformation"),
-            license_info=info.get("licenseInfo"),
-            extent=info.get("extent"),
-        )
-        if thumbnail:
-            item_props.thumbnail = thumbnail[0]
-            item_props.thumbnail_url = thumbnail[1]
         return Item(
             id=info["id"],
             owner=info["owner"],
             org_id=info["orgId"],
             url=info["url"],
-            properties=item_props,
+            properties=ItemProperties.from_dict(info=info, metadata=metadata, thumbnail=thumbnail),
             sharing_level=sharing_level,
             raw_item=info,
         )

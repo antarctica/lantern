@@ -4,23 +4,18 @@ from __future__ import annotations
 
 import json
 from argparse import ArgumentParser
+from copy import deepcopy
 from datetime import UTC, datetime
-from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
-from urllib.parse import parse_qs, urlparse
 
-import requests
-from lxml import etree
-from lxml.html import HTMLParser
-from lxml.html import fragment_fromstring as html_fromstring
-from lxml.html import tostring as html_tostring
+import inquirer
 from tasks._shared import confirm, get_record, init
 
 from lantern.lib.magic_distribution.arcgis.client import ArcGisClient
 from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.magic_distribution.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
-from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.record.record import Record
 
@@ -28,6 +23,8 @@ if TYPE_CHECKING:
     import logging
 
     from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.catalogues.bas import BasCatalogue
 
 
 def _get_cli_args() -> dict:
@@ -93,222 +90,44 @@ def _dump_arcgis_item(logger: logging.Logger, output_path: Path, item: ArcGisIte
     logger.info("AGOL item %s dumped to %s", item.id, item_path.resolve())
 
 
-def _snake_to_camel_case(s: str) -> str:
-    """Convert from snake_case to camelCase."""
-    parts = s.split("_")
-    return parts[0] + "".join(p.capitalize() for p in parts[1:])
-
-
-def _normalise_arcgis_html(html: str) -> str:
-    """
-    Normalise HTML string between a catalogue record and an ArcGIS item.
-
-    Converts between HTML generated:
-    - from Markdown in the catalogue item
-    - after having been submitted and processed by Arc
-
-    Accounts for:
-    - differences in syntax (`<a href='x'>` vs `<a href="x">`)
-    - `rel="nofollow ugc"` being added to anchor elements
-    - possible extra div wrapper
-    """
-    element = html_fromstring(html, create_parent=True, parser=HTMLParser())
-    # add `rel="nofollow ugc"` to any anchor elements
-    for a in element.iter("a"):
-        relations = {t for t in a.get("rel", "").split() if t}
-        relations.update({"nofollow", "ugc"})
-        a.set("rel", " ".join(sorted(relations)))
-    # correct double wrapping div
-    if element.tag == "div" and len(element) == 1 and element[0].tag == "div":
-        element = element[0]
-    return html_tostring(doc=element, encoding="unicode")
-
-
-def _parse_md_file_id(metadata_xml: str) -> str | None:
-    """Attempt to get mdFileID element from Esri metadata instance."""
-    root = etree.fromstring(metadata_xml.encode())
-    md_file_id_elem = root.find("mdFileID")
-    return md_file_id_elem.text if md_file_id_elem is not None else None
-
-
-def _diff_arcgis_items(logger: logging.Logger, source_item: ArcGisItem, target_item: ArcGisItem) -> dict:
-    """
-    Compare a source and target ArcGIS items and return a dict of any differences that need applying.
-
-    In this case it's only the sharing level (access) and these item.properties that are relevant:
-    - title
-    - snippet
-    - description
-    - access_information (accessInformation) [attribution]
-    - license_info (licenseInfo)
-    - metadata
-    - thumbnail_url (thumbnailurl), specifcally the sha1 query parameter, location is ignored
-    """
-    diff = {}
+def _sync_item(
+    logger: logging.Logger,
+    cat: BasCatalogue,
+    arc: ArcGisClient,
+    admin_keys: AdministrationKeys,
+    item_id: str,
+    file_identifier: str,
+    branch: str | None = None,
+) -> None:
+    """Apply a source catalogue record to a target ArcGIS item."""
+    source_record = get_record(logger=logger, cat=cat, reference=file_identifier, branch=branch)
+    target_item = arc.get_item(item_id)
+    source_item = _create_source_arcgis_item(
+        source_record=Record.loads(source_record.dumps(strip_admin=False)),
+        admin_keys=admin_keys,
+        target_item=target_item,
+    )
+    original_target = deepcopy(target_item)
 
     if source_item.sharing_level != target_item.sharing_level:
-        diff["sharing_level"] = source_item.sharing_level
+        confirm(logger, f"Update sharing level to {source_item.sharing_level.name}?")
 
-    # get mdFileID element value from source_item.properties.metadata XML str via LXML
-    source_md_file_id = _parse_md_file_id(source_item.properties.metadata)
-    target_md_file_id = _parse_md_file_id(target_item.properties.metadata)
-    if source_md_file_id != target_md_file_id:
-        logger.debug(source_item.properties.metadata)
-        logger.debug(target_item.properties.metadata)
-        diff["metadata"] = source_item.properties.metadata
+    diff = arc.diff_items(item=source_item, other=target_item)
+    if not diff:
+        logger.info("Target item %s == %s, skipping.", target_item.id, source_record.file_identifier)
+        return
+    logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
+    logger.info(list(diff.keys()))
 
-    for prop in ["title", "snippet", "access_information"]:
-        src_val = getattr(source_item.properties, prop, None)
-        tgt_val = getattr(target_item.properties, prop, None)
-        if src_val == tgt_val or src_val is None:
-            continue
-        diff[_snake_to_camel_case(prop)] = src_val
-    for html_prop in ["description", "license_info"]:
-        src_val = _normalise_arcgis_html(getattr(source_item.properties, html_prop, "") or "")
-        tgt_val = _normalise_arcgis_html(getattr(target_item.properties, html_prop, "") or "")
-        if src_val in (tgt_val, ""):
-            continue
-        diff[_snake_to_camel_case(html_prop)] = src_val
+    changed = arc.sync_item(source=source_item, target=target_item, allow_sharing_change=True)
+    if changed:
+        _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=original_target)
 
-    # prefer to compare target against AGOL processed source image rather than original (as it won't match)
-    src_thumbnail_params = parse_qs(urlparse(source_item.properties.thumbnail_url).query)
-    src_thumbnail_sha1 = (
-        src_thumbnail_params["sha1Agol"][0]
-        if "sha1Agol" in src_thumbnail_params
-        else src_thumbnail_params.get("sha1", [None])[0]
-    )
-    tgt_thumbnail_sha1 = parse_qs(urlparse(target_item.properties.thumbnail_url).query).get("sha1", [None])[0]
-    if src_thumbnail_sha1 != tgt_thumbnail_sha1:
-        logger.debug(source_item.properties.thumbnail_url)
-        logger.debug(target_item.properties.thumbnail_url)
-        diff["thumbnail_url"] = source_item.properties.thumbnail_url
-
-    return diff
-
-
-def _update_agol_metadata(logger: logging.Logger, base_url: str, token: str, item: ArcGisItem, metadata: str) -> None:
-    """
-    Update metadata for an ArcGIS Online item.
-
-    AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    Source: https://developers.arcgis.com/rest/users-groups-and-items/update-info/
-    """
-    logger.info("Updating metadata for item: %s", item.id)
-    logger.debug(metadata)
-    req = requests.post(
-        url=f"{base_url}/updateInfo",
-        params={"folderName": "metadata", "token": token, "f": "json"},
-        files={"file": ("metadata.xml", BytesIO(metadata.encode("utf-8")), "application/xml")},
-        timeout=10,
-    )
-    req.raise_for_status()
-    data = req.json()
-    if not data.get("success"):
-        msg = f"Error updating metadata for item {item.id} in AGOL: {data}"
-        raise ValueError(msg)
-
-
-def _update_agol_sharing(
-    logger: logging.Logger, base_url: str, token: str, item: ArcGisItem, sharing_level: SharingLevel
-) -> None:
-    """
-    Update sharing for an ArcGIS Online item.
-
-    AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    Source: https://developers.arcgis.com/rest/users-groups-and-items/share-item-as-item-owner/
-    """
-    logger.info("Updating sharing for item: %s", item.id)
-    sharing = {"everyone": False, "org": False}
-    if sharing_level == SharingLevel.ORG:
-        sharing["org"] = True
-    elif sharing_level == SharingLevel.EVERYONE:
-        sharing["everyone"] = True
-        sharing["org"] = True
-    files_sharing: dict[str, tuple] = {k: (None, v) for k, v in sharing.items()}
-    logger.debug(sharing)
-
-    req = requests.post(
-        url=f"{base_url}/share",
-        params={"token": token, "f": "json"},
-        files=files_sharing,
-        timeout=10,
-    )
-    req.raise_for_status()
-    data = req.json()
-    if "error" in data:
-        msg = f"Error updating sharing for item {item.id} in AGOL: {data['error']['message']}"
-        raise ValueError(msg)
-
-
-def _update_agol_properties(
-    logger: logging.Logger, base_url: str, token: str, item: ArcGisItem, properties: dict
-) -> None:
-    """
-    Update properties for an ArcGIS Online item.
-
-    AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
-    """
-    logger.info("Updating properties for item: %s", item.id)
-    files_update: dict[str, tuple] = {k: (None, v) for k, v in properties.items()}
-    files_update["metadataEditable"] = (None, "false")
-    logger.debug(files_update)
-    req = requests.post(
-        url=f"{base_url}/update",
-        params={"f": "json", "token": token},
-        files=files_update,
-        timeout=10,
-    )
-    req.raise_for_status()
-    data = req.json()
-    if "error" in data:
-        msg = f"Error updating item {item.id} in AGOL: {data['error']['message']}"
-        raise ValueError(msg)
-
-
-def _update_agol_thumbnail(logger: logging.Logger, base_url: str, token: str, item: ArcGisItem, url: str) -> None:
-    """
-    Update thumbnail image for an ArcGIS Online item.
-
-    AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    Source: https://developers.arcgis.com/rest/users-groups-and-items/update-thumbnail/
-    """
-    logger.info("Updating thumbnail for item: %s", item.id)
-    req = requests.post(
-        url=f"{base_url}/updateThumbnail",
-        params={"token": token, "f": "json", "url": url},
-        timeout=10,
-    )
-    req.raise_for_status()
-    data = req.json()
-    if not data.get("success"):
-        msg = f"Error updating thumbnail for item {item.id} in AGOL: {data}"
-        raise ValueError(msg)
-
-
-def _update_agol_item(logger: logging.Logger, agol_token: str, item: ArcGisItem, properties: dict) -> None:
-    """
-    Update properties in an ArcGIS Online item.
-
-    AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
-    """
-    base_url = f"https://www.arcgis.com/sharing/rest/content/users/{item.owner}/items/{item.id}"
-
-    metadata = properties.pop("metadata", None)
-    if isinstance(metadata, str):
-        _update_agol_metadata(logger=logger, base_url=base_url, token=agol_token, item=item, metadata=metadata)
-
-    sharing = properties.pop("sharing_level", None)
-    if isinstance(sharing, SharingLevel):
-        confirm(logger, f"Update sharing level to {sharing}?")
-        _update_agol_sharing(logger=logger, base_url=base_url, token=agol_token, item=item, sharing_level=sharing)
-
-    thumbnail = properties.pop("thumbnail_url", None)
-    if thumbnail:
-        _update_agol_thumbnail(logger=logger, base_url=base_url, token=agol_token, item=item, url=thumbnail)
-
-    _update_agol_properties(logger=logger, base_url=base_url, token=agol_token, item=item, properties=properties)
+    if target_item.sharing_level != ArcGisSharingLevel.EVERYONE:
+        return
+    if not inquirer.confirm(message="Target is public, reassign to publishing user?", default=True):
+        return
+    arc.reassign_item(owner_id=target_item.owner, item_id=target_item.id, new_owner_id="BritishAntarcticSurvey")
 
 
 def main() -> None:
@@ -319,22 +138,15 @@ def main() -> None:
         logger=logger, app_client_id=config.AGOL_CLIENT_ID, app_client_secret=config.AGOL_CLIENT_SECRET
     )
 
-    source_record = get_record(logger=logger, cat=catalogue, reference=args["source_id"])
-    target_item = arc_client.get_item(args["target_id"])
-    source_item = _create_source_arcgis_item(
-        source_record=Record.loads(source_record.dumps(strip_admin=False)),
+    _sync_item(
+        logger=logger,
+        cat=catalogue,
+        arc=arc_client,
         admin_keys=config.ADMIN_METADATA_KEYS,
-        target_item=target_item,
+        item_id=args["target_id"],
+        file_identifier=args["source_id"],
+        branch="changeset/MAGIC/data-management.84",
     )
-
-    diff = _diff_arcgis_items(logger=logger, source_item=source_item, target_item=target_item)
-    if not diff:
-        logger.info("Target item %s == %s, skipping.", target_item.id, source_record.file_identifier)
-        return
-    logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
-    logger.info(list(diff.keys()))
-    _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=target_item)
-    _update_agol_item(logger=logger, agol_token=arc_client._access_token, item=target_item, properties=diff)
 
     params = f"task esri-item --source {args['source_id']} --target {args['target_id']}"
     logger.info("Re-run as: '%s'", params)

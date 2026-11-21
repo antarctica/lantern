@@ -4,6 +4,7 @@ import hashlib
 from datetime import UTC, datetime
 from functools import cached_property
 from http import HTTPMethod
+from io import BytesIO
 from typing import TYPE_CHECKING, Any, NamedTuple
 from urllib.parse import parse_qs, urlparse
 
@@ -13,13 +14,24 @@ from authlib.oauth2.rfc7523 import ClientSecretJWT
 from geojson import FeatureCollection
 from lxml import etree
 
-from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item, ItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
 from lantern.lib.magic_distribution.arcgis.models.artefact import ArtefactArcGisService
-from lantern.lib.magic_distribution.arcgis.utils import HTTPArcGISTokenAuth, check_arcgis_error, ensure_query_param
+from lantern.lib.magic_distribution.arcgis.utils import (
+    HTTPArcGISTokenAuth,
+    check_arcgis_error,
+    normalise_arcgis_html,
+    sharing_level_parameters,
+    snake_to_camel_case,
+)
 from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
 
 if TYPE_CHECKING:
     import logging
+
+
+class SharingChangeNotAuthorisedError(Exception):
+    """Raised when a sharing level change would be made but has not been explicitly authorised."""
 
 
 class SpatialExtent(NamedTuple):
@@ -44,19 +56,20 @@ class ArcGisClient:
 
     Supported features:
     -------------------
-    - fetching item/service metadata
+    - fetching and setting item/service metadata
       - including Portal item ID for a Service, and Service for a Portal item (where applicable)
-    - for feature services:
+    - for Arc Server feature services:
       - getting when a layer was last updated (based on its features)
       - getting features as a GeoJSON feature collection
-    - for items:
-      - getting item information, including optional additional metadata (for related file identifier) and thumbnail
-      - getting item as a ServiceArtefact (for use with other MAGIC distribution workflows, see Items vs Artefacts)
+    - for Arc Portal items:
+      - getting/setting information, including optional additional metadata (for related file identifier) and thumbnail
+      - reassigning an item to another owner
+      - getting item as a ServiceArtefact (for use with other MAGIC distribution workflows)
 
     Internal conventions:
     ---------------------
     - `fetch` methods make network requests to access data directly
-    - `get` methods return (processed) data, and may depend on one or more `fetch` methods
+    - `get` methods return (processed) data, but may depend on one or more `fetch` methods
     """
 
     def __init__(self, logger: logging.Logger, app_client_id: str, app_client_secret: str) -> None:
@@ -96,11 +109,18 @@ class ArcGisClient:
     def _request(self, method: HTTPMethod, url: str, format_: str | None = "json", **kwargs: Any) -> requests.Response:
         """Make HTTP request with default content-type, authentication and error handling."""
         timeout = kwargs.pop("timeout", self._timeout)
+        params = kwargs.pop("params", {})
         if format_:
-            url = ensure_query_param(url=url, name="f", value=format_)
+            params["f"] = format_
+
         self._logger.debug("Calling %s %s ...", method.value, url)
         res = requests.request(
-            method.value, url, timeout=timeout, auth=HTTPArcGISTokenAuth(token=self._access_token), **kwargs
+            method=method.value,
+            url=url,
+            timeout=timeout,
+            params=params,
+            auth=HTTPArcGISTokenAuth(token=self._access_token),
+            **kwargs,
         )
         # check for HTTP and ArcGIS application errors
         res.raise_for_status()
@@ -195,6 +215,37 @@ class ArcGisClient:
             data["orgId"] = ""
         return data
 
+    def _set_item_info(self, owner_id: str, item_id: str, properties: ItemProperties) -> None:
+        """
+        Set raw information for an ArcGIS Portal item.
+
+        Excludes:
+        - `metadata` and `item_type` (type), 'thumbnail_url' (thumbnailurl) properties which cannot be directly changed
+        - `metadataFormats` which should not be changed to prevent changes to catalogue record associations
+        - empty properties ('' / None / [])
+
+        Also:
+        - hard codes `metadataEditable` as False to prevent changes to catalogue record associations.
+
+        Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
+        """
+        self._logger.info("Updating properties for item: %s", item_id)
+
+        _properties = {
+            k: v
+            for k, v in properties.to_dict().items()
+            if k not in ["type", "metadata", "metadataFormats", "thumbnailurl"] and v is not None and len(v) > 0
+        }
+        _properties["metadataEditable"] = "false"
+        files_update: dict[str, tuple] = {k: (None, v) for k, v in _properties.items()}
+        self._logger.debug(files_update)
+
+        self._request(
+            method=HTTPMethod.POST,
+            url=f"{self._base_url}/content/users/{owner_id}/items/{item_id}/update",
+            files=files_update,
+        )
+
     def _fetch_item_metadata(self, item_id: str) -> str:
         """
         Fetch optional additional metadata for an ArcGIS Portal item.
@@ -203,6 +254,7 @@ class ArcGisClient:
         supported standard / information model (e.g. ISO 19115, Dublin Core, etc.).
 
         Sources:
+        - https://developers.arcgis.com/rest/users-groups-and-items/metadata-reference/#view-metadata
         - https://doc.arcgis.com/en/arcgis-online/manage-data/metadata.htm
         """
         self._logger.info("Fetching additional metadata for item: %s", item_id)
@@ -213,6 +265,26 @@ class ArcGisClient:
             format_=None,
         )
         return res.text
+
+    def _set_item_metadata(self, owner_id: str, item_id: str, metadata: str) -> None:
+        """
+        Set or overwrite optional additional metadata for an ArcGIS Portal item.
+
+        Requires access through owner endpoint.
+
+        Sources:
+        - https://developers.arcgis.com/rest/users-groups-and-items/update-info/
+        - https://doc.arcgis.com/en/arcgis-online/manage-data/metadata.htm
+        """
+        self._logger.info("Updating metadata for item: %s", item_id)
+        self._logger.debug(metadata)
+
+        self._request(
+            method=HTTPMethod.POST,
+            url=f"{self._base_url}/content/users/{owner_id}/items/{item_id}/updateInfo",
+            params={"folderName": "metadata"},
+            files={"file": ("metadata.xml", BytesIO(metadata.encode("utf-8")), "application/xml")},
+        )
 
     def _fetch_item_thumbnail(self, item_id: str, item_info: dict | None = None) -> tuple[str, str]:
         """
@@ -248,6 +320,38 @@ class ArcGisClient:
         access_url = f"{thumbnail_url.scheme}://{thumbnail_url.netloc}{thumbnail_url.path}?sha1={sha1}&w=400"
         return thumbnail_path, access_url
 
+    def _set_item_thumbnail(self, owner_id: str, item_id: str, url: str) -> None:
+        """
+        Set optional thumbnail for an ArcGIS Portal item.
+
+        Source: https://developers.arcgis.com/rest/users-groups-and-items/update-thumbnail/
+        """
+        self._logger.info("Updating thumbnail for item: %s", item_id)
+        self._request(
+            method=HTTPMethod.POST,
+            url=f"{self._base_url}/content/users/{owner_id}/items/{item_id}/updateThumbnail",
+            params={"url": url},
+        )
+
+    def _set_item_sharing(self, owner_id: str, item_id: str, sharing_level: SharingLevel) -> None:
+        """
+        Set sharing level for an ArcGIS Online item.
+
+        Does not support setting group sharing.
+
+        Source: https://developers.arcgis.com/rest/users-groups-and-items/share-item-as-item-owner/
+        """
+        self._logger.info("Setting sharing for item: %s", item_id)
+
+        files_sharing = sharing_level_parameters(sharing_level)
+        self._logger.debug(files_sharing)
+
+        self._request(
+            method=HTTPMethod.POST,
+            url=f"{self._base_url}/content/users/{owner_id}/items/{item_id}/share",
+            files=files_sharing,
+        )
+
     def get_item(self, item_id: str) -> Item:
         """
         Get ArcGIS Portal item by item ID.
@@ -263,12 +367,60 @@ class ArcGisClient:
 
         return Item.from_item_json(info=info, metadata=meta, thumbnail=thumbnail)
 
+    def set_item(
+        self,
+        item: Item,
+        info_properties: ItemProperties | None = None,
+        metadata: str | None = None,
+        sharing_level: SharingLevel | None = None,
+        thumbnail_url: str | None = None,
+    ) -> None:
+        """
+        Set supported parts of an ArcGIS Portal item.
+
+        Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
+        """
+        if info_properties:
+            self._set_item_info(owner_id=item.owner, item_id=item.id, properties=info_properties)
+        if metadata:
+            self._set_item_metadata(owner_id=item.owner, item_id=item.id, metadata=metadata)
+        if thumbnail_url:
+            self._set_item_thumbnail(owner_id=item.owner, item_id=item.id, url=thumbnail_url)
+        if sharing_level:
+            self._set_item_sharing(owner_id=item.owner, item_id=item.id, sharing_level=sharing_level)
+
+    def reassign_item(self, owner_id: str, item_id: str, new_owner_id: str, new_folder_name: str = "/") -> None:
+        """
+        Change the owner of an ArcGIS Portal item within the same organisation.
+
+        Requires organisation administrator permissions. Defaults to the new owner's root folder.
+
+        Source: https://developers.arcgis.com/rest/users-groups-and-items/reassign-item/
+        """
+        self._logger.info("Reassigning item %s to %s", item_id, new_owner_id)
+        self._request(
+            method=HTTPMethod.POST,
+            url=f"{self._base_url}/content/users/{owner_id}/items/{item_id}/reassign",
+            data={"targetUsername": new_owner_id, "targetFolderName": new_folder_name},
+        )
+
     @staticmethod
     def _get_item_file_identifier(item: Item) -> str | None:
-        """Attempt to get catalogue resource associated with ArcGIS Portal item based on optionally attached metadata."""
+        """
+        Attempt to get a catalogue resource associated with an ArcGIS Portal item from optional attached metadata.
+
+        Returns `f19cab63-8ca1-4d36-817c-b5f3675a1e33` for a metadata value of:
+        ```
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <metadata><mdFileID>f19cab63-8ca1-4d36-817c-b5f3675a1e33</mdFileID></metadata>
+        ```
+        """
         if not item.properties.metadata:
             return None
-        root = etree.fromstring(item.properties.metadata.encode())
+        try:
+            root = etree.fromstring(item.properties.metadata.encode())
+        except etree.XMLSyntaxError:
+            return None
         md_file_id_elem = root.find("mdFileID")
         return md_file_id_elem.text if md_file_id_elem is not None else None
 
@@ -305,6 +457,111 @@ class ArcGisClient:
         return ArtefactFormats.get_service_format(
             endpoint=endpoint, endpoint_auth=HTTPArcGISTokenAuth(token=self._access_token)
         ).label
+
+    def diff_items(self, item: Item, other: Item) -> dict:
+        """
+        Compare an item with another item and return a dict of any differences for a subset of item properties.
+
+        Performs a one-way comparison. Where a property is present in the `other` item but not the original, it is not
+        included as a difference.
+
+        Returned dict keys are aligned with, and intended for, `ItemProperties.from_dict().
+
+        Compares:
+        - sharing level (access), as a SharingLevel enum
+        - item.properties are compared:
+          - title
+          - snippet
+          - description
+          - access_information (accessInformation) [attribution]
+          - license_info (licenseInfo) [terms of use]
+          - metadata
+          - thumbnail_url (thumbnailurl), specifically the sha1 query parameter, location is ignored
+        """
+        diff = {}
+
+        if item.sharing_level != other.sharing_level:
+            diff["sharing_level"] = item.sharing_level
+
+        # get mdFileID element value from source_item.properties.metadata XML str via LXML
+        item_md_file_id = self._get_item_file_identifier(item)
+        other_md_file_id = self._get_item_file_identifier(other)
+        if item_md_file_id != other_md_file_id:
+            self._logger.debug(item.properties.metadata)
+            self._logger.debug(other.properties.metadata)
+            diff["metadata"] = item.properties.metadata
+
+        for prop in ["title", "snippet", "access_information"]:
+            item_val = getattr(item.properties, prop, None)
+            other_val = getattr(other.properties, prop, None)
+            if item_val == other_val or item_val is None:
+                continue
+            diff[snake_to_camel_case(prop)] = item_val
+
+        for html_prop in ["description", "license_info"]:
+            item_val = normalise_arcgis_html(getattr(item.properties, html_prop, "") or "")
+            other_val = normalise_arcgis_html(getattr(other.properties, html_prop, "") or "")
+            if item_val in (other_val, "", "<div></div>"):
+                continue
+            diff[snake_to_camel_case(html_prop)] = item_val
+
+        # prefer to compare target against AGOL processed source image rather than original (as it won't match)
+        item_thumbnail_params = parse_qs(urlparse(item.properties.thumbnail_url).query)
+        src_thumbnail_sha1 = (
+            item_thumbnail_params["sha1Agol"][0]
+            if "sha1Agol" in item_thumbnail_params
+            else item_thumbnail_params.get("sha1", [None])[0]
+        )
+        other_thumbnail_sha1 = parse_qs(urlparse(other.properties.thumbnail_url).query).get("sha1", [None])[0]
+        if src_thumbnail_sha1 != other_thumbnail_sha1:
+            self._logger.debug(item.properties.thumbnail_url)
+            self._logger.debug(other.properties.thumbnail_url)
+            diff["thumbnail_url"] = item.properties.thumbnail_url
+
+        return diff
+
+    def sync_item(self, source: Item, target: Item, allow_sharing_change: bool = False) -> bool:
+        """
+        Sync an ArcGIS Portal item with another item.
+
+        Updates supported properties in a target item to match a source item based on a comparison.
+
+        See `diff_items()` for supported properties. Returns `True` if changes were made.
+
+        Where the sharing level differs, `allow_sharing_change` must be True or a `SharingChangeNotAuthorisedError`
+        exception is raised.
+        """
+        self._logger.info("Syncing item %s (source) with %s (target) ...", source.id, target.id)
+
+        diff = self.diff_items(item=source, other=target)
+        if not diff:
+            self._logger.info("No differences between items, skipping.")
+            return False
+        self._logger.debug(list(diff.keys()))
+
+        self._logger.info("Updating target...")
+        # This is a bit messy, set_item takes separate arguments for metadata, sharing level and thumbnail, which we
+        # detach from the diff results. However, properties requires a metadata value plus a type and title (even if
+        # not changed) which we inject, from the target item where not part of the diff.
+        metadata = diff.pop("metadata", target.properties.metadata)
+        sharing = diff.pop("sharing_level", None)
+        thumbnail = diff.pop("thumbnail_url", None)
+        properties = ItemProperties.from_dict(
+            info={
+                "title": diff.get("title") or target.properties.title,
+                "type": target.properties.item_type.value,
+                "metadata": metadata,
+                **diff,
+            },
+        )
+
+        if isinstance(sharing, SharingLevel) and not allow_sharing_change:
+            raise SharingChangeNotAuthorisedError()
+
+        self.set_item(
+            item=target, info_properties=properties, metadata=metadata, sharing_level=sharing, thumbnail_url=thumbnail
+        )
+        return True
 
     def get_artefact(self, item_ref: str, resource_id: str | None = None) -> ArtefactArcGisService:
         """

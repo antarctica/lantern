@@ -7,12 +7,16 @@ import requests
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
 from lantern.lib.magic_distribution.arcgis.utils import (
     ArcGISAuthError,
     ArcGISRequestError,
     HTTPArcGISTokenAuth,
     check_arcgis_error,
     ensure_query_param,
+    normalise_arcgis_html,
+    sharing_level_parameters,
+    snake_to_camel_case,
 )
 
 
@@ -30,6 +34,42 @@ class TestUtils:
     def test_ensure_query_param(self, url: str, name: str, value: str, expected: str):
         """Can ensure a query parameter is present in a URL."""
         assert ensure_query_param(url=url, name=name, value=value) == expected
+
+    @pytest.mark.parametrize(("value", "expected"), [("x_x", "xX"), ("x", "x"), ("", "")])
+    def test_snake_to_camel_case(self, value: str, expected: str):
+        """Can convert snake_case strings to camelCase."""
+        assert snake_to_camel_case(value) == expected
+
+    @pytest.mark.parametrize(
+        ("html", "expected"),
+        [
+            (
+                '<a href="https://example.com">Link</a>',
+                '<div><a href="https://example.com" rel="nofollow ugc">Link</a></div>',
+            ),
+            (
+                '<div><p><a href="https://example.com" rel="ugc custom">Link</a></p></div>',
+                '<div><p><a href="https://example.com" rel="custom nofollow ugc">Link</a></p></div>',
+            ),
+            ("<div><p>Text</p></div>", "<div><p>Text</p></div>"),
+        ],
+    )
+    def test_normalise_arcgis_html(self, html: str, expected: str):
+        """Can normalise anchor attributes and extra div wrappers."""
+        assert normalise_arcgis_html(html) == expected
+
+    @pytest.mark.parametrize(
+        ("sharing_level", "expected"),
+        [
+            (SharingLevel.PRIVATE, {"everyone": (None, False), "org": (None, False)}),
+            (SharingLevel.SHARED, {"everyone": (None, False), "org": (None, False)}),
+            (SharingLevel.ORG, {"everyone": (None, False), "org": (None, True)}),
+            (SharingLevel.EVERYONE, {"everyone": (None, True), "org": (None, True)}),
+        ],
+    )
+    def test_sharing_level_parameters(self, sharing_level: SharingLevel, expected: dict[str, tuple]):
+        """Can determine the sharing API parameters for each sharing level."""
+        assert sharing_level_parameters(sharing_level) == expected
 
     @pytest.mark.parametrize(
         ("body", "expected"),

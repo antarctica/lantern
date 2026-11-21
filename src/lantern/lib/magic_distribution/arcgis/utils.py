@@ -4,7 +4,12 @@ from json import JSONDecodeError
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
+from lxml.html import HTMLParser
+from lxml.html import fragment_fromstring as html_fromstring
+from lxml.html import tostring as html_tostring
 from requests.auth import AuthBase
+
+from lantern.lib.magic_distribution.arcgis.gis.enums import SharingLevel
 
 if TYPE_CHECKING:
     import requests
@@ -66,3 +71,45 @@ def check_arcgis_error(response: requests.Response) -> None:
         raise ArcGISAuthError() from None
     msg = data["error"].get("message", "Unknown ArcGIS error")
     raise ArcGISRequestError(msg) from None
+
+
+def snake_to_camel_case(s: str) -> str:
+    """Convert from snake_case to camelCase."""
+    parts = s.split("_")
+    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+
+def normalise_arcgis_html(html: str) -> str:
+    """
+    Normalise HTML string between a Lantern catalogue record and an ArcGIS item.
+
+    Converts between HTML generated:
+    - from Markdown in the catalogue item
+    - after having been submitted and processed by Arc
+
+    Accounts for:
+    - differences in syntax (`<a href='x'>` vs `<a href="x">`)
+    - `rel="nofollow ugc"` being added to anchor elements
+    - possible extra div wrapper
+    """
+    element = html_fromstring(html, create_parent=True, parser=HTMLParser())
+    # add `rel="nofollow ugc"` to any anchor elements
+    for a in element.iter("a"):
+        relations = {t for t in a.get("rel", "").split() if t}
+        relations.update({"nofollow", "ugc"})
+        a.set("rel", " ".join(sorted(relations)))
+    # correct double wrapping div
+    if element.tag == "div" and len(element) == 1 and element[0].tag == "div":
+        element = element[0]
+    return html_tostring(doc=element, encoding="unicode")
+
+
+def sharing_level_parameters(sharing_level: SharingLevel) -> dict[str, tuple]:
+    """Determine ArcGIS sharing API parameters based on sharing level."""
+    sharing = {"everyone": False, "org": False}
+    if sharing_level == SharingLevel.ORG:
+        sharing["org"] = True
+    elif sharing_level == SharingLevel.EVERYONE:
+        sharing["everyone"] = True
+        sharing["org"] = True
+    return {k: (None, v) for k, v in sharing.items()}

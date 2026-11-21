@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import UTC, datetime
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING
@@ -9,8 +10,13 @@ import pytest
 from pytest_httpserver import HTTPServer, RequestMatcher
 from werkzeug import Response
 
-from lantern.lib.magic_distribution.arcgis.client import ArcGisClient, SpatialExtent
-from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item
+from lantern.lib.magic_distribution.arcgis.client import (
+    ArcGisClient,
+    SharingChangeNotAuthorisedError,
+    SpatialExtent,
+)
+from lantern.lib.magic_distribution.arcgis.gis.dataclasses import Item, ItemProperties
+from lantern.lib.magic_distribution.arcgis.gis.enums import ItemType, SharingLevel
 from lantern.lib.magic_distribution.arcgis.models.artefact import ArtefactArcGisService
 from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
 
@@ -165,6 +171,27 @@ class TestArcGisClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
+    def test_set_item_info(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Can update properties within a Portal item."""
+        expected = "Foo"
+        original = ItemProperties(
+            title=fx_lib_arcgis_item.properties.title,
+            item_type=fx_lib_arcgis_item.properties.item_type,
+            metadata=fx_lib_arcgis_item.properties.metadata,
+        )
+        update = deepcopy(original)
+        update.title = expected
+
+        fx_lib_arcgis_client._set_item_info(
+            owner_id=fx_lib_arcgis_item.owner, item_id=fx_lib_arcgis_item.id, properties=update
+        )
+
+        result = fx_lib_arcgis_client._fetch_item_info(fx_lib_arcgis_item.id)
+        assert result["title"] == expected
+        assert result["title"] != original.title
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
     def test_fetch_item_metadata(self, fx_lib_arcgis_client: ArcGisClient):
         """
         Can fetch additional metadata for a Portal item.
@@ -173,6 +200,19 @@ class TestArcGisClient:
         """
         result = fx_lib_arcgis_client._fetch_item_metadata(item_id="x")
         assert "<metadata>" in result
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_set_item_metadata(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Can update metadata associated with a Portal item."""
+        expected = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><metadata><mdFileID>y</mdFileID></metadata>'
+
+        fx_lib_arcgis_client._set_item_metadata(
+            owner_id=fx_lib_arcgis_item.owner, item_id=fx_lib_arcgis_item.id, metadata=expected
+        )
+
+        result = fx_lib_arcgis_client._fetch_item_metadata(fx_lib_arcgis_item.id)
+        assert result == expected
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -190,12 +230,81 @@ class TestArcGisClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
+    def test_set_item_thumbnail(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Can update metadata associated with a Portal item."""
+        expected = "https://www.arcgis.com/sharing/rest/content/items/x/info/thumbnail/ago_downloaded.png?sha1=11f6ad8ec52a2984abaafd7c3b516503785c2072&w=400"
+
+        fx_lib_arcgis_client._set_item_thumbnail(
+            owner_id=fx_lib_arcgis_item.owner, item_id=fx_lib_arcgis_item.id, url="https://example.com/overview.png"
+        )
+
+        result = fx_lib_arcgis_client._fetch_item_thumbnail(fx_lib_arcgis_item.id)
+        assert result[1] == expected
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_set_item_sharing(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Can update metadata associated with a Portal item."""
+        expected = SharingLevel.ORG
+        fx_lib_arcgis_client._set_item_sharing(
+            owner_id=fx_lib_arcgis_item.owner, item_id=fx_lib_arcgis_item.id, sharing_level=expected
+        )
+
+        result = fx_lib_arcgis_client._fetch_item_info(fx_lib_arcgis_item.id)
+        assert SharingLevel[result["access"].upper()] == expected
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
     def test_get_item(self, fx_lib_arcgis_client: ArcGisClient):
         """Can get a Portal item with info, metadata and thumbnail as an ArcGIS item dataclass."""
         item_id = "x"
         result = fx_lib_arcgis_client.get_item(item_id=item_id)
         assert isinstance(result, Item)
         assert result.id == item_id
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        "properties", [None, ItemProperties(title="x", item_type=ItemType.FEATURE_SERVICE, metadata="")]
+    )
+    @pytest.mark.parametrize("metadata", [None, "x"])
+    @pytest.mark.parametrize("sharing_level", [None, SharingLevel.ORG])
+    @pytest.mark.parametrize("thumbnail_url", [None, "x"])
+    def test_set_item(
+        self,
+        mocker: MockerFixture,
+        fx_lib_arcgis_client: ArcGisClient,
+        fx_lib_arcgis_item: Item,
+        properties: ItemProperties | None,
+        metadata: str | None,
+        sharing_level: SharingLevel | None,
+        thumbnail_url: str | None,
+    ):
+        """Can set supported parts of a Portal item."""
+        mocker.patch.object(fx_lib_arcgis_client, "_set_item_info", return_value=None)
+        mocker.patch.object(fx_lib_arcgis_client, "_set_item_metadata", return_value=None)
+        mocker.patch.object(fx_lib_arcgis_client, "_set_item_thumbnail", return_value=None)
+        mocker.patch.object(fx_lib_arcgis_client, "_set_item_sharing", return_value=None)
+
+        fx_lib_arcgis_client.set_item(
+            item=fx_lib_arcgis_item,
+            info_properties=properties,
+            metadata=metadata,
+            sharing_level=sharing_level,
+            thumbnail_url=thumbnail_url,
+        )
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_reassign_item(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Can move an item to another owner and optional folder."""
+        expected = "y"
+
+        fx_lib_arcgis_client.reassign_item(
+            owner_id=fx_lib_arcgis_item.owner, item_id=fx_lib_arcgis_item.id, new_owner_id=expected
+        )
+
+        result = fx_lib_arcgis_client._fetch_item_info(fx_lib_arcgis_item.id)
+        assert result["owner"] == expected
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("with_value", [False, True])
@@ -209,6 +318,13 @@ class TestArcGisClient:
 
         result = fx_lib_arcgis_client._get_item_file_identifier(fx_lib_arcgis_item)
         assert result == expected
+
+    @pytest.mark.cov()
+    def test_get_item_file_identifier_invalid(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Cannot get file identifier from invalid or malformed."""
+        fx_lib_arcgis_item.properties.metadata = "x"
+        result = fx_lib_arcgis_client._get_item_file_identifier(fx_lib_arcgis_item)
+        assert result is None
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("is_service", [False, True])
@@ -258,6 +374,144 @@ class TestArcGisClient:
             assert result == expected
         else:
             assert result is None
+
+    def test_diff_items(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """
+        Can identify changes to supported ArcGIS item properties.
+
+        With all optional (supported) properties set, and all different to the comparison.
+        """
+        item = deepcopy(fx_lib_arcgis_item)
+        item.properties.snippet = "x"
+        item.properties.access_information = "x"
+        item.properties.metadata = "<metadata><mdFileID>x</mdFileID></metadata>"  # to support value parsing
+        item.properties.description = "<div>x</div>"  # to account for HTML normalisation
+        item.properties.license_info = "<div>x</div>"  # to account for HTML normalisation
+        item.properties.thumbnail_url = "https://example.com/thumbnail.png?sha1=123&sha1Agol=231"
+
+        # All different
+        other = deepcopy(fx_lib_arcgis_item)
+        other.sharing_level = SharingLevel.ORG  # vs. private
+        other.properties.metadata = "<metadata><mdFileID>y</mdFileID></metadata>"  # to support value parsing
+        other.properties.title = "y"
+        other.properties.snippet = "y"
+        other.properties.access_information = "y"
+        other.properties.description = "<div>y</div>"  # to account for HTML normalisation
+        other.properties.license_info = "<div>y</div>"  # to account for HTML normalisation
+        other.properties.thumbnail_url = "https://example.com/thumbnail.png?sha1=999"
+
+        expected = {
+            "sharing_level": item.sharing_level,
+            "metadata": item.properties.metadata,
+            "title": item.properties.title,
+            "snippet": item.properties.snippet,
+            "accessInformation": item.properties.access_information,
+            "description": item.properties.description,
+            "licenseInfo": item.properties.license_info,
+            "thumbnail_url": item.properties.thumbnail_url,
+        }
+
+        result = fx_lib_arcgis_client.diff_items(item, other)
+        assert result == expected
+
+    @pytest.mark.cov()
+    def test_diff_items_missing_optional(self, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item):
+        """Does not include supported properties that are missing from the source item."""
+        item = deepcopy(fx_lib_arcgis_item)
+
+        other = deepcopy(fx_lib_arcgis_item)
+        other.properties.snippet = "y"
+        other.properties.access_information = "y"
+        other.properties.description = "<div>y</div>"  # to account for HTML normalisation
+        other.properties.license_info = "<div>y</div>"  # to account for HTML normalisation
+
+        assert fx_lib_arcgis_client.diff_items(item, other) == {}
+
+    @pytest.mark.parametrize("allow_sharing_change", [False, True])
+    def test_sync_item_no_changes(
+        self,
+        mocker: MockerFixture,
+        fx_lib_arcgis_client: ArcGisClient,
+        fx_lib_arcgis_item: Item,
+        allow_sharing_change: bool,
+    ):
+        """Can not update a target where there are no differences with the source."""
+        mocker.patch.object(fx_lib_arcgis_client, "diff_items", return_value={})
+        mocker.patch.object(fx_lib_arcgis_client, "set_item")
+
+        result = fx_lib_arcgis_client.sync_item(
+            source=fx_lib_arcgis_item, target=fx_lib_arcgis_item, allow_sharing_change=allow_sharing_change
+        )
+        assert result is False
+
+    @pytest.mark.parametrize(
+        "diff",
+        [
+            {"title": "updated"},
+            {"snippet": "summary"},
+            {"metadata": "updated metadata"},
+            {"thumbnail_url": "https://example.com/updated.png?sha1=updated"},
+            {"sharing_level": SharingLevel.EVERYONE},
+            {
+                "title": "updated",
+                "snippet": "summary",
+                "description": "<div>description</div>",
+                "accessInformation": "attribution",
+                "licenseInfo": "<div>licence</div>",
+                "metadata": "updated metadata",
+                "thumbnail_url": "https://example.com/updated.png?sha1=updated",
+                "sharing_level": SharingLevel.ORG,
+            },
+        ],
+    )
+    def test_sync_item(
+        self, mocker: MockerFixture, fx_lib_arcgis_client: ArcGisClient, fx_lib_arcgis_item: Item, diff: dict
+    ):
+        """Can update a target item based on differences with the source."""
+        mocker.patch.object(fx_lib_arcgis_client, "diff_items", return_value=deepcopy(diff))
+        set_item = mocker.patch.object(fx_lib_arcgis_client, "set_item")
+
+        source = deepcopy(fx_lib_arcgis_item)
+        target = deepcopy(fx_lib_arcgis_item)
+        target.properties.title = "target title"
+        target.properties.item_type = ItemType.FEATURE_SERVICE
+        target.properties.metadata = "target metadata"
+        metadata = diff.get("metadata", "target metadata")
+        expected = ItemProperties(
+            title=diff.get("title", "target title"),
+            item_type=ItemType.FEATURE_SERVICE,
+            metadata=metadata,
+            snippet=diff.get("snippet"),
+            description=diff.get("description"),
+            access_information=diff.get("accessInformation"),
+            license_info=diff.get("licenseInfo"),
+        )
+
+        result = fx_lib_arcgis_client.sync_item(source=source, target=target, allow_sharing_change=True)
+        assert result is True
+        set_item.assert_called_once_with(
+            item=target,
+            info_properties=expected,
+            metadata=metadata,
+            sharing_level=diff.get("sharing_level"),
+            thumbnail_url=diff.get("thumbnail_url"),
+        )
+
+    @pytest.mark.cov()
+    def test_sync_item_sharing_not_authorised(
+        self,
+        mocker: MockerFixture,
+        fx_lib_arcgis_client: ArcGisClient,
+        fx_lib_arcgis_item: Item,
+    ):
+        """Cannot change the sharing level of an item unless authorised."""
+        mocker.patch.object(fx_lib_arcgis_client, "diff_items", return_value={"sharing_level": SharingLevel.PRIVATE})
+        mocker.patch.object(fx_lib_arcgis_client, "set_item")
+        target = deepcopy(fx_lib_arcgis_item)
+        fx_lib_arcgis_item.sharing_level = SharingLevel.EVERYONE
+
+        with pytest.raises(SharingChangeNotAuthorisedError):
+            fx_lib_arcgis_client.sync_item(source=fx_lib_arcgis_item, target=target)
 
     @pytest.mark.parametrize("item_ref", [None, "x", "https://example.com?id=x"])
     @pytest.mark.parametrize("resource_id", [None, "x"])

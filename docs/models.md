@@ -474,20 +474,19 @@ mapped to a `identification.graphic_overviews` with an identifier of `overview-a
 
 #### ArcGIS items thumbnails syncing
 
-To ensure accurate change detection when applying a record to an ArcGIS item
-(via the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command), the `href` property of this
+To ensure accurate change detection when applying a record to an ArcGIS item, the `href` property of this
 graphic overview MUST include a `sha1Agol` query parameter, set after an initial application and known accurate state.
 
 > [!NOTE]
-> Capturing this known SHA1 value is a manual action (via downloading the thumbnail image from on the ArcGIS item page
-> and running `sha1sum` or similar locally).
+> Capturing the `sha1Agol` value is a manual action (by downloading the thumbnail image from the ArcGIS item page and
+> hashing it). Captured values should then be appended to the relevant graphic overview in the source record.
 
 See the [ArcGIS Thumbnails](/docs/libraries.md#arcgis-thumbnails) Libraries documentation for more information on how
 thumbnail values are compared.
 
 > [!TIP]
-> As a best practice, graphic overviews SHOULD also include a `sha1` query parameter (in addition to `sha1Agol`) with a
-> value for the original, non-Arc processed value.
+> As a best practice, graphic overviews SHOULD also include a `sha1` query parameter (in addition to `sha1Agol`) for
+> the original, non-Arc processed, image.
 
 ### ArcGIS items limitations
 
